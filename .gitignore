@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.build/
+.env
+.env.*
+pb_data/
+.DS_Store
+EOF
