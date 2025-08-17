@@ -1,0 +1,121 @@
+{
+  "id": "r9oikaughrm8cl6",
+  "name": "solar_cells",
+  "type": "base",
+  "system": false,
+  "schema": [
+    {
+      "system": false,
+      "id": "x8oicxqj",
+      "name": "gridKey",
+      "type": "text",
+      "required": true,
+      "presentable": true,
+      "unique": true,
+      "options": {
+        "min": null,
+        "max": null,
+        "pattern": ""
+      }
+    },
+    {
+      "system": false,
+      "id": "p8n2ksjr",
+      "name": "latRounded",
+      "type": "number",
+      "required": false,
+      "presentable": false,
+      "unique": false,
+      "options": {
+        "min": null,
+        "max": null,
+        "noDecimal": false
+      }
+    },
+    {
+      "system": false,
+      "id": "mhqedizq",
+      "name": "lngRounded",
+      "type": "number",
+      "required": false,
+      "presentable": false,
+      "unique": false,
+      "options": {
+        "min": null,
+        "max": null,
+        "noDecimal": false
+      }
+    },
+    {
+      "system": false,
+      "id": "0nnduerc",
+      "name": "ttlDays",
+      "type": "number",
+      "required": false,
+      "presentable": false,
+      "unique": false,
+      "options": {
+        "min": null,
+        "max": null,
+        "noDecimal": false
+      }
+    },
+    {
+      "system": false,
+      "id": "scey6njx",
+      "name": "payload",
+      "type": "json",
+      "required": false,
+      "presentable": false,
+      "unique": false,
+      "options": {
+        "maxSize": 2000000
+      }
+    },
+    {
+      "system": false,
+      "id": "rbjilpcr",
+      "name": "source",
+      "type": "text",
+      "required": false,
+      "presentable": false,
+      "unique": false,
+      "options": {
+        "min": null,
+        "max": null,
+        "pattern": ""
+      }
+    },
+    {
+      "system": false,
+      "id": "unec74gv",
+      "name": "fetchedAt",
+      "type": "date",
+      "required": false,
+      "presentable": false,
+      "unique": false,
+      "options": {
+        "min": "",
+        "max": ""
+      }
+    },
+    {
+      "system": false,
+      "id": "lastAccessAt",
+      "name": "lastAccessAt",
+      "type": "date",
+      "required": false,
+      "presentable": false,
+      "unique": false,
+      "options": {
+        "min": "",
+        "max": ""
+      }
+    }
+  ],
+  "indexes": [
+    "CREATE UNIQUE INDEX idx_solar_cells_gridKey ON solar_cells (gridKey)",
+    "CREATE INDEX idx_solar_cells_source ON solar_cells (source)",
+    "CREATE INDEX idx_solar_cells_fetchedAt ON solar_cells (fetchedAt)"
+  ]
+}

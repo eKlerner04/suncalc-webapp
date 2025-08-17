@@ -1,11 +1,18 @@
 import { pb, SOLAR_COLLECTION, generateGridKey, SolarCell } from '../utils/pb';
+import { pvgisService } from './pvgisService';
+import { nasaService } from './nasaService';
+import { PVGISResponse } from '../types/solar';
+import { RecordModel } from 'pocketbase';
+
+// Erweitere das SolarCell Interface um RecordModel
+interface SolarCellRecord extends SolarCell, RecordModel {}
 
 // Cache-Service für Solar-Daten mit PocketBase
-export class SolarCacheService {
+class SolarCacheService {
   private static instance: SolarCacheService;
-  
+
   private constructor() {}
-  
+
   public static getInstance(): SolarCacheService {
     if (!SolarCacheService.instance) {
       SolarCacheService.instance = new SolarCacheService();
@@ -14,139 +21,158 @@ export class SolarCacheService {
   }
 
   // Hauptfunktion: Solar-Daten abrufen (mit Caching)
-  async getSolarData(lat: number, lng: number): Promise<{ data: any; source: string }> {
+  async getSolarData(lat: number, lng: number, area: number, tilt: number, azimuth: number): Promise<{ data: PVGISResponse, source: string }> {
     const gridKey = generateGridKey(lat, lng);
     console.log(`🔍 Cache-Check für ${gridKey} (lat=${lat}, lng=${lng})`);
-    
-    try {
-      // Fall A & B: Suche in der Datenbank
-      const existingRecord = await this.findInDatabase(gridKey);
-      
-      if (existingRecord) {
-        // Aktualisiere lastAccessAt
-        await this.updateLastAccess(existingRecord.id);
-        
-        if (this.isDataFresh(existingRecord)) {
-          // Fall A: Daten sind frisch
-          console.log(`✅ Fall A: Frische Daten aus Cache (${gridKey})`);
-          return { 
-            data: existingRecord.payload, 
-            source: 'local' 
-          };
-        } else {
-          // Fall B: Daten sind veraltet, aber liefern sie sofort zurück
-          console.log(`⚠️ Fall B: Veraltete Daten aus Cache (${gridKey}), starte Background-Refresh`);
-          this.refreshDataInBackground(lat, lng, gridKey); // Hintergrund-Update
-          return { 
-            data: existingRecord.payload, 
-            source: 'local_stale' 
-          };
-        }
-      }
-      
-      // Fall C: Kein Treffer in der Datenbank
-      console.log(`🔄 Fall C: Keine Daten im Cache (${gridKey}), rufe externe API auf`);
-      const freshData = await this.fetchExternalData(lat, lng);
-      await this.saveToDatabase(gridKey, lat, lng, freshData);
-      
-      return { 
-        data: freshData, 
-        source: 'external' 
-      };
-      
-    } catch (error: any) {
-      console.error(`❌ Fehler im Cache-Service für ${gridKey}:`, error);
-      // Fallback: Direkter API-Aufruf ohne Caching
-      const fallbackData = await this.fetchExternalData(lat, lng);
-      return { 
-        data: fallbackData, 
-        source: 'fallback' 
-      };
+
+    // Fall A: Prüfe ob Daten im Cache sind und frisch
+    const cachedData = await this.findInDatabase(gridKey);
+    if (cachedData && this.isDataFresh(cachedData)) {
+      console.log(`✅ Fall A: Frische Daten aus Cache (${gridKey})`);
+      await this.updateLastAccess(gridKey);
+      return { data: cachedData.payload, source: 'local' };
     }
+
+    // Fall B: Daten im Cache aber veraltet
+    if (cachedData && !this.isDataFresh(cachedData)) {
+      console.log(`🟡 Fall B: Daten im Cache aber veraltet (${gridKey})`);
+      await this.updateLastAccess(gridKey);
+      
+      // Hintergrund-Refresh starten
+      this.refreshDataInBackground(lat, lng, area, tilt, azimuth, gridKey);
+      
+      return { data: cachedData.payload, source: 'local_stale' };
+    }
+
+    // Fall C: Keine Daten im Cache
+    console.log(`🔄 Fall C: Keine Daten im Cache (${gridKey}), rufe externe API auf`);
+    const externalData = await this.fetchExternalData(lat, lng, area, tilt, azimuth);
+    
+    // Neue Daten in der Datenbank speichern
+    await this.saveToDatabase(gridKey, lat, lng, externalData);
+    
+    return { data: externalData, source: externalData.source };
   }
 
-  // Suche nach existierenden Daten in der Datenbank
-  private async findInDatabase(gridKey: string): Promise<SolarCell | null> {
+  // Daten in der Datenbank suchen
+  private async findInDatabase(gridKey: string): Promise<SolarCellRecord | null> {
     try {
       const records = await pb.collection(SOLAR_COLLECTION).getList(1, 1, {
         filter: `gridKey = "${gridKey}"`
       });
       
-      return records.items.length > 0 ? records.items[0] as SolarCell : null;
-    } catch (error: any) {
-      console.log(`📝 Keine Daten in DB für ${gridKey}:`, error.message);
+      return records.items.length > 0 ? records.items[0] as SolarCellRecord : null;
+    } catch (error) {
+      console.error(`❌ Fehler beim Suchen in DB für ${gridKey}:`, error);
       return null;
     }
   }
 
-  // Prüfe ob Daten noch frisch sind (TTL nicht überschritten)
-  private isDataFresh(record: SolarCell): boolean {
-    const fetchedAt = new Date(record.fetchedAt);
+  // Prüfen ob Daten noch frisch sind (TTL nicht überschritten)
+  private isDataFresh(data: SolarCellRecord): boolean {
+    const fetchedDate = new Date(data.fetchedAt);
     const now = new Date();
-    const ageInDays = (now.getTime() - fetchedAt.getTime()) / (1000 * 60 * 60 * 24);
+    const daysDiff = (now.getTime() - fetchedDate.getTime()) / (1000 * 60 * 60 * 24);
     
-    return ageInDays < record.ttlDays;
+    return daysDiff < data.ttlDays;
   }
 
-  // Aktualisiere lastAccessAt für einen Datensatz
-  private async updateLastAccess(recordId: string): Promise<void> {
+  // lastAccessAt aktualisieren
+  private async updateLastAccess(gridKey: string): Promise<void> {
     try {
-      await pb.collection(SOLAR_COLLECTION).update(recordId, {
-        lastAccessAt: new Date().toISOString()
-      });
-    } catch (error: any) {
-      console.error('Fehler beim Aktualisieren von lastAccessAt:', error);
+      const record = await this.findInDatabase(gridKey);
+      if (record) {
+        await pb.collection(SOLAR_COLLECTION).update(record.id, {
+          lastAccessAt: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error(`❌ Fehler beim Aktualisieren von lastAccessAt für ${gridKey}:`, error);
     }
   }
 
-  // Hintergrund-Update für veraltete Daten
-  private async refreshDataInBackground(lat: number, lng: number, gridKey: string): Promise<void> {
+  // Hintergrund-Refresh für veraltete Daten
+  private refreshDataInBackground(lat: number, lng: number, area: number, tilt: number, azimuth: number, gridKey: string): void {
     // Asynchron im Hintergrund ausführen
-    setImmediate(async () => {
+    setTimeout(async () => {
       try {
-        console.log(`🔄 Background-Refresh für ${gridKey} gestartet`);
-        const freshData = await this.fetchExternalData(lat, lng);
+        console.log(`🔄 Starte Background-Refresh für ${gridKey}...`);
+        const freshData = await this.fetchExternalData(lat, lng, area, tilt, azimuth);
         await this.updateDatabaseRecord(gridKey, freshData);
-        console.log(`✅ Background-Refresh für ${gridKey} abgeschlossen`);
+        console.log(`✅ Background-Refresh für ${gridKey} abgeschlossen (${freshData.source})`);
       } catch (error: any) {
         console.error(`❌ Background-Refresh für ${gridKey} fehlgeschlagen:`, error);
       }
-    });
+    }, 0);
   }
 
-  // Externe API aufrufen (hier PVGIS oder andere Solar-APIs)
-  private async fetchExternalData(lat: number, lng: number): Promise<any> {
-    // TODO: Hier echte PVGIS-API oder andere Solar-API einbinden
-    // Für jetzt: Mock-Daten
-    console.log(`🌞 Rufe externe Solar-API auf für lat=${lat}, lng=${lng}`);
+  // Externe API aufrufen (PVGIS, NASA POWER, oder Fallback)
+  private async fetchExternalData(lat: number, lng: number, area: number, tilt: number, azimuth: number): Promise<PVGISResponse> {
+    console.log(`🌞 Rufe externe Solar-API auf für lat=${lat}, lng=${lng}, area=${area}, tilt=${tilt}, azimuth=${azimuth}`);
     
-    // Simuliere API-Aufruf
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Versuche zuerst PVGIS
+    const pvgisData = await pvgisService.getSolarData(lat, lng, area, tilt, azimuth);
+    if (pvgisData) {
+      console.log(`✅ PVGIS erfolgreich: ${pvgisData.annual_kWh} kWh`);
+      return pvgisData;
+    }
+    
+    // Fallback: NASA POWER
+    console.log(`🔄 PVGIS fehlgeschlagen, versuche NASA POWER...`);
+    const nasaData = await nasaService.getSolarData(lat, lng, area, tilt, azimuth);
+    if (nasaData) {
+      console.log(`✅ NASA POWER erfolgreich: ${nasaData.annual_kWh} kWh`);
+      return nasaData;
+    }
+    
+    // Letzter Fallback: Lokale Berechnung
+    console.log(`⚠️ Alle APIs fehlgeschlagen, verwende Fallback-Daten`);
+    return this.generateFallbackData(lat, lng, area, tilt, azimuth);
+  }
+
+  // Lokale Fallback-Daten generieren
+  private generateFallbackData(lat: number, lng: number, area: number, tilt: number, azimuth: number): PVGISResponse {
+    // Vereinfachte lokale Berechnung basierend auf Breitengrad
+    const baseEfficiency = 0.15; // 15% Basis-Effizienz
+    const latitudeFactor = Math.cos((Math.abs(lat) * Math.PI) / 180); // Breitengrad-Faktor
+    const tiltFactor = Math.cos((tilt - 35) * Math.PI / 180); // Neigungs-Faktor (35° optimal)
+    
+    // Jährliche Strahlung in kWh/m² (vereinfacht)
+    const annualRadiation = 1200 * latitudeFactor * tiltFactor; // 1200 kWh/m² Basis
+    const annual_kWh = Math.round(annualRadiation * area * baseEfficiency);
+    
+    console.log(`✅ Fallback-Daten generiert: ${annual_kWh} kWh pro Jahr`);
     
     return {
-      annual_kWh: Math.round(Math.random() * 500 + 800), // 800-1300 kWh
-      co2_saved: Math.round(Math.random() * 200 + 400), // 400-600 kg
-      efficiency: Math.round(Math.random() * 20 + 80), // 80-100%
-      timestamp: new Date().toISOString()
+      annual_kWh: annual_kWh,
+      co2_saved: Math.round(annual_kWh * 0.5),
+      efficiency: Math.round(baseEfficiency * 100),
+      timestamp: new Date().toISOString(),
+      source: 'fallback',
+      metadata: {
+        calculation_date: new Date().toISOString(),
+        assumptions: {
+          losses_percent: 25,
+          m2_per_kwp: 6.5,
+          co2_factor: 0.5
+        }
+      }
     };
   }
 
   // Neue Daten in der Datenbank speichern
-  private async saveToDatabase(gridKey: string, lat: number, lng: number, payload: any): Promise<void> {
+  private async saveToDatabase(gridKey: string, lat: number, lng: number, payload: PVGISResponse): Promise<void> {
     try {
       const roundedCoords = this.roundCoordinates(lat, lng);
-      
-      // Datum als einfachen String formatieren (YYYY-MM-DD)
-      const today = new Date().toISOString().split('T')[0];
       
       const recordData = {
         gridKey,
         latRounded: roundedCoords.latRounded,
         lngRounded: roundedCoords.lngRounded,
         payload,
-        source: 'external',
-        fetchedAt: today,
-        lastAccessAt: today,
+        source: payload.source,
+        fetchedAt: new Date().toISOString(),
+        lastAccessAt: new Date().toISOString(),
         ttlDays: 90
       };
       
@@ -154,12 +180,12 @@ export class SolarCacheService {
       
       await pb.collection(SOLAR_COLLECTION).create(recordData);
       
-      console.log(`✅ Neue Daten für ${gridKey} in DB gespeichert`);
+      console.log(`✅ Neue Daten für ${gridKey} in DB gespeichert (${payload.source})`);
     } catch (error: any) {
       console.error(`❌ Fehler beim Speichern in DB für ${gridKey}:`, error);
       console.error('❌ Fehler-Details:', error.response?.data);
       
-      // Versuche es mit einem einfacheren Datensatz
+      // Versuche es mit einem vereinfachten Datensatz
       try {
         console.log('🔄 Versuche es mit vereinfachtem Datensatz...');
         const roundedCoords = this.roundCoordinates(lat, lng);
@@ -170,7 +196,7 @@ export class SolarCacheService {
           latRounded: roundedCoords.latRounded,
           lngRounded: roundedCoords.lngRounded,
           payload: JSON.stringify(payload), // Als String statt JSON
-          source: 'external',
+          source: payload.source,
           fetchedAt: today,
           lastAccessAt: today,
           ttlDays: 90
@@ -185,19 +211,19 @@ export class SolarCacheService {
   }
 
   // Existierenden Datensatz aktualisieren
-  private async updateDatabaseRecord(gridKey: string, payload: any): Promise<void> {
+  private async updateDatabaseRecord(gridKey: string, payload: PVGISResponse): Promise<void> {
     try {
       const record = await this.findInDatabase(gridKey);
       if (record) {
         await pb.collection(SOLAR_COLLECTION).update(record.id, {
           payload,
-          source: 'external',
+          source: payload.source,
           fetchedAt: new Date().toISOString(),
           ttlDays: 90
         });
-        console.log(`🔄 Datensatz für ${gridKey} aktualisiert`);
+        console.log(`🔄 Datensatz für ${gridKey} aktualisiert (${payload.source})`);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error(`❌ Fehler beim Aktualisieren des Datensatzes für ${gridKey}:`, error);
     }
   }

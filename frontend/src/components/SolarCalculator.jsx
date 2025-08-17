@@ -199,6 +199,20 @@ export default function SolarCalculator() {
               München
             </button>
             <button
+              onClick={() => handleQuickLocation('34.08910', '-118.41069', 'Los Angeles')}
+              style={{
+                padding: '5px 10px',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '3px',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              Los Angeles
+            </button>
+            <button
               onClick={() => handleQuickLocation('50.9375', '6.9603', 'Köln')}
               style={{
                 padding: '5px 10px',

@@ -22,12 +22,12 @@ router.get('/', async (req, res) => {
   }
   
   try {
-    // Verwende den Cache-Service für Solar-Daten
-    const { data: solarData, source } = await solarCacheService.getSolarData(lat, lng);
+    // Verwende den Cache-Service für Solar-Daten (alle Parameter übergeben)
+    const { data: solarData, source } = await solarCacheService.getSolarData(lat, lng, area, tilt, azimuth);
     
     // Berechne zusätzliche Werte basierend auf der Dachfläche
-    const annual_kWh = Math.round(area * (solarData.annual_kWh || 100));
-    const co2 = Math.round(annual_kWh * 0.5); // 0.5 kg CO2 pro kWh
+    const annual_kWh = solarData.annual_kWh; // Direkt von der API
+    const co2 = solarData.co2_saved; // Direkt von der API
     
     const response = {
       inputs: { lat, lng, area, tilt, azimuth },
@@ -36,7 +36,8 @@ router.get('/', async (req, res) => {
       cache: {
         source,
         solarData,
-        message: `Daten von: ${source}`
+        message: `Daten von: ${source}`,
+        metadata: solarData.metadata
       }
     };
     
