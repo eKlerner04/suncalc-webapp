@@ -1,0 +1,106 @@
+{
+  "id": "solar_cells",
+  "name": "solar_cells",
+  "type": "base",
+  "system": false,
+  "schema": [
+    {
+      "id": "gridKey",
+      "name": "gridKey",
+      "type": "text",
+      "system": false,
+      "required": true,
+      "unique": true,
+      "options": {
+        "min": 1,
+        "max": 50,
+        "pattern": ""
+      }
+    },
+    {
+      "id": "latRounded",
+      "name": "latRounded",
+      "type": "number",
+      "system": false,
+      "required": true,
+      "options": {
+        "min": -90,
+        "max": 90
+      }
+    },
+    {
+      "id": "lngRounded",
+      "name": "lngRounded",
+      "type": "number",
+      "system": false,
+      "required": true,
+      "options": {
+        "min": -180,
+        "max": 180
+      }
+    },
+    {
+      "id": "payload",
+      "name": "payload",
+      "type": "json",
+      "system": false,
+      "required": true,
+      "options": {}
+    },
+    {
+      "id": "source",
+      "name": "source",
+      "type": "select",
+      "system": false,
+      "required": true,
+      "options": {
+        "values": ["local", "local_stale", "external", "fallback"]
+      }
+    },
+    {
+      "id": "fetchedAt",
+      "name": "fetchedAt",
+      "type": "date",
+      "system": false,
+      "required": true,
+      "options": {
+        "min": "",
+        "max": ""
+      }
+    },
+    {
+      "id": "lastAccessAt",
+      "name": "lastAccessAt",
+      "type": "date",
+      "system": false,
+      "required": true,
+      "options": {
+        "min": "",
+        "max": ""
+      }
+    },
+    {
+      "id": "ttlDays",
+      "name": "ttLDays",
+      "type": "number",
+      "system": false,
+      "required": true,
+      "options": {
+        "min": 1,
+        "max": 365
+      }
+    }
+  ],
+  "indexes": [
+    "CREATE UNIQUE INDEX idx_gridKey ON solar_cells (gridKey)",
+    "CREATE INDEX idx_latRounded_lngRounded ON solar_cells (latRounded, lngRounded)",
+    "CREATE INDEX idx_fetchedAt ON solar_cells (fetchedAt)",
+    "CREATE INDEX idx_lastAccessAt ON solar_cells (lastAccessAt)"
+  ],
+  "listRule": "",
+  "viewRule": "",
+  "createRule": "",
+  "updateRule": "",
+  "deleteRule": "",
+  "options": {}
+}
