@@ -68,6 +68,9 @@ export class NASAService {
           const efficiency = 0.15; // 15% Modul-Effizienz
           const annual_kWh = Math.round(annualRadiation * area * efficiency);
           
+          // Berechne jährliche Strahlung (kWh/m²/Jahr)
+          const annual_radiation = (annualRadiation * 365).toFixed(1);
+          
           console.log(`✅ NASA POWER erfolgreich: ${annual_kWh} kWh pro Jahr (Strahlung: ${annualRadiation.toFixed(1)} kWh/m²/Tag summiert)`);
           
           return {
@@ -79,11 +82,12 @@ export class NASAService {
             metadata: {
               nasa_power_url: nasaUrl.toString(),
               calculation_date: new Date().toISOString(),
+              monthly_data: this.generateMonthlyDistribution(annual_kWh),
               assumptions: {
                 losses_percent: 20, // Höhere Verluste bei NASA POWER
                 m2_per_kwp: 6.5,
                 co2_factor: 0.5,
-                annual_radiation: annualRadiation.toFixed(1)
+                annual_radiation: annual_radiation
               }
             }
           };
@@ -97,6 +101,16 @@ export class NASAService {
       console.error('❌ NASA POWER API-Fehler:', error);
       return null;
     }
+  }
+
+  private generateMonthlyDistribution(annual_kWh: number): number[] {
+    // Monatliche Verteilung basierend auf Jahresertrag
+    const monthlyDistribution = [
+      0.05, 0.08, 0.12, 0.15, 0.18, 0.20, // Jan-Jun
+      0.22, 0.20, 0.15, 0.12, 0.08, 0.05  // Jul-Dez
+    ];
+    
+    return monthlyDistribution.map(ratio => Math.round(annual_kWh * ratio));
   }
 }
 

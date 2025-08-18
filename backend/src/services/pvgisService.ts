@@ -55,6 +55,38 @@ export class PVGISService {
         const co2_saved = Math.round(annual_kWh * 0.5); // 0.5 kg CO2 pro kWh
         const efficiency = Math.round((annual_kWh / (area * 1000)) * 100); // Effizienz in %
         
+        // Echte Strahlungsdaten von PVGIS extrahieren
+        let annual_radiation = null;
+        let monthly_data = null;
+        
+        // Monatliche Daten extrahieren (falls verfügbar)
+        if (data.outputs && data.outputs.monthly && data.outputs.monthly.fixed) {
+          monthly_data = data.outputs.monthly.fixed.map((month: any) => {
+            const monthly_kWh = month.E_m || 0;
+            console.log(`📅 Monat ${month.month}: ${monthly_kWh} kWh`);
+            return Math.round(monthly_kWh);
+          });
+          console.log(`✅ Monatliche Daten extrahiert:`, monthly_data);
+          
+          // Berechne jährliche Strahlung aus monatlichen Daten
+          const totalMonthlyRadiation = monthly_data.reduce((sum: number, val: number) => sum + val, 0);
+          annual_radiation = (totalMonthlyRadiation / area).toFixed(1);
+          console.log(`☀️ Jährliche Strahlung berechnet: ${annual_radiation} kWh/m²/Jahr`);
+        } else {
+          // Fallback: Generiere geschätzte monatliche Daten
+          console.log(`⚠️ Keine monatlichen Daten von PVGIS, generiere Schätzung`);
+          const monthlyDistribution = [
+            0.04, 0.06, 0.10, 0.14, 0.16, 0.18, // Jan-Jun (Winter/Frühling)
+            0.20, 0.18, 0.14, 0.10, 0.06, 0.04  // Jul-Dez (Sommer/Herbst)
+          ];
+          monthly_data = monthlyDistribution.map(ratio => Math.round(annual_kWh * ratio));
+          console.log(`📊 Geschätzte monatliche Daten generiert:`, monthly_data);
+          
+          // Schätze Strahlung basierend auf Jahresertrag
+          annual_radiation = (annual_kWh / area).toFixed(1);
+          console.log(`☀️ Geschätzte Strahlung: ${annual_radiation} kWh/m²/Jahr`);
+        }
+        
         console.log(`✅ PVGIS erfolgreich: ${annual_kWh} kWh pro Jahr`);
         
         return {
@@ -66,12 +98,13 @@ export class PVGISService {
           metadata: {
             pvgis_url: pvgisUrl.toString(),
             calculation_date: new Date().toISOString(),
+            monthly_data: monthly_data,
             assumptions: {
               losses_percent: 14,
               m2_per_kwp: m2_per_kwp,
               co2_factor: 0.5,
               kwp: kwp,
-              annual_radiation: (data.outputs.totals.fixed.E_y / (area * 1000)).toFixed(1)
+              annual_radiation: annual_radiation
             }
           }
         };

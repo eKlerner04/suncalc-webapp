@@ -9,6 +9,7 @@ export interface PVGISResponse {
     pvgis_url?: string;
     nasa_power_url?: string;
     calculation_date: string;
+    monthly_data?: number[]; // Monatliche kWh-Werte (Jan-Dez)
     assumptions: {
       losses_percent: number;
       m2_per_kwp: number;

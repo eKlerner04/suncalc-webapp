@@ -25,27 +25,16 @@ class SolarCacheService {
     const gridKey = generateGridKey(lat, lng);
     console.log(`🔍 Cache-Check für ${gridKey} (lat=${lat}, lng=${lng})`);
 
-    // Fall A: Prüfe ob Daten im Cache sind und frisch
+    // Prüfe ob Daten im Cache sind und frisch
     const cachedData = await this.findInDatabase(gridKey);
     if (cachedData && this.isDataFresh(cachedData)) {
-      console.log(`✅ Fall A: Frische Daten aus Cache (${gridKey})`);
+      console.log(`✅ Frische Daten aus Cache (${gridKey})`);
       await this.updateLastAccess(gridKey);
       return { data: cachedData.payload, source: 'local' };
     }
 
-    // Fall B: Daten im Cache aber veraltet
-    if (cachedData && !this.isDataFresh(cachedData)) {
-      console.log(`🟡 Fall B: Daten im Cache aber veraltet (${gridKey})`);
-      await this.updateLastAccess(gridKey);
-      
-      // Hintergrund-Refresh starten
-      this.refreshDataInBackground(lat, lng, area, tilt, azimuth, gridKey);
-      
-      return { data: cachedData.payload, source: 'local_stale' };
-    }
-
-    // Fall C: Keine Daten im Cache
-    console.log(`🔄 Fall C: Keine Daten im Cache (${gridKey}), rufe externe API auf`);
+    // Keine frischen Daten im Cache: Hole neue Daten
+    console.log(`🔄 Keine frischen Daten im Cache (${gridKey}), rufe externe API auf`);
     const externalData = await this.fetchExternalData(lat, lng, area, tilt, azimuth);
     
     // Neue Daten in der Datenbank speichern
@@ -57,11 +46,35 @@ class SolarCacheService {
   // Daten in der Datenbank suchen
   private async findInDatabase(gridKey: string): Promise<SolarCellRecord | null> {
     try {
-      const records = await pb.collection(SOLAR_COLLECTION).getList(1, 1, {
-        filter: `gridKey = "${gridKey}"`
-      });
+      console.log(`🔍 Suche in DB nach gridKey: "${gridKey}"`);
       
-      return records.items.length > 0 ? records.items[0] as SolarCellRecord : null;
+      // Verwende direkte HTTP-API statt PocketBase-Client
+      const response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=gridKey%3D%22${gridKey}%22`);
+      const data = await response.json();
+      
+      console.log(`🔍 HTTP-API Suche Ergebnis: ${data.totalItems} Datensätze gefunden`);
+      
+      if (data.items && data.items.length > 0) {
+        // Nehme den ältesten Datensatz (mit dem frühesten lastAccessAt)
+        const oldestRecord = data.items.reduce((oldest: any, current: any) => {
+          const oldestDate = new Date(oldest.lastAccessAt);
+          const currentDate = new Date(current.lastAccessAt);
+          return oldestDate < currentDate ? oldest : current;
+        });
+        
+        const record = oldestRecord as SolarCellRecord;
+        console.log(`🔍 Gefundener Datensatz:`, {
+          id: record.id,
+          gridKey: record.gridKey,
+          source: record.source,
+          lastAccessAt: record.lastAccessAt,
+          ttlDays: record.ttlDays
+        });
+        return record;
+      } else {
+        console.log(`🔍 Kein Datensatz mit gridKey "${gridKey}" gefunden`);
+        return null;
+      }
     } catch (error) {
       console.error(`❌ Fehler beim Suchen in DB für ${gridKey}:`, error);
       return null;
@@ -70,11 +83,20 @@ class SolarCacheService {
 
   // Prüfen ob Daten noch frisch sind (TTL nicht überschritten)
   private isDataFresh(data: SolarCellRecord): boolean {
-    const fetchedDate = new Date(data.fetchedAt);
+    const ttlDays = data.ttlDays || 90;
+    const lastAccessAt = new Date(data.lastAccessAt);
     const now = new Date();
-    const daysDiff = (now.getTime() - fetchedDate.getTime()) / (1000 * 60 * 60 * 24);
+    const expiry = new Date(lastAccessAt.getTime() + ttlDays * 24 * 60 * 60 * 1000);
     
-    return daysDiff < data.ttlDays;
+    const isFresh = expiry > now;
+    console.log(`🔍 TTL-Check für ${data.gridKey}:`);
+    console.log(`   - TTL: ${ttlDays} Tage`);
+    console.log(`   - LastAccess: ${lastAccessAt.toISOString()}`);
+    console.log(`   - Expiry: ${expiry.toISOString()}`);
+    console.log(`   - Jetzt: ${now.toISOString()}`);
+    console.log(`   - Frisch: ${isFresh ? 'JA' : 'NEIN'}`);
+    
+    return isFresh;
   }
 
   // lastAccessAt aktualisieren
@@ -85,25 +107,11 @@ class SolarCacheService {
         await pb.collection(SOLAR_COLLECTION).update(record.id, {
           lastAccessAt: new Date().toISOString()
         });
+        console.log(`✅ lastAccessAt für ${gridKey} aktualisiert`);
       }
     } catch (error) {
       console.error(`❌ Fehler beim Aktualisieren von lastAccessAt für ${gridKey}:`, error);
     }
-  }
-
-  // Hintergrund-Refresh für veraltete Daten
-  private refreshDataInBackground(lat: number, lng: number, area: number, tilt: number, azimuth: number, gridKey: string): void {
-    // Asynchron im Hintergrund ausführen
-    setTimeout(async () => {
-      try {
-        console.log(`🔄 Starte Background-Refresh für ${gridKey}...`);
-        const freshData = await this.fetchExternalData(lat, lng, area, tilt, azimuth);
-        await this.updateDatabaseRecord(gridKey, freshData);
-        console.log(`✅ Background-Refresh für ${gridKey} abgeschlossen (${freshData.source})`);
-      } catch (error: any) {
-        console.error(`❌ Background-Refresh für ${gridKey} fehlgeschlagen:`, error);
-      }
-    }, 0);
   }
 
   // Externe API aufrufen (PVGIS, NASA POWER, oder Fallback)
@@ -207,24 +215,6 @@ class SolarCacheService {
       } catch (simpleError: any) {
         console.error(`❌ Auch vereinfachter Datensatz fehlgeschlagen:`, simpleError.response?.data);
       }
-    }
-  }
-
-  // Existierenden Datensatz aktualisieren
-  private async updateDatabaseRecord(gridKey: string, payload: PVGISResponse): Promise<void> {
-    try {
-      const record = await this.findInDatabase(gridKey);
-      if (record) {
-        await pb.collection(SOLAR_COLLECTION).update(record.id, {
-          payload,
-          source: payload.source,
-          fetchedAt: new Date().toISOString(),
-          ttlDays: 90
-        });
-        console.log(`🔄 Datensatz für ${gridKey} aktualisiert (${payload.source})`);
-      }
-    } catch (error) {
-      console.error(`❌ Fehler beim Aktualisieren des Datensatzes für ${gridKey}:`, error);
     }
   }
 

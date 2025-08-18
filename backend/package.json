@@ -4,13 +4,15 @@
   "type": "commonjs",
   "main": "src/server.ts",
   "scripts": {
-    "dev": "nodemon --watch src --exec ts-node src/server.ts",
-    "start": "ts-node src/server.ts",
+    "start": "NODE_ENV=development ts-node src/server.ts",
+    "start:prod": "node dist/server.js",
     "build": "tsc",
-    "start:prod": "node dist/server.js"
+    "dev": "ts-node src/server.ts"
   },
   "dependencies": {
+    "bullmq": "^5.58.0",
     "express": "^5.1.0",
+    "ioredis": "^5.7.0",
     "pocketbase": "^0.22.0"
   },
   "devDependencies": {
