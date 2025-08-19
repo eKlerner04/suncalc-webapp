@@ -1,5 +1,6 @@
 import express from 'express';
 import solarRoutes from './routes/solar';
+import locationsRoutes from './routes/locations';
 import { backgroundJobController } from './services/backgroundJobController';
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/solar', solarRoutes);
+app.use('/api/locations', locationsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -25,14 +27,23 @@ app.get('/health', (req, res) => {
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'SunCalc Backend läuft!',
+    message: 'SunCalc Backend läuft erfolgreich!',
     timestamp: new Date().toISOString(),
+    version: '1.0.0',
+    features: [
+      'Solar-Berechnung mit PVGIS/NASA POWER',
+      'Intelligentes Caching mit TTL',
+      'Popularitäts-basierte Pre-Fetch-Strategie',
+      'Automatische Background-Jobs'
+    ],
     backgroundJobs: backgroundJobController.getStatus(),
     endpoints: {
       health: '/health',
       solar: '/api/solar',
+      locations: '/api/locations',
       backgroundJobs: '/api/background-jobs'
-    }
+    },
+    documentation: 'Siehe /api/locations für Popularitäts-Statistiken'
   });
 });
 
@@ -73,6 +84,16 @@ app.post('/api/background-jobs/mode', (req, res) => {
 
 // Server starten
 app.listen(PORT, () => {
-  console.log(`🚀 SunCalc Backend läuft auf Port ${PORT}`);
-  console.log(`📊 Background-Jobs Status:`, backgroundJobController.getStatus());
+  console.log('\n[SERVER] SunCalc Backend gestartet');
+  console.log('─────────────────────────────────────────────────────────────');
+  console.log(`[URL] Server läuft auf: http://localhost:${PORT}`);
+  console.log(`[API] Verfügbare Endpunkte:`);
+  console.log(`  • Solar-Berechnung: /api/solar`);
+  console.log(`  • Standort-Info: /api/locations`);
+  console.log(`  • Health-Check: /health`);
+  console.log(`  • Root: /`);
+  console.log('─────────────────────────────────────────────────────────────');
+  console.log(`[JOBS] Background-Jobs Status:`, backgroundJobController.getStatus());
+  console.log('─────────────────────────────────────────────────────────────');
+  console.log('');
 });

@@ -12,20 +12,18 @@ export class NASAService {
     return NASAService.instance;
   }
 
-  // NASA POWER API aufrufen
   async getSolarData(lat: number, lng: number, area: number, tilt: number, azimuth: number): Promise<PVGISResponse | null> {
     try {
-      console.log(`🛰️ NASA POWER Service: Rufe Solar-Daten ab für lat=${lat}, lng=${lng}`);
+      console.log(` NASA POWER Service: Rufe Solar-Daten ab für lat=${lat}, lng=${lng}`);
       
-      // NASA POWER API für Strahlungsdaten (korrigierte Parameter)
-      // NASA POWER braucht min. 2 Grad Bereich für regionale API
-      const latMin = (lat - 1).toFixed(6); // 1 Grad nach unten
-      const latMax = (lat + 1).toFixed(6); // 1 Grad nach oben
-      const lngMin = (lng - 1).toFixed(6); // 1 Grad nach links
-      const lngMax = (lng + 1).toFixed(6); // 1 Grad nach rechts
+     
+      const latMin = (lat - 1).toFixed(6);
+      const latMax = (lat + 1).toFixed(6); 
+      const lngMin = (lng - 1).toFixed(6); 
+      const lngMax = (lng + 1).toFixed(6); 
       
       const nasaUrl = new URL('https://power.larc.nasa.gov/api/temporal/daily/regional');
-      nasaUrl.searchParams.set('parameters', 'ALLSKY_SFC_SW_DWN'); // Alle Himmelsstrahlung
+      nasaUrl.searchParams.set('parameters', 'ALLSKY_SFC_SW_DWN'); 
       nasaUrl.searchParams.set('community', 'RE');
       nasaUrl.searchParams.set('longitude-min', lngMin);
       nasaUrl.searchParams.set('longitude-max', lngMax);
@@ -35,40 +33,34 @@ export class NASAService {
       nasaUrl.searchParams.set('end', '20241231');
       nasaUrl.searchParams.set('format', 'JSON');
       
-      console.log(`🛰️ NASA POWER Request: ${nasaUrl.toString()}`);
-      console.log(`🔍 Teste diese URL im Browser: ${nasaUrl.toString()}`);
+      console.log(` NASA POWER Request: ${nasaUrl.toString()}`);
+      console.log(` Teste diese URL im Browser: ${nasaUrl.toString()}`);
       
       const response = await fetch(nasaUrl.toString());
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`❌ NASA POWER HTTP ${response.status}: ${response.statusText}`);
-        console.error(`❌ NASA POWER Error Details: ${errorText}`);
+        console.error(` NASA POWER HTTP ${response.status}: ${response.statusText}`);
+        console.error(` NASA POWER Error Details: ${errorText}`);
         throw new Error(`NASA POWER HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
       
       const data = await response.json();
-      console.log(`📊 NASA POWER Response:`, JSON.stringify(data, null, 2));
+      console.log(`NASA POWER Response:`, JSON.stringify(data, null, 2));
       
-      // NASA POWER Daten parsen
       if (data.features && data.features.length > 0) {
-        // Nehme den ersten Feature (nächster Punkt zu den Koordinaten)
         const feature = data.features[0];
         if (feature.properties && feature.properties.parameter && feature.properties.parameter.ALLSKY_SFC_SW_DWN) {
           const dailyRadiation = feature.properties.parameter.ALLSKY_SFC_SW_DWN;
           
-          // Summiere alle täglichen Strahlungswerte
           const annualRadiation = Object.values(dailyRadiation).reduce((sum: number, value: any) => {
-            // Ignoriere ungültige Werte (-999)
             return value > -900 ? sum + value : sum;
           }, 0);
           
-          // Strahlung zu kWh umrechnen (korrigiert)
-          // NASA POWER gibt kWh/m²/Tag zurück, wir brauchen kWh/m²/Jahr
-          const efficiency = 0.15; // 15% Modul-Effizienz
+          
+          const efficiency = 0.15;
           const annual_kWh = Math.round(annualRadiation * area * efficiency);
           
-          // Berechne jährliche Strahlung (kWh/m²/Jahr)
           const annual_radiation = (annualRadiation * 365).toFixed(1);
           
           console.log(`✅ NASA POWER erfolgreich: ${annual_kWh} kWh pro Jahr (Strahlung: ${annualRadiation.toFixed(1)} kWh/m²/Tag summiert)`);
@@ -104,10 +96,10 @@ export class NASAService {
   }
 
   private generateMonthlyDistribution(annual_kWh: number): number[] {
-    // Monatliche Verteilung basierend auf Jahresertrag
+  
     const monthlyDistribution = [
-      0.05, 0.08, 0.12, 0.15, 0.18, 0.20, // Jan-Jun
-      0.22, 0.20, 0.15, 0.12, 0.08, 0.05  // Jul-Dez
+      0.05, 0.08, 0.12, 0.15, 0.18, 0.20, 
+      0.22, 0.20, 0.15, 0.12, 0.08, 0.05  
     ];
     
     return monthlyDistribution.map(ratio => Math.round(annual_kWh * ratio));
