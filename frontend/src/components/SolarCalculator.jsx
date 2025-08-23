@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { fetchSolarData } from '../services/api';
 import ChartContainer from './ChartContainer';
 import SolarDetails from './SolarDetails';
+import LocationMap from './LocationMap';
 
 export default function SolarCalculator() {
   const [solarData, setSolarData] = useState(null);
@@ -12,8 +13,8 @@ export default function SolarCalculator() {
   
   // State für benutzerdefinierte Koordinaten
   const [coordinates, setCoordinates] = useState({
-    lat: '51.5413',
-    lng: '9.9158',
+    lat: '',
+    lng: '',
     area: '15',
     tilt: '35',
     azimuth: '180'
@@ -57,6 +58,15 @@ export default function SolarCalculator() {
     console.log(`📍 Schnellstandort gesetzt: ${name} (${lat}, ${lng})`);
   };
 
+  const handleMapLocationSelect = (lat, lng) => {
+    setCoordinates(prev => ({
+      ...prev,
+      lat: lat.toString(),
+      lng: lng.toString()
+    }));
+    console.log(`🗺️ Standort von Karte gesetzt: (${lat}, ${lng})`);
+  };
+
   return (
     <section className="card" style={{ 
       width: '100%',
@@ -74,13 +84,27 @@ export default function SolarCalculator() {
         <>
           <h2>Solar-Potential berechnen</h2>
       
-          {/* Koordinaten-Eingabe */}
+          {/* Interaktive Karte zur Standortauswahl */}
           <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>Standort-Koordinaten</h3>
+            <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>Standort auf der Karte wählen</h3>
             
             <div style={{ 
+              maxWidth: '800px',
+              margin: '0 auto 20px auto',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}>
+              <LocationMap
+                onLocationSelect={handleMapLocationSelect}
+                selectedLat={coordinates.lat ? parseFloat(coordinates.lat) : null}
+                selectedLng={coordinates.lng ? parseFloat(coordinates.lng) : null}
+              />
+            </div>
+            
+            {/* Aktuelle Koordinaten anzeigen */}
+            <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
               gap: '15px', 
               marginBottom: '20px',
               maxWidth: '800px',
@@ -96,6 +120,7 @@ export default function SolarCalculator() {
                   step="0.0001"
                   value={coordinates.lat}
                   onChange={(e) => handleInputChange('lat', e.target.value)}
+                  placeholder="Klicke auf die Karte oder gib Koordinaten ein"
                   style={{
                     width: '100%',
                     padding: '8px',
@@ -114,6 +139,7 @@ export default function SolarCalculator() {
                   step="0.0001"
                   value={coordinates.lng}
                   onChange={(e) => handleInputChange('lng', e.target.value)}
+                  placeholder="Klicke auf die Karte oder gib Koordinaten ein"
                   style={{
                     width: '100%',
                     padding: '8px',
