@@ -218,8 +218,8 @@ export default function SolarCalculator() {
           {/* Ergebnisse */}
           {solarData && (
             <SolarResults 
-              solarData={solarData}
-              timeUnit={timeUnit}
+                solarData={solarData} 
+                timeUnit={timeUnit}
               setTimeUnit={setTimeUnit}
               onShowDetails={() => setShowDetails(true)}
             />

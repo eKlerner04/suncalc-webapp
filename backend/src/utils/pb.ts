@@ -35,18 +35,51 @@ export interface SolarCell {
   updated: string;
 }
 
-// Koordinaten auf Rasterzellen runden (für gridKey)
+// Koordinaten auf 5km × 5km Rasterzellen runden (für gridKey)
 export function roundCoordinates(lat: number, lng: number): { latRounded: number, lngRounded: number } {
+  // Für 5km Grid: auf 0.045° runden (≈ 5km)
+  // Da 1° ≈ 111km, 5km ≈ 0.045°
+  const gridSize = 0.045;
+  
   return {
-    latRounded: Math.round(lat * 100) / 100,
-    lngRounded: Math.round(lng * 100) / 100
+    latRounded: Math.round(lat / gridSize) * gridSize,
+    lngRounded: Math.round(lng / gridSize) * gridSize
   };
 }
 
 // Grid-Key aus gerundeten Koordinaten generieren
 export function generateGridKey(lat: number, lng: number): string {
   const rounded = roundCoordinates(lat, lng);
-  return `${rounded.latRounded}_${rounded.lngRounded}`;
+  return `${rounded.latRounded.toFixed(4)}_${rounded.lngRounded.toFixed(4)}`;
+}
+
+// Hilfsfunktion um Grid-Größe zu berechnen
+export function getGridSizeKm(lat: number, lng: number): { latKm: number, lngKm: number } {
+  const rounded = roundCoordinates(lat, lng);
+  const latRad = rounded.latRounded * Math.PI / 180;
+  
+  return {
+    latKm: 5.0, // Konstante 5km
+    lngKm: 5.0 / Math.cos(latRad) // Variiert je nach Breitengrad
+  };
+}
+
+// Grid-Grenzen für ein bestimmten GridKey berechnen
+export function getGridBounds(gridKey: string): {
+  minLat: number, maxLat: number, minLng: number, maxLng: number
+} {
+  const [latStr, lngStr] = gridKey.split('_');
+  const centerLat = parseFloat(latStr);
+  const centerLng = parseFloat(lngStr);
+  
+  const gridSize = 0.045; // 5km Grid
+  
+  return {
+    minLat: centerLat - gridSize / 2,
+    maxLat: centerLat + gridSize / 2,
+    minLng: centerLng - gridSize / 2,
+    maxLng: centerLng + gridSize / 2
+  };
 }
 
 /**
