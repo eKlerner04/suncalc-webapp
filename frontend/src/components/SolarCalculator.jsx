@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { fetchSolarData } from '../services/api';
 import SolarDetails from './SolarDetails';
 import LocationMap from './LocationMap';
@@ -28,6 +28,7 @@ export default function SolarCalculator() {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchTimeoutRef = useRef(null);
 
   // Nominatim API Service
   const searchAddress = async (query) => {
@@ -48,7 +49,7 @@ export default function SolarCalculator() {
     }
   };
 
-  const handleSearchInput = async (e) => {
+  const handleSearchInput = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
     
@@ -58,11 +59,18 @@ export default function SolarCalculator() {
       return;
     }
 
-    setIsSearching(true);
-    const results = await searchAddress(query);
-    setSearchResults(results);
-    setShowSearchResults(true);
-    setIsSearching(false);
+    // Verzögerung (Debouncing) - warte 500ms nach dem letzten Tastendruck
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setIsSearching(true);
+      const results = await searchAddress(query);
+      setSearchResults(results);
+      setShowSearchResults(true);
+      setIsSearching(false);
+    }, 500);
   };
 
   const handleAddressSelect = (result) => {
