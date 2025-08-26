@@ -181,240 +181,101 @@ export default function LocationMap({
 
   return (
     <div style={{ 
+      position: 'relative', 
       width: '100%', 
-      height: '60vh', 
-      minHeight: '400px',
-      borderRadius: '16px',
-      overflow: 'hidden',
-      border: '2px solid #e0e0e0',
-      position: 'relative',
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+      height: '100%',
+      borderRadius: '12px',
+      overflow: 'hidden'
     }}>
-      {/* Moderne Adresssuche */}
-      <div style={{
-        position: 'absolute',
-        top: '16px',
-        left: '16px',
-        right: '16px',
-        zIndex: 1000,
-        maxWidth: '380px'
-      }}>
-        <div style={{
-          position: 'relative',
-          width: '100%'
-        }}>
-          {/* Suchfeld mit modernem Design */}
-          <div style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '16px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)',
-            transition: 'all 0.3s ease',
-            overflow: 'hidden'
-          }}>
-            {/* Such-Icon */}
-            <div style={{
-              padding: '0 16px',
-              color: '#6366f1',
-              fontSize: '18px'
-            }}>
-              🔍
-            </div>
-            
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Adresse oder Ort eingeben..."
-              style={{
-                flex: 1,
-                padding: '16px 0',
-                border: 'none',
-                outline: 'none',
-                background: 'transparent',
-                fontSize: '15px',
-                color: '#1f2937',
-                fontWeight: '500'
-              }}
-            />
-            
-            {/* Lösch-Button mit Animation */}
-            {searchQuery && (
-              <button
-                onClick={clearSearch}
-                style={{
-                  padding: '8px',
-                  margin: '0 12px',
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  color: '#ef4444',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '32px',
-                  height: '32px'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'rgba(239, 68, 68, 0.2)';
-                  e.target.style.transform = 'scale(1.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'rgba(239, 68, 68, 0.1)';
-                  e.target.style.transform = 'scale(1)';
-                }}
-              >
-                ×
-              </button>
-            )}
-          </div>
-
-          {/* Moderne Suchergebnisse */}
-          {showSearchResults && searchResults.length > 0 && (
-            <div style={{
-              position: 'absolute',
-              top: 'calc(100% + 8px)',
-              left: '0',
-              right: '0',
-              background: 'rgba(255, 255, 255, 0.98)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.1)',
-              maxHeight: '280px',
-              overflowY: 'auto',
-              zIndex: 1001,
-              animation: 'slideDown 0.3s ease-out'
-            }}>
-              {searchResults.map((result, index) => (
-                <div
-                  key={index}
-                  onClick={() => handleAddressSelect(result)}
-                  style={{
-                    padding: '16px 20px',
-                    borderBottom: index < searchResults.length - 1 ? '1px solid rgba(0, 0, 0, 0.06)' : 'none',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    lineHeight: '1.5',
-                    transition: 'all 0.2s ease',
-                    borderRadius: index === 0 ? '16px 16px 0 0' : index === searchResults.length - 1 ? '0 0 16px 16px' : '0'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = 'rgba(99, 102, 241, 0.08)';
-                    e.target.style.transform = 'translateX(4px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = 'transparent';
-                    e.target.style.transform = 'translateX(0)';
-                  }}
-                >
-                  <div style={{ 
-                    fontWeight: '600', 
-                    color: '#1f2937',
-                    fontSize: '15px',
-                    marginBottom: '4px'
-                  }}>
-                    📍 {result.name}
-                  </div>
-                  <div style={{ 
-                    fontSize: '13px', 
-                    color: '#6b7280',
-                    lineHeight: '1.4'
-                  }}>
-                    {result.displayName}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Moderner Ladeindikator */}
-          {isSearching && (
-            <div style={{
-              position: 'absolute',
-              top: 'calc(100% + 8px)',
-              left: '0',
-              right: '0',
-              background: 'rgba(255, 255, 255, 0.98)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
-              padding: '20px',
-              fontSize: '14px',
-              color: '#6366f1',
-              zIndex: 1001,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '12px',
-              fontWeight: '500'
-            }}>
-              <div style={{
-                width: '20px',
-                height: '20px',
-                border: '2px solid rgba(99, 102, 102, 241, 0.2)',
-                borderTop: '2px solid #6366f1',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite'
-              }}></div>
-              Suche läuft...
-            </div>
-          )}
-        </div>
-      </div>
-
       <MapContainer
         ref={mapRef}
-        center={[51.5413, 9.9158]} // Deutschland-Zentrum
-        zoom={6}
-        style={{ height: '100%', width: '100%' }}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
+        center={[initialLat || 51.5413, initialLng || 9.9158]}
+        zoom={8}
+        style={{ 
+          height: '100%', 
+          width: '100%',
+          borderRadius: '12px'
+        }}
+        zoomControl={false}
+        attributionControl={false}
         doubleClickZoom={false}
-        zoomControl={true}
-        attributionControl={true}
-        whenReady={handleMapReady}
+        scrollWheelZoom={true}
+        dragging={true}
+        animate={true}
+        easeLinearity={0.35}
+        onLoad={() => {
+          console.log('Karte geladen');
+        }}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {/* Fadenkreuz */}
-        <Crosshair onLocationSelect={onLocationSelect} setCrosshairPosition={setCrosshairPosition} />
+        {/* Fadenkreuz-Komponente */}
+        <Crosshair 
+          onLocationSelect={onLocationSelect} 
+          setCrosshairPosition={setCrosshairPosition}
+        />
         
-        {/* Ausgewählter Standort als Marker */}
-        {crosshairPosition && (
-          <Marker 
-            position={[crosshairPosition.lat, crosshairPosition.lng]}
+        {/* Marker für ausgewählten Standort */}
+        {selectedLat && selectedLng && (
+          <Marker
+            position={[selectedLat, selectedLng]}
             icon={L.divIcon({
-              className: 'custom-crosshair',
+              className: 'custom-marker',
               html: `
                 <div style="
-                  width: 20px; 
-                  height: 20px; 
-                  background: #ff4444; 
-                  border: 3px solid white; 
-                  border-radius: 50%; 
-                  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                  width: 24px;
+                  height: 24px;
+                  background: #ef4444;
+                  border: 3px solid #ffffff;
+                  border-radius: 50%;
+                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
                   position: relative;
                 ">
                   <div style="
                     position: absolute;
                     top: 50%;
                     left: 50%;
-                    width: 2px;
-                    height: 2px;
-                    background: white;
                     transform: translate(-50%, -50%);
+                    width: 8px;
+                    height: 8px;
+                    background: #ffffff;
+                    border-radius: 50%;
+                  "></div>
+                </div>
+              `,
+              iconSize: [24, 24],
+              iconAnchor: [12, 12]
+            })}
+          />
+        )}
+        
+        {/* Fadenkreuz-Marker */}
+        {crosshairPosition && !isDragging && (
+          <Marker
+            position={crosshairPosition}
+            icon={L.divIcon({
+              className: 'crosshair-marker',
+              html: `
+                <div style="
+                  width: 20px;
+                  height: 20px;
+                  border: 2px solid #3b82f6;
+                  border-radius: 50%;
+                  background: rgba(59, 130, 246, 0.1);
+                  position: relative;
+                  animation: pulse 2s infinite;
+                ">
+                  <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 4px;
+                    height: 4px;
+                    background: #3b82f6;
                     border-radius: 50%;
                   "></div>
                 </div>
@@ -425,60 +286,117 @@ export default function LocationMap({
           />
         )}
       </MapContainer>
-      
-      {/* Moderne Koordinaten-Anzeige (oben rechts) */}
-      {crosshairPosition && (
-        <div style={{
-          position: 'absolute',
-          top: '16px',
-          right: '16px',
-          background: 'rgba(0, 0, 0, 0.85)',
-          backdropFilter: 'blur(20px)',
-          color: 'white',
-          padding: '16px 20px',
-          borderRadius: '16px',
-          fontSize: '13px',
-          fontFamily: 'monospace',
-          zIndex: 1000,
-          maxWidth: '280px',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.2)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          animation: 'slideIn 0.3s ease-out'
-        }}>
-          <div style={{ 
-            marginBottom: '8px',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#fbbf24',
+
+      {/* Zoom-Controls */}
+      <div style={{
+        position: 'absolute',
+        top: '16px',
+        left: '16px',
+        zIndex: 1000,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px'
+      }}>
+        <button
+          onClick={() => mapRef.current?.zoomIn()}
+          style={{
+            width: '40px',
+            height: '40px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            borderRadius: '8px',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px'
-          }}>
-            🎯 Koordinaten
-          </div>
-          <div style={{ 
-            marginBottom: '8px',
-            fontSize: '15px',
-            fontWeight: '500',
-            color: '#f3f4f6',
-            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace'
-          }}>
-            {crosshairPosition.lat.toFixed(4)}, {crosshairPosition.lng.toFixed(4)}
-          </div>
-          {currentAddress && (
-            <div style={{ 
-              fontSize: '12px', 
-              color: '#d1d5db',
-              wordBreak: 'break-word',
-              lineHeight: '1.4',
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-              paddingTop: '8px'
-            }}>
-              📍 {currentAddress}
-            </div>
-          )}
+            justifyContent: 'center',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            color: '#374151',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 1)';
+            e.target.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.95)';
+            e.target.style.transform = 'scale(1)';
+          }}
+        >
+          +
+        </button>
+        <button
+          onClick={() => mapRef.current?.zoomOut()}
+          style={{
+            width: '40px',
+            height: '40px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            color: '#374151',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 1)';
+            e.target.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.95)';
+            e.target.style.transform = 'scale(1)';
+          }}
+        >
+          -
+        </button>
+      </div>
+
+      {/* Adress-Anzeige */}
+      {currentAddress && (
+        <div style={{
+          position: 'absolute',
+          bottom: '16px',
+          left: '16px',
+          right: '16px',
+          background: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '500',
+          zIndex: 1000,
+          maxWidth: '400px'
+        }}>
+          <strong>Koordinaten:</strong> {crosshairPosition?.lat?.toFixed(6)}, {crosshairPosition?.lng?.toFixed(6)}
+          <br />
+          <strong>Adresse:</strong> {currentAddress}
         </div>
       )}
+
+      {/* CSS für Animationen */}
+      <style jsx>{`
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.2); opacity: 0.7; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .custom-marker {
+          background: transparent !important;
+          border: none !important;
+        }
+        
+        .crosshair-marker {
+          background: transparent !important;
+          border: none !important;
+        }
+      `}</style>
     </div>
   );
 }

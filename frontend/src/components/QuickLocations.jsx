@@ -11,22 +11,12 @@ export default function QuickLocations({ onQuickLocation }) {
 
   return (
     <div style={{ 
-      marginTop: '40px',
-      textAlign: 'center',
       width: '100%',
       boxSizing: 'border-box'
     }}>
-      <h3 style={{ 
-        marginBottom: '24px',
-        fontSize: '1.25rem',
-        fontWeight: '600',
-        color: '#2d3748'
-      }}>
-        Schnellstandorte
-      </h3>
       <div style={{ 
         display: 'flex', 
-        gap: '20px', 
+        gap: '12px', 
         justifyContent: 'center',
         flexWrap: 'wrap',
         width: '100%',
@@ -37,29 +27,27 @@ export default function QuickLocations({ onQuickLocation }) {
             key={location.name}
             onClick={() => onQuickLocation(location.lat, location.lng, location.name)}
             style={{
-              padding: '12px 24px',
-              backgroundColor: '#f7fafc',
-              color: '#2d3748',
+              padding: '12px 20px',
+              backgroundColor: '#ffffff',
+              color: '#374151',
               border: '2px solid #e2e8f0',
-              borderRadius: '12px',
+              borderRadius: '8px',
               cursor: 'pointer',
               fontSize: '0.875rem',
-              fontWeight: '500',
+              fontWeight: '600',
               boxSizing: 'border-box',
               transition: 'all 0.2s ease',
-              minWidth: '120px'
+              minWidth: '100px'
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#edf2f7';
+              e.target.style.backgroundColor = '#f1f5f9';
               e.target.style.borderColor = '#cbd5e0';
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.1)';
+              e.target.style.transform = 'translateY(-1px)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#f7fafc';
+              e.target.style.backgroundColor = '#ffffff';
               e.target.style.borderColor = '#e2e8f0';
               e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
             }}
           >
             {location.name}
