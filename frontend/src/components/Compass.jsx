@@ -362,22 +362,59 @@ export default function Compass({ azimuth, onInputChange }) {
         ></div>
       </div>
       
-      {/* Aktuelle Ausrichtung anzeigen */}
+
+      
+      {/* Direkte Gradzahl-Eingabe */}
       <div style={{
         position: 'absolute',
         bottom: '-40px',
         left: '50%',
         transform: 'translateX(-50%)',
-        fontSize: '1rem',
-        fontWeight: '600',
-        color: '#3182ce',
-        backgroundColor: 'white',
-        padding: '8px 16px',
-        borderRadius: '20px',
-        border: '2px solid #e2e8f0',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
       }}>
-        {azimuth}°
+        <input
+          type="number"
+          min="0"
+          max="359"
+          value={azimuth}
+          onChange={(e) => {
+            const value = parseInt(e.target.value) || 0;
+            const clampedValue = Math.max(0, Math.min(359, value));
+            onInputChange('azimuth', clampedValue.toString());
+          }}
+          onBlur={(e) => {
+            const value = parseInt(e.target.value) || 0;
+            const clampedValue = Math.max(0, Math.min(359, value));
+            onInputChange('azimuth', clampedValue.toString());
+          }}
+          style={{
+            width: '60px',
+            padding: '6px 8px',
+            fontSize: '0.875rem',
+            border: '2px solid #e2e8f0',
+            borderRadius: '8px',
+            textAlign: 'center',
+            outline: 'none',
+            transition: 'all 0.2s ease'
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = '#3182ce';
+            e.target.style.boxShadow = '0 0 0 3px rgba(49, 130, 206, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = '#e2e8f0';
+            e.target.style.boxShadow = 'none';
+          }}
+        />
+        <span style={{
+          fontSize: '0.875rem',
+          fontWeight: '600',
+          color: '#64748b'
+        }}>
+          °
+        </span>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import SolarDetails from './SolarDetails';
 import LocationMap from './LocationMap';
 import LocationInputs from './LocationInputs';
 import RoofParameters from './RoofParameters';
-import QuickLocations from './QuickLocations';
+
 import SolarResults from './SolarResults';
 
 export default function SolarCalculator() {
@@ -119,14 +119,7 @@ export default function SolarCalculator() {
     }));
   };
 
-  const handleQuickLocation = (lat, lng, name) => {
-    setCoordinates(prev => ({
-      ...prev,
-      lat,
-      lng
-    }));
-    console.log(`Schnellstandort gesetzt: ${name} (${lat}, ${lng})`);
-  };
+
 
   const handleMapLocationSelect = async (lat, lng) => {
     setCoordinates(prev => ({
@@ -445,19 +438,7 @@ export default function SolarCalculator() {
                 />
               </div>
 
-              {/* Schnellstandorte */}
-              <div style={{ marginBottom: '40px' }}>
-                <h3 style={{ 
-                  margin: '0 0 24px 0',
-                  fontSize: '1.5rem',
-                  fontWeight: '600',
-                  color: '#374151',
-                  textAlign: 'center'
-                }}>
-                  Schnellstandorte
-                </h3>
-                <QuickLocations onQuickLocation={handleQuickLocation} />
-              </div>
+
             </div>
           </div>
 

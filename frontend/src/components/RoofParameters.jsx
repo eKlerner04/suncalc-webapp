@@ -72,6 +72,143 @@ export default function RoofParameters({ coordinates, onInputChange }) {
             width: '100%',
             padding: '20px 0'
           }}>
+            {/* Dach-Animation - Graphisch verbessert */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: '30px',
+              height: '150px',
+              alignItems: 'flex-end',
+              background: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)',
+              borderRadius: '16px',
+              padding: '20px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+            }}>
+              <div style={{
+                position: 'relative',
+                width: '140px',
+                height: '70px'
+              }}>
+                {/* Haus - komplett neu gebaut */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '0',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '100px',
+                  height: '50px'
+                }}>
+                  {/* Hauswand */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '0',
+                    left: '0',
+                    width: '100px',
+                    height: '50px',
+                    background: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)',
+                    border: '2px solid #94a3b8',
+                    borderRadius: '8px 8px 0 0',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  }} />
+                  
+                  {/* Tür */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '0',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '16px',
+                    height: '20px',
+                    backgroundColor: '#475569',
+                    borderRadius: '4px 4px 0 0',
+                    border: '1px solid #334155'
+                  }} />
+                  
+                  {/* Fenster links */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '15px',
+                    left: '15px',
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: '#e0f2fe',
+                    borderRadius: '2px',
+                    border: '1px solid #0284c7',
+                    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)'
+                  }} />
+                  
+                  {/* Fenster rechts */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '15px',
+                    right: '15px',
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: '#e0f2fe',
+                    borderRadius: '2px',
+                    border: '1px solid #0284c7',
+                    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)'
+                  }} />
+                </div>
+                
+                {/* Dach - schicke schräge Linie mit festem rechten Ende */}
+                <div style={{
+                  position: 'absolute',
+                  top: '17px',
+                  right: '17px',
+                  width: '100px',
+                  height: '4px',
+                  background: 'linear-gradient(90deg, #dc2626 0%, #b91c1c 50%, #dc2626 100%)',
+                  borderRadius: '2px',
+                  transformOrigin: 'right center',
+                  transform: `rotate(${coordinates.tilt}deg)`,
+                  transition: 'transform 0.2s ease-out',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))'
+                }} />
+                
+                {/* Sonne - verbessert */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-70px',
+                  right: '-35px',
+                  width: '25px',
+                  height: '25px',
+                  background: 'radial-gradient(circle, #fbbf24 0%, #f59e0b 70%, #d97706 100%)',
+                  borderRadius: '50%',
+                  boxShadow: '0 0 20px #fbbf24, 0 0 40px rgba(251, 191, 36, 0.3)',
+                  animation: 'pulse 3s ease-in-out infinite'
+                }} />
+                
+                {/* Sonnenstrahlen */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-30px',
+                  right: '-40px',
+                  width: '35px',
+                  height: '35px',
+                  background: 'conic-gradient(from 0deg, transparent 0deg, rgba(251, 191, 36, 0.3) 45deg, transparent 90deg, rgba(251, 191, 36, 0.3) 135deg, transparent 180deg, rgba(251, 191, 36, 0.3) 225deg, transparent 270deg, rgba(251, 191, 36, 0.3) 315deg, transparent 360deg)',
+                  borderRadius: '50%',
+                  animation: 'rotate 8s linear infinite'
+                }} />
+                
+                {/* CSS-Animationen */}
+                <style>
+                  {`
+                    @keyframes pulse {
+                      0%, 100% { transform: scale(1); opacity: 1; }
+                      50% { transform: scale(1.15); opacity: 0.9; }
+                    }
+                    @keyframes rotate {
+                      from { transform: rotate(0deg); }
+                      to { transform: rotate(360deg); }
+                    }
+                  `}
+                </style>
+              </div>
+            </div>
+            
             <input
               id="tilt"
               type="range"
@@ -83,7 +220,7 @@ export default function RoofParameters({ coordinates, onInputChange }) {
                 width: '100%',
                 height: '8px',
                 borderRadius: '4px',
-                background: 'linear-gradient(to right, #e2e8f0 0%, #1e293b 50%, #e2e8f0 100%)',
+                background: `linear-gradient(to right, #e2e8f0 0%, #1e293b ${(coordinates.tilt / 90) * 100}%, #e2e8f0 ${(coordinates.tilt / 90) * 100}%)`,
                 outline: 'none',
                 cursor: 'pointer',
                 WebkitAppearance: 'none',
