@@ -26,6 +26,129 @@ export default function RoofParameters({ coordinates, onInputChange }) {
           }}>
             Dachfläche (m²)
           </label>
+          
+          {/* Dachfläche-Animation - Schicker gemacht */}
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            height: '150px',
+            background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%)',
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '30px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+            overflow: 'hidden'
+          }}>
+            {/* Hintergrund-Textur */}
+            <div style={{
+              position: 'absolute',
+              top: '0',
+              left: '0',
+              width: '100%',
+              height: '100%',
+              background: `
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)
+              `,
+              pointerEvents: 'none'
+            }} />
+            {/* Dachfläche-Visualisierung */}
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+                             {/* Dachfläche als animierte Fläche - Schicker gemacht */}
+               <div style={{
+                 width: `${Math.min(80, Math.max(20, coordinates.area * 2))}%`,
+                 height: `${Math.min(60, Math.max(15, coordinates.area * 1.5))}%`,
+                 background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 40%, #991b1b 70%, #7f1d1d 100%)',
+                 borderRadius: '12px',
+                 border: '3px solid #7f1d1d',
+                 boxShadow: '0 8px 24px rgba(220, 38, 38, 0.4), 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2)',
+                 transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                 position: 'relative',
+                 overflow: 'hidden',
+                 transform: 'perspective(100px) rotateX(5deg)',
+                 filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+               }}>
+                                 {/* Dachziegel-Muster - Schicker gemacht */}
+                 <div style={{
+                   position: 'absolute',
+                   top: '0',
+                   left: '0',
+                   width: '100%',
+                   height: '100%',
+                   background: `
+                     repeating-linear-gradient(
+                       90deg,
+                       transparent 0px,
+                       transparent 6px,
+                       rgba(255,255,255,0.15) 6px,
+                       rgba(255,255,255,0.15) 8px
+                     ),
+                     repeating-linear-gradient(
+                       0deg,
+                       transparent 0px,
+                       transparent 6px,
+                       rgba(255,255,255,0.15) 6px,
+                       rgba(255,255,255,0.15) 8px
+                     )
+                   `,
+                   animation: 'tileMove 4s linear infinite'
+                 }} />
+                 
+                 {/* Sonnenreflexion - Schicker gemacht */}
+                 <div style={{
+                   position: 'absolute',
+                   top: '8%',
+                   left: '8%',
+                   width: '35%',
+                   height: '25%',
+                   background: 'radial-gradient(ellipse, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 40%, transparent 70%)',
+                   borderRadius: '50%',
+                   animation: 'shine 5s ease-in-out infinite',
+                   filter: 'blur(1px)'
+                 }} />
+                 
+                 {/* Zusätzliche Glanzpunkte */}
+                 <div style={{
+                   position: 'absolute',
+                   top: '25%',
+                   right: '15%',
+                   width: '20%',
+                   height: '15%',
+                   background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%)',
+                   borderRadius: '50%',
+                   animation: 'shine 3s ease-in-out infinite 1s'
+                 }} />
+              </div>
+              
+                             {/* Größenanzeige - Schicker gemacht */}
+               <div style={{
+                 position: 'absolute',
+                 bottom: '12px',
+                 right: '12px',
+                 background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)',
+                 padding: '6px 12px',
+                 borderRadius: '12px',
+                 fontSize: '0.8rem',
+                 fontWeight: '700',
+                 color: '#1e293b',
+                 border: '2px solid rgba(255,255,255,0.8)',
+                 boxShadow: '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
+                 backdropFilter: 'blur(10px)',
+                 letterSpacing: '0.5px'
+               }}>
+                 {coordinates.area} m²
+               </div>
+            </div>
+          </div>
+          
           <input
             id="area"
             type="number"
@@ -53,6 +176,20 @@ export default function RoofParameters({ coordinates, onInputChange }) {
               e.target.style.boxShadow = 'none';
             }}
           />
+          
+          {/* CSS-Animationen für Dachfläche */}
+          <style>
+            {`
+              @keyframes tileMove {
+                0% { transform: translateX(0px) translateY(0px); }
+                100% { transform: translateX(-10px) translateY(-10px); }
+              }
+              @keyframes shine {
+                0%, 100% { opacity: 0.3; transform: scale(1); }
+                50% { opacity: 0.6; transform: scale(1.2); }
+              }
+            `}
+          </style>
         </div>
         
         <div style={{ width: '100%', boxSizing: 'border-box' }}>

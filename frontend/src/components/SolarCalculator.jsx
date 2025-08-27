@@ -146,15 +146,36 @@ export default function SolarCalculator() {
   };
 
   return (
-    <div style={{ 
-      width: '100%',
-      minHeight: '100vh',
-      margin: '0',
-      padding: '0',
-      boxSizing: 'border-box',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-      backgroundColor: '#ffffff'
-    }}>
+    <>
+      {/* Globale CSS-Regeln für horizontales Scrollen verhindern */}
+      <style>
+        {`
+          body {
+            overflow-x: hidden !important;
+            max-width: 100vw !important;
+          }
+          html {
+            overflow-x: hidden !important;
+            max-width: 100vw !important;
+          }
+          * {
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+          }
+        `}
+      </style>
+      
+      <div style={{ 
+        width: '100%',
+        minHeight: '100vh',
+        margin: '0',
+        padding: '0',
+        boxSizing: 'border-box',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        backgroundColor: '#ffffff',
+        overflowX: 'hidden',
+        maxWidth: '100vw'
+      }}>
       {/* Details-Seite anzeigen wenn showDetails true ist */}
       {showDetails ? (
         <SolarDetails 
@@ -533,6 +554,7 @@ export default function SolarCalculator() {
           `}</style>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

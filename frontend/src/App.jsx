@@ -16,7 +16,7 @@ L.Icon.Default.mergeOptions({
 // Komponenten importieren
 import Header from './components/Header';
 import SolarCalculator from './components/SolarCalculator';
-import ArchitectureInfo from './components/ArchitectureInfo';
+
 import Footer from './components/Footer';
 
 export default function App() {
@@ -26,7 +26,7 @@ export default function App() {
       
       <main className="main">
         <SolarCalculator />
-        <ArchitectureInfo />
+
       </main>
       
       <Footer />

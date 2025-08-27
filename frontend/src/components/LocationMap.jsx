@@ -218,75 +218,19 @@ export default function LocationMap({
           setCrosshairPosition={setCrosshairPosition}
         />
         
-        {/* Marker für ausgewählten Standort */}
+                {/* Marker für ausgewählten Standort - Standard Leaflet */}
         {selectedLat && selectedLng && (
-          <Marker
-            position={[selectedLat, selectedLng]}
-            icon={L.divIcon({
-              className: 'custom-marker',
-              html: `
-                <div style="
-                  width: 24px;
-                  height: 24px;
-                  background: #ef4444;
-                  border: 3px solid #ffffff;
-                  border-radius: 50%;
-                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-                  position: relative;
-                ">
-                  <div style="
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    width: 8px;
-                    height: 8px;
-                    background: #ffffff;
-                    border-radius: 50%;
-                  "></div>
-                </div>
-              `,
-              iconSize: [24, 24],
-              iconAnchor: [12, 12]
-            })}
-          />
+          <Marker position={[selectedLat, selectedLng]} />
         )}
         
-        {/* Fadenkreuz-Marker */}
+        {/* Fadenkreuz-Marker - Standard Leaflet */}
         {crosshairPosition && !isDragging && (
-          <Marker
-            position={crosshairPosition}
-            icon={L.divIcon({
-              className: 'crosshair-marker',
-              html: `
-                <div style="
-                  width: 20px;
-                  height: 20px;
-                  border: 2px solid #3b82f6;
-                  border-radius: 50%;
-                  background: rgba(59, 130, 246, 0.1);
-                  position: relative;
-                  animation: pulse 2s infinite;
-                ">
-                  <div style="
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    width: 4px;
-                    height: 4px;
-                    background: #3b82f6;
-                    border-radius: 50%;
-                  "></div>
-                </div>
-              `,
-              iconSize: [20, 20],
-              iconAnchor: [10, 10]
-            })}
-          />
+          <Marker position={crosshairPosition} />
         )}
       </MapContainer>
 
+
+      
       {/* Zoom-Controls */}
       <div style={{
         position: 'absolute',
