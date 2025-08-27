@@ -128,13 +128,28 @@ export default function SolarCalculator() {
     console.log(`Schnellstandort gesetzt: ${name} (${lat}, ${lng})`);
   };
 
-  const handleMapLocationSelect = (lat, lng) => {
+  const handleMapLocationSelect = async (lat, lng) => {
     setCoordinates(prev => ({
       ...prev,
       lat: lat.toString(),
       lng: lng.toString()
     }));
     console.log(`Standort von Karte gesetzt: (${lat}, ${lng})`);
+    
+    // Automatisch Adresse für die neuen Koordinaten abrufen und ins Suchfeld eintragen
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=18&addressdetails=1`
+      );
+      const data = await response.json();
+      
+      if (data.display_name) {
+        setSearchQuery(data.display_name);
+        console.log(`Adresse automatisch ausgefüllt: ${data.display_name}`);
+      }
+    } catch (error) {
+      console.error('Fehler beim automatischen Adressabruf:', error);
+    }
   };
 
   return (
