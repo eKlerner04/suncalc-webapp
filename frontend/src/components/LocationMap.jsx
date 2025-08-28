@@ -218,7 +218,7 @@ export default function LocationMap({
           setCrosshairPosition={setCrosshairPosition}
         />
         
-                {/* Marker für ausgewählten Standort - Standard Leaflet */}
+        {/* Marker für ausgewählten Standort - Standard Leaflet */}
         {selectedLat && selectedLng && (
           <Marker position={[selectedLat, selectedLng]} />
         )}

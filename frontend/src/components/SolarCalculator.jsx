@@ -1,10 +1,10 @@
 import { useState, useRef } from 'react';
 import { fetchSolarData } from '../services/api';
+import { addToSearchHistory } from '../services/searchHistoryService';
 import SolarDetails from './SolarDetails';
 import LocationMap from './LocationMap';
 import LocationInputs from './LocationInputs';
 import RoofParameters from './RoofParameters';
-
 import SolarResults from './SolarResults';
 
 export default function SolarCalculator() {
@@ -103,6 +103,36 @@ export default function SolarCalculator() {
       );
       console.log('Frontend hat Daten erhalten:', data);
       setSolarData(data);
+      
+      // Suchverlauf speichern
+      console.log('🔍 [SolarCalculator] Versuche Suchverlauf zu speichern...');
+      console.log('📊 [SolarCalculator] Empfangene Daten:', data);
+      console.log('📍 [SolarCalculator] Aktuelle Koordinaten:', coordinates);
+      console.log('🏠 [SolarCalculator] Aktuelle Adresse:', searchQuery);
+      
+      if (data && data.yield && data.yield.annual_kWh) {
+        console.log('✅ [SolarCalculator] Daten sind gültig, erstelle Suchdaten...');
+        
+        const searchData = {
+          address: searchQuery || `${coordinates.lat}, ${coordinates.lng}`,
+          lat: parseFloat(coordinates.lat),
+          lng: parseFloat(coordinates.lng),
+          area: parseFloat(coordinates.area),
+          tilt: parseFloat(coordinates.tilt),
+          azimuth: parseFloat(coordinates.azimuth),
+          solarPotential: Math.round(data.yield.annual_kWh)
+        };
+        
+        console.log('📝 [SolarCalculator] Suchdaten erstellt:', searchData);
+        const result = addToSearchHistory(searchData);
+        console.log('💾 [SolarCalculator] Suchverlauf gespeichert, Ergebnis:', result);
+      } else {
+        console.log('❌ [SolarCalculator] Daten sind ungültig oder yield.annual_kWh fehlt:', data);
+        console.log('🔍 [SolarCalculator] Verfügbare Datenfelder:', Object.keys(data || {}));
+        if (data && data.yield) {
+          console.log('📊 [SolarCalculator] Yield-Daten:', data.yield);
+        }
+      }
     } catch (err) {
       console.error('Frontend-Fehler:', err);
       setError(err.message);
@@ -117,6 +147,23 @@ export default function SolarCalculator() {
       ...prev,
       [field]: value
     }));
+  };
+
+  // Suchverlauf wiederherstellen
+  const handleRestoreSearch = (searchItem) => {
+    setCoordinates({
+      lat: searchItem.lat.toString(),
+      lng: searchItem.lng.toString(),
+      area: searchItem.area.toString(),
+      tilt: searchItem.tilt.toString(),
+      azimuth: searchItem.azimuth.toString()
+    });
+    setSearchQuery(searchItem.address);
+    
+    // Automatisch Solarpotential berechnen
+    setTimeout(() => {
+      handleCalculateSolar();
+    }, 100);
   };
 
 
@@ -185,36 +232,7 @@ export default function SolarCalculator() {
         />
       ) : (
         <div style={{ width: '100%', maxWidth: '100%', margin: '0 auto' }}>
-          {/* Hero-Sektion - Volle Breite */}
-          <div style={{ 
-            width: '100%',
-            background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-            color: 'white',
-            padding: '80px 40px',
-            textAlign: 'center',
-            marginBottom: '0'
-          }}>
-            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-              <h1 style={{ 
-                fontSize: '4rem',
-                fontWeight: '900',
-                margin: '0 0 24px 0',
-                letterSpacing: '-0.03em',
-                lineHeight: '1.1'
-              }}>
-                Solar-Potential berechnen
-              </h1>
-              <p style={{ 
-                fontSize: '1.5rem',
-                margin: '0',
-                lineHeight: '1.4',
-                opacity: '0.9',
-                fontWeight: '400'
-              }}>
-                Wählen Sie Ihren Standort und die Dachparameter für eine präzise Solarpotential-Berechnung
-              </p>
-            </div>
-          </div>
+
       
           {/* Hauptinhalt - Volle Breite Grid */}
           <div style={{ 
@@ -226,17 +244,35 @@ export default function SolarCalculator() {
           }}>
             {/* Linke Spalte - Karte (Volle Höhe) */}
             <div style={{ 
-              background: '#f8fafc',
+              background: '#ffffff',
               padding: '40px',
               borderRight: '1px solid #e2e8f0'
             }}>
               <h2 style={{ 
                 margin: '0 0 32px 0',
-                fontSize: '2rem',
-                fontWeight: '700',
-                color: '#1e293b',
-                textAlign: 'center'
+                fontSize: '1.75rem',
+                fontWeight: '600',
+                color: '#475569',
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px'
               }}>
+                <span style={{
+                  background: '#3b82f6',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '28px',
+                  height: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.875rem',
+                  fontWeight: '700'
+                }}>
+                  1
+                </span>
                 Standort wählen
               </h2>
               
@@ -285,14 +321,7 @@ export default function SolarCalculator() {
                   transition: 'all 0.2s ease',
                   overflow: 'hidden'
                 }}>
-                  {/* Such-Icon */}
-                  <div style={{
-                    padding: '0 16px',
-                    color: '#6366f1',
-                    fontSize: '18px'
-                  }}>
-                    🔍
-                  </div>
+
                   
                   <input
                     id="address"
@@ -446,17 +475,36 @@ export default function SolarCalculator() {
               <div style={{ marginBottom: '40px' }}>
                 <h2 style={{ 
                   margin: '0 0 32px 0',
-                  fontSize: '2rem',
-                  fontWeight: '700',
-                  color: '#1e293b',
-                  textAlign: 'center'
+                  fontSize: '1.75rem',
+                  fontWeight: '600',
+                  color: '#475569',
+                  textAlign: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '12px'
                 }}>
-                  Dachparameter
+                  <span style={{
+                    background: '#10b981',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '28px',
+                    height: '28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.875rem',
+                    fontWeight: '700'
+                  }}>
+                    2
+                  </span>
+                  Dachparameter einstellen
                 </h2>
-                <RoofParameters 
-                  coordinates={coordinates} 
-                  onInputChange={handleInputChange} 
-                />
+                          <RoofParameters 
+            coordinates={coordinates}
+            onInputChange={handleInputChange}
+            onRestoreSearch={handleRestoreSearch}
+          />
               </div>
 
 
@@ -465,11 +513,38 @@ export default function SolarCalculator() {
 
           {/* Solar-Potential Button - Zentral unten, volle Breite */}
           <div style={{ 
-            background: '#f8fafc',
+            background: '#ffffff',
             padding: '40px',
             borderTop: '1px solid #e2e8f0',
             textAlign: 'center'
           }}>
+            <h2 style={{ 
+              margin: '0 0 24px 0',
+              fontSize: '1.75rem',
+              fontWeight: '600',
+              color: '#475569',
+              textAlign: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px'
+            }}>
+              <span style={{
+                background: '#f59e0b',
+                color: 'white',
+                borderRadius: '50%',
+                width: '28px',
+                height: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.875rem',
+                fontWeight: '700'
+              }}>
+                3
+              </span>
+              Solarpotential berechnen
+            </h2>
             <button 
               onClick={handleCalculateSolar}
               disabled={loading || !coordinates.lat || !coordinates.lng}

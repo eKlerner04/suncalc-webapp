@@ -1,16 +1,19 @@
 import React from 'react';
 import Compass from './Compass';
+import SearchHistory from './SearchHistory';
 
-export default function RoofParameters({ coordinates, onInputChange }) {
+export default function RoofParameters({ coordinates, onInputChange, onRestoreSearch }) {
+  console.log('🏗️ [RoofParameters] Komponente wird gerendert, onRestoreSearch:', onRestoreSearch);
+  
   return (
     <div style={{ 
       width: '100%',
       boxSizing: 'border-box'
     }}>
       <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-        gap: '24px', 
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '24px',
         width: '100%',
         boxSizing: 'border-box'
       }}>
@@ -29,16 +32,16 @@ export default function RoofParameters({ coordinates, onInputChange }) {
           
           {/* Dachfläche-Animation - Schicker gemacht */}
           <div style={{
-            position: 'relative',
-            width: '100%',
-            height: '150px',
-            background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%)',
-            borderRadius: '16px',
-            padding: '20px',
+            display: 'flex',
+            justifyContent: 'center',
             marginBottom: '30px',
+            height: '200px',
+            alignItems: 'flex-end',
+            background: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)',
+            borderRadius: '16px',
+            padding: '0px',
             border: '1px solid #e2e8f0',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-            overflow: 'hidden'
+            boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
           }}>
             {/* Hintergrund-Textur */}
             <div style={{
@@ -62,7 +65,7 @@ export default function RoofParameters({ coordinates, onInputChange }) {
               justifyContent: 'center',
               alignItems: 'center'
             }}>
-                             {/* Dachfläche als animierte Fläche - Schicker gemacht */}
+                {/* Dachfläche als animierte Fläche - Schicker gemacht */}
                <div style={{
                  width: `${Math.min(80, Math.max(20, coordinates.area * 2))}%`,
                  height: `${Math.min(60, Math.max(15, coordinates.area * 1.5))}%`,
@@ -76,7 +79,7 @@ export default function RoofParameters({ coordinates, onInputChange }) {
                  transform: 'perspective(100px) rotateX(5deg)',
                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
                }}>
-                                 {/* Dachziegel-Muster - Schicker gemacht */}
+                 {/* Dachziegel-Muster - Schicker gemacht */}
                  <div style={{
                    position: 'absolute',
                    top: '0',
@@ -128,7 +131,7 @@ export default function RoofParameters({ coordinates, onInputChange }) {
                  }} />
               </div>
               
-                             {/* Größenanzeige - Schicker gemacht */}
+                {/* Größenanzeige - Schicker gemacht */}
                <div style={{
                  position: 'absolute',
                  bottom: '12px',
@@ -207,18 +210,18 @@ export default function RoofParameters({ coordinates, onInputChange }) {
           <div style={{
             position: 'relative',
             width: '100%',
-            padding: '20px 0'
+            padding: '0px 0'
           }}>
             {/* Dach-Animation - Graphisch verbessert */}
             <div style={{
               display: 'flex',
               justifyContent: 'center',
               marginBottom: '30px',
-              height: '150px',
+              height: '200px',
               alignItems: 'flex-end',
               background: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)',
               borderRadius: '16px',
-              padding: '20px',
+              padding: '0px',
               border: '1px solid #e2e8f0',
               boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
             }}>
@@ -292,8 +295,8 @@ export default function RoofParameters({ coordinates, onInputChange }) {
                 {/* Dach - schicke schräge Linie mit festem rechten Ende */}
                 <div style={{
                   position: 'absolute',
-                  top: '17px',
-                  right: '17px',
+                  top: '20px',
+                  right: '20px',
                   width: '100px',
                   height: '4px',
                   background: 'linear-gradient(90deg, #dc2626 0%, #b91c1c 50%, #dc2626 100%)',
@@ -308,8 +311,8 @@ export default function RoofParameters({ coordinates, onInputChange }) {
                 {/* Sonne - verbessert */}
                 <div style={{
                   position: 'absolute',
-                  top: '-70px',
-                  right: '-35px',
+                  top: '-100px',
+                  right: '-10px',
                   width: '25px',
                   height: '25px',
                   background: 'radial-gradient(circle, #fbbf24 0%, #f59e0b 70%, #d97706 100%)',
@@ -321,10 +324,10 @@ export default function RoofParameters({ coordinates, onInputChange }) {
                 {/* Sonnenstrahlen */}
                 <div style={{
                   position: 'absolute',
-                  top: '-30px',
-                  right: '-40px',
-                  width: '35px',
-                  height: '35px',
+                  top: '-100px',
+                  right: '-10px',
+                  width: '25px',
+                  height: '25px',
                   background: 'conic-gradient(from 0deg, transparent 0deg, rgba(251, 191, 36, 0.3) 45deg, transparent 90deg, rgba(251, 191, 36, 0.3) 135deg, transparent 180deg, rgba(251, 191, 36, 0.3) 225deg, transparent 270deg, rgba(251, 191, 36, 0.3) 315deg, transparent 360deg)',
                   borderRadius: '50%',
                   animation: 'rotate 8s linear infinite'
@@ -402,6 +405,9 @@ export default function RoofParameters({ coordinates, onInputChange }) {
           />
         </div>
       </div>
+
+      {/* Suchverlauf */}
+      <SearchHistory onRestoreSearch={onRestoreSearch} />
     </div>
   );
 }

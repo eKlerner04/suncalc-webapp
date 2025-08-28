@@ -390,7 +390,7 @@ export default function Compass({ azimuth, onInputChange }) {
             onInputChange('azimuth', clampedValue.toString());
           }}
           style={{
-            width: '60px',
+            width: '80px',
             padding: '6px 8px',
             fontSize: '0.875rem',
             border: '2px solid #e2e8f0',
