@@ -27,36 +27,50 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
             fontWeight: '600',
             color: '#374151'
           }}>
-            Dachfläche (m²)
+            Modulfläche: <span style={{ color: '#00000', fontWeight: '700' }}>{coordinates.area} m²</span>
           </label>
           
-          {/* Dachfläche-Animation - Schicker gemacht */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginBottom: '30px',
-            height: '200px',
-            alignItems: 'flex-end',
-            background: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)',
-            borderRadius: '16px',
-            padding: '0px',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-          }}>
-            {/* Hintergrund-Textur */}
-            <div style={{
-              position: 'absolute',
-              top: '0',
-              left: '0',
-              width: '100%',
-              height: '100%',
-              background: `
-                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)
-              `,
-              pointerEvents: 'none'
-            }} />
-            {/* Dachfläche-Visualisierung */}
+                  {/* Dachfläche - Einfache Darstellung */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginBottom: '30px',
+          height: '200px',
+          alignItems: 'center',
+          background: '#ffffff',
+          borderRadius: '16px',
+          padding: '24px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+        }}>
+          <style>
+            {`
+              @keyframes cellAppear {
+                0% {
+                  opacity: 0;
+                  transform: scale(0.8) rotate(-5deg);
+                }
+                50% {
+                  opacity: 0.7;
+                  transform: scale(1.1) rotate(2deg);
+                }
+                100% {
+                  opacity: 1;
+                  transform: scale(1) rotate(0deg);
+                }
+              }
+              
+              @keyframes panelExpand {
+                0% {
+                  transform: scaleX(0.8);
+                }
+                100% {
+                  transform: scaleX(1);
+                }
+              }
+            `}
+          </style>
+            {/* Einfache Dachfläche-Visualisierung */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -65,90 +79,102 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
               justifyContent: 'center',
               alignItems: 'center'
             }}>
-                {/* Dachfläche als animierte Fläche - Schicker gemacht */}
-               <div style={{
-                 width: `${Math.min(80, Math.max(20, coordinates.area * 2))}%`,
-                 height: `${Math.min(60, Math.max(15, coordinates.area * 1.5))}%`,
-                 background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 40%, #991b1b 70%, #7f1d1d 100%)',
-                 borderRadius: '12px',
-                 border: '3px solid #7f1d1d',
-                 boxShadow: '0 8px 24px rgba(220, 38, 38, 0.4), 0 4px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2)',
-                 transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                 position: 'relative',
-                 overflow: 'hidden',
-                 transform: 'perspective(100px) rotateX(5deg)',
-                 filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
-               }}>
-                 {/* Dachziegel-Muster - Schicker gemacht */}
-                 <div style={{
-                   position: 'absolute',
-                   top: '0',
-                   left: '0',
-                   width: '100%',
-                   height: '100%',
-                   background: `
-                     repeating-linear-gradient(
-                       90deg,
-                       transparent 0px,
-                       transparent 6px,
-                       rgba(255,255,255,0.15) 6px,
-                       rgba(255,255,255,0.15) 8px
-                     ),
-                     repeating-linear-gradient(
-                       0deg,
-                       transparent 0px,
-                       transparent 6px,
-                       rgba(255,255,255,0.15) 6px,
-                       rgba(255,255,255,0.15) 8px
-                     )
-                   `,
-                   animation: 'tileMove 4s linear infinite'
-                 }} />
-                 
-                 {/* Sonnenreflexion - Schicker gemacht */}
-                 <div style={{
-                   position: 'absolute',
-                   top: '8%',
-                   left: '8%',
-                   width: '35%',
-                   height: '25%',
-                   background: 'radial-gradient(ellipse, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 40%, transparent 70%)',
-                   borderRadius: '50%',
-                   animation: 'shine 5s ease-in-out infinite',
-                   filter: 'blur(1px)'
-                 }} />
-                 
-                 {/* Zusätzliche Glanzpunkte */}
-                 <div style={{
-                   position: 'absolute',
-                   top: '25%',
-                   right: '15%',
-                   width: '20%',
-                   height: '15%',
-                   background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%)',
-                   borderRadius: '50%',
-                   animation: 'shine 3s ease-in-out infinite 1s'
-                 }} />
+              {/* Solarpanel-Design wie im Bild */}
+              <div style={{
+                width: `${Math.min(90, Math.max(40, coordinates.area * 2.2))}%`,
+                height: `${Math.min(70, Math.max(30, coordinates.area * 1.6))}%`,
+                background: '#ffffff',
+                borderRadius: '8px',
+                border: '3px solid #374151',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                overflow: 'hidden',
+                animation: 'panelExpand 0.8s ease-out'
+              }}>
+                {/* Innerer Rahmen */}
+                <div style={{
+                  position: 'absolute',
+                  top: '6px',
+                  left: '6px',
+                  right: '6px',
+                  bottom: '6px',
+                  border: '1px solid #9ca3af',
+                  borderRadius: '4px'
+                }} />
+                
+                {/* Vertikale Teilung (mittlere Linie) - nur ab 15 m² */}
+                {coordinates.area >= 15 && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '6px',
+                    left: '50%',
+                    width: '2px',
+                    height: 'calc(100% - 12px)',
+                    background: '#374151',
+                    transform: 'translateX(-50%)'
+                  }} />
+                )}
+                
+                {/* Solarzellen-Gitter - Linke Seite (immer sichtbar) */}
+                <div style={{
+                  position: 'absolute',
+                  top: '12px',
+                  left: '12px',
+                  width: coordinates.area >= 15 ? 'calc(50% - 18px)' : 'calc(100% - 24px)',
+                  height: 'calc(100% - 24px)',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gridTemplateRows: 'repeat(3, 1fr)',
+                  gap: '2px'
+                }}>
+                  {Array.from({ length: 12 }, (_, i) => {
+                    // Berechne, wie viele Zellen bei der aktuellen Fläche sichtbar sein sollen
+                    const visibleCells = Math.min(12, Math.ceil(coordinates.area * 0.8));
+                    const isVisible = i < visibleCells;
+                    
+                    return (
+                      <div key={`left-${i}`} style={{
+                        background: isVisible ? '#6b7280' : '#e5e7eb',
+                        border: '1px solid #374151',
+                        borderRadius: '2px',
+                        animation: isVisible ? `cellAppear 0.6s ease-out ${i * 0.05}s both` : 'none',
+                        opacity: isVisible ? 1 : 0.3,
+                        transform: isVisible ? 'scale(0.8)' : 'scale(1)',
+                        transition: 'all 0.3s ease'
+                      }} />
+                    );
+                  })}
+                </div>
+                
+                {/* Solarzellen-Gitter - Rechte Seite (nur ab 15 m²) */}
+                {coordinates.area >= 15 && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    width: 'calc(50% - 18px)',
+                    height: 'calc(100% - 24px)',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gridTemplateRows: 'repeat(3, 1fr)',
+                    gap: '2px'
+                  }}>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <div key={`right-${i}`} style={{
+                        background: '#6b7280',
+                        border: '1px solid #374151',
+                        borderRadius: '2px',
+                        animation: `cellAppear 0.6s ease-out ${(i + 12) * 0.05}s both`,
+                        opacity: 0,
+                        transform: 'scale(0.8)'
+                      }} />
+                    ))}
+                  </div>
+                )}
               </div>
               
-                {/* Größenanzeige - Schicker gemacht */}
-               <div style={{
-                 position: 'absolute',
-                 bottom: '12px',
-                 right: '12px',
-                 background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)',
-                 padding: '6px 12px',
-                 borderRadius: '12px',
-                 fontSize: '0.8rem',
-                 fontWeight: '700',
-                 color: '#1e293b',
-                 border: '2px solid rgba(255,255,255,0.8)',
-                 boxShadow: '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
-                 backdropFilter: 'blur(10px)',
-                 letterSpacing: '0.5px'
-               }}>
-                 {coordinates.area} m²
-               </div>
+
             </div>
           </div>
           
@@ -219,7 +245,7 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
               marginBottom: '30px',
               height: '200px',
               alignItems: 'flex-end',
-              background: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)',
+              background: '#ffffff',
               borderRadius: '16px',
               padding: '0px',
               border: '1px solid #e2e8f0',

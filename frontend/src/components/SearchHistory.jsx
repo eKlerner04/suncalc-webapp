@@ -121,9 +121,9 @@ export default function SearchHistory({ onRestoreSearch }) {
           // Info-Nachricht wenn kein Verlauf vorhanden
           <div style={{
             padding: '24px',
-            background: 'rgba(255, 255, 255, 0.8)',
+            background: '#ffffff',
             borderRadius: '12px',
-            border: '2px dashed #cbd5e1',
+            border: '2px solid #ffffff',
             textAlign: 'center'
           }}>
             <div style={{
@@ -159,18 +159,18 @@ export default function SearchHistory({ onRestoreSearch }) {
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: '12px 16px',
-              background: 'rgba(255, 255, 255, 0.8)',
+              background: '#ffffff',
               borderRadius: '12px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid #ffffff',
               cursor: 'pointer',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 1)';
+              e.target.style.background = '#f8fafc';
               e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.8)';
+              e.target.style.background = '#ffffff';
               e.target.style.boxShadow = 'none';
             }}
             onClick={() => restoreSearch(item)}
