@@ -199,6 +199,46 @@ export class NASAService {
     
     return monthlyDistribution.map(ratio => Math.round(annual_kWh * ratio));
   }
+
+  // Fallback-Berechnung für Strahlungsdaten basierend auf Breitengrad
+  private calculateFallbackRadiation(lat: number): {
+    dni: number;
+    ghi: number;
+    dif: number;
+  } {
+    // Vereinfachte Berechnung basierend auf dem Breitengrad
+    const absLat = Math.abs(lat);
+    
+    // Basis-Strahlungswerte für Deutschland (ca. 50°N)
+    let baseGHI = 1100; // kWh/m²/Jahr
+    let baseDNI = 900;  // kWh/m²/Jahr
+    let baseDIF = 400;  // kWh/m²/Jahr
+    
+    // Anpassung basierend auf Breitengrad
+    if (absLat < 40) {
+      // Südlicher (mehr Sonne)
+      baseGHI = 1400;
+      baseDNI = 1200;
+      baseDIF = 500;
+    } else if (absLat > 60) {
+      // Nördlicher (weniger Sonne)
+      baseGHI = 800;
+      baseDNI = 600;
+      baseDIF = 300;
+    }
+    
+    // Kleine zufällige Variation (±10%)
+    const variation = 0.9 + Math.random() * 0.2;
+    
+    const result = {
+      ghi: Math.round(baseGHI * variation),
+      dni: Math.round(baseDNI * variation),
+      dif: Math.round(baseDIF * variation)
+    };
+    
+    console.log(` NASA Fallback-Strahlungsdaten berechnet (lat=${lat}):`, result);
+    return result;
+  }
 }
 
 // Singleton-Instanz exportieren
