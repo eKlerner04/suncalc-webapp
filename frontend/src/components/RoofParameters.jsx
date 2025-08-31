@@ -181,9 +181,20 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
           <input
             id="area"
             type="number"
-            min="1"
+            min="0.01"
+            step="0.01"
             value={coordinates.area}
-            onChange={(e) => onInputChange('area', e.target.value)}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              if (value < 0.01) {
+                e.target.setCustomValidity('Die Modulfläche muss mindestens 0,01 m² betragen');
+                e.target.style.borderColor = '#dc2626';
+              } else {
+                e.target.setCustomValidity('');
+                e.target.style.borderColor = '#e2e8f0';
+              }
+              onInputChange('area', e.target.value);
+            }}
             style={{
               width: '100%',
               padding: '16px',
@@ -201,10 +212,27 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
               e.target.style.boxShadow = '0 0 0 3px rgba(30, 41, 59, 0.1)';
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = '#e2e8f0';
+              if (parseFloat(e.target.value) < 0.01) {
+                e.target.style.borderColor = '#dc2626';
+              } else {
+                e.target.style.borderColor = '#e2e8f0';
+              }
               e.target.style.boxShadow = 'none';
             }}
           />
+          
+          {/* Warnung für Mindestfläche - nur bei ungültigen Werten */}
+          {parseFloat(coordinates.area) < 0.01 && (
+            <div style={{
+              marginTop: '8px',
+              fontSize: '0.75rem',
+              color: '#dc2626',
+              fontStyle: 'italic',
+              animation: 'fadeIn 0.3s ease-in'
+            }}>
+              Mindestfläche: 0,01 m²
+            </div>
+          )}
           
           {/* CSS-Animationen für Dachfläche */}
           <style>
@@ -216,6 +244,10 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
               @keyframes shine {
                 0%, 100% { opacity: 0.3; transform: scale(1); }
                 50% { opacity: 0.6; transform: scale(1.2); }
+              }
+              @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-5px); }
+                to { opacity: 1; transform: translateY(0); }
               }
             `}
           </style>
