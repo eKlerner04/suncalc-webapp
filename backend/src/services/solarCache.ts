@@ -185,7 +185,20 @@ class SolarCacheService {
         popularityScore: score,
         isHot,
         locationWeight,
-        recencyBonus
+        recencyBonus,
+        // Neue Felder für bessere Performance
+        radiation_data: payload.radiation || null,
+        extended_metadata: {
+          panel_efficiency: payload.metadata?.assumptions?.panel_efficiency,
+          inverter_efficiency: payload.metadata?.assumptions?.inverter_efficiency,
+          temperature_losses: payload.metadata?.assumptions?.temperature_losses,
+          soiling_losses: payload.metadata?.assumptions?.soiling_losses,
+          shading_losses: payload.metadata?.assumptions?.shading_losses,
+          wiring_losses: payload.metadata?.assumptions?.wiring_losses,
+          monthly_radiation: payload.metadata?.monthly_radiation
+        },
+        calculation_quality: this.determineCalculationQuality(payload),
+        last_validation: new Date().toISOString()
       };
       
       console.log(' Versuche Datensatz zu speichern:', JSON.stringify(recordData, null, 2));
@@ -263,6 +276,19 @@ class SolarCacheService {
     if (absLat < 45) return 1.3;      
     if (absLat < 60) return 1.1;      
     return 1.0;                       
+  }
+
+  private determineCalculationQuality(payload: PVGISResponse): string {
+    // Bestimme die Qualität basierend auf der Datenquelle und Verfügbarkeit der Strahlungswerte
+    if (payload.source === 'pvgis' && payload.radiation?.dni && payload.radiation?.ghi && payload.radiation?.dif) {
+      return 'high'; // PVGIS mit vollständigen Strahlungsdaten
+    } else if (payload.source === 'nasa_power' && payload.radiation?.dni && payload.radiation?.ghi && payload.radiation?.dif) {
+      return 'medium'; // NASA POWER mit vollständigen Strahlungsdaten
+    } else if (payload.source === 'pvgis' || payload.source === 'nasa_power') {
+      return 'medium'; // API-Daten aber ohne vollständige Strahlungswerte
+    } else {
+      return 'estimated'; // Fallback-Daten
+    }
   }
 }
 

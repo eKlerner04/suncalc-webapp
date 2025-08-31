@@ -33,6 +33,8 @@ router.get('/', async (req, res) => {
       inputs: { lat, lng, area, tilt, azimuth },
       yield: { annual_kWh },
       co2,
+      // Neue Strahlungswerte
+      radiation: solarData.radiation || null,
       cache: {
         source,
         solarData,

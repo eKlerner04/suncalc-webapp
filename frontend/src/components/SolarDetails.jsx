@@ -216,6 +216,125 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
         </div>
       </div>
 
+      {/* Neue Sektion: Strahlungswerte */}
+      {solarData.radiation && (
+        <div style={{ 
+          backgroundColor: '#fff3cd', 
+          borderRadius: '10px', 
+          padding: '20px', 
+          marginBottom: '25px',
+          border: '1px solid #ffeaa7',
+          width: '100%',
+          boxSizing: 'border-box'
+        }}>
+          <h2 style={{ 
+            color: '#856404', 
+            marginBottom: '20px',
+            fontSize: '24px',
+            fontWeight: '600'
+          }}>
+            ☀️ Strahlungswerte (Wissenschaftlich)
+          </h2>
+          
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+            gap: '20px',
+            width: '100%'
+          }}>
+            <div style={{ 
+              backgroundColor: 'white', 
+              padding: '20px', 
+              borderRadius: '8px',
+              textAlign: 'center',
+              border: '1px solid #ffeaa7'
+            }}>
+              <div style={{ fontSize: '28px', fontWeight: '700', color: '#f39c12', marginBottom: '5px' }}>
+                {solarData.radiation.dni?.toFixed(1) || 'N/A'}
+              </div>
+              <div style={{ color: '#6c757d', fontSize: '14px' }}>kWh/m²/Jahr</div>
+              <div style={{ color: '#f39c12', fontSize: '16px', fontWeight: '600', marginTop: '5px' }}>
+                DNI (Direct Normal)
+              </div>
+              <div style={{ color: '#a0aec0', fontSize: '12px', marginTop: '5px' }}>
+                Direkte Sonnenstrahlung
+              </div>
+            </div>
+            
+            <div style={{ 
+              backgroundColor: 'white', 
+              padding: '20px', 
+              borderRadius: '8px',
+              textAlign: 'center',
+              border: '1px solid #ffeaa7'
+            }}>
+              <div style={{ fontSize: '28px', fontWeight: '700', color: '#e74c3c', marginBottom: '5px' }}>
+                {solarData.radiation.ghi?.toFixed(1) || 'N/A'}
+              </div>
+              <div style={{ color: '#6c757d', fontSize: '14px' }}>kWh/m²/Jahr</div>
+              <div style={{ color: '#e74c3c', fontSize: '16px', fontWeight: '600', marginTop: '5px' }}>
+                GHI (Global Horizontal)
+              </div>
+              <div style={{ color: '#a0aec0', fontSize: '12px', marginTop: '5px' }}>
+                Gesamtstrahlung horizontal
+              </div>
+            </div>
+            
+            <div style={{ 
+              backgroundColor: 'white', 
+              padding: '20px', 
+              borderRadius: '8px',
+              textAlign: 'center',
+              border: '1px solid #ffeaa7'
+            }}>
+              <div style={{ fontSize: '28px', fontWeight: '700', color: '#9b59b6', marginBottom: '5px' }}>
+                {solarData.radiation.dif?.toFixed(1) || 'N/A'}
+              </div>
+              <div style={{ color: '#6c757d', fontSize: '14px' }}>kWh/m²/Jahr</div>
+              <div style={{ color: '#9b59b6', fontSize: '16px', fontWeight: '600', marginTop: '5px' }}>
+                DIF (Diffuse)
+              </div>
+              <div style={{ color: '#a0aec0', fontSize: '12px', marginTop: '5px' }}>
+                Diffuse Strahlung
+              </div>
+            </div>
+            
+            <div style={{ 
+              backgroundColor: 'white', 
+              padding: '20px', 
+              borderRadius: '8px',
+              textAlign: 'center',
+              border: '1px solid #ffeaa7'
+            }}>
+              <div style={{ fontSize: '28px', fontWeight: '700', color: '#27ae60', marginBottom: '5px' }}>
+                {solarData.radiation.annual_total?.toFixed(1) || 'N/A'}
+              </div>
+              <div style={{ color: '#6c757d', fontSize: '14px' }}>kWh/m²/Jahr</div>
+              <div style={{ color: '#27ae60', fontSize: '16px', fontWeight: '600', marginTop: '5px' }}>
+                Gesamt (Geneigt)
+              </div>
+              <div style={{ color: '#a0aec0', fontSize: '12px', marginTop: '5px' }}>
+                Auf geneigte Fläche
+              </div>
+            </div>
+          </div>
+          
+          <div style={{ 
+            marginTop: '20px', 
+            padding: '15px', 
+            backgroundColor: 'white', 
+            borderRadius: '8px',
+            border: '1px solid #ffeaa7'
+          }}>
+            <p style={{ margin: 0, color: '#856404', fontStyle: 'italic', fontSize: '14px' }}>
+              <strong>Wissenschaftliche Grundlage:</strong> Diese Werte stammen von der PVGIS-API (Joint Research Centre der EU) 
+              und der NASA POWER API. Sie basieren auf Satellitendaten und meteorologischen Modellen und sind 
+              international anerkannte Standards für Solarberechnungen.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Chart-Komponenten */}
       <div style={{ 
         width: '100%',

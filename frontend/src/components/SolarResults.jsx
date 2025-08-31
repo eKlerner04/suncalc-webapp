@@ -107,19 +107,89 @@ export default function SolarResults({ solarData, timeUnit, setTimeUnit, onShowD
               <div>
                 <span style={{ color: '#718096', fontWeight: '500' }}>Jährlicher Ertrag:</span>
                 <div style={{ color: '#2d3748', fontWeight: '600', marginTop: '4px' }}>
-                  {solarData.annual_kWh?.toFixed(1) || 'N/A'} kWh
+                  {solarData.yield?.annual_kWh?.toFixed(1) || 'N/A'} kWh
                 </div>
               </div>
               <div>
                 <span style={{ color: '#718096', fontWeight: '500' }}>Monatlicher Ø:</span>
                 <div style={{ color: '#2d3748', fontWeight: '600', marginTop: '4px' }}>
-                  {solarData.annual_kWh ? (solarData.annual_kWh / 12).toFixed(1) : 'N/A'} kWh
+                  {solarData.yield?.annual_kWh ? (solarData.yield.annual_kWh / 12).toFixed(1) : 'N/A'} kWh
+                </div>
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <span style={{ color: '#718096', fontWeight: '500' }}>Datenquelle:</span>
+                <div style={{ color: '#2d3748', fontWeight: '600', marginTop: '4px' }}>
+                  {solarData.cache?.source || 'Unbekannt'}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Neue Sektion für Strahlungswerte */}
+      {solarData.radiation && (
+        <div style={{ marginBottom: '32px' }}>
+          <h4 style={{
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            color: '#4a5568',
+            margin: '0 0 16px 0'
+          }}>
+            Strahlungswerte
+          </h4>
+          <div style={{
+            backgroundColor: '#ffffff',
+            padding: '20px',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '16px',
+              fontSize: '0.875rem'
+            }}>
+              <div>
+                <span style={{ color: '#718096', fontWeight: '500' }}>DNI (Direkt):</span>
+                <div style={{ color: '#2d3748', fontWeight: '600', marginTop: '4px' }}>
+                  {solarData.radiation.dni?.toFixed(1) || 'N/A'} kWh/m²/Jahr
+                </div>
+                <div style={{ color: '#a0aec0', fontSize: '0.75rem', marginTop: '2px' }}>
+                  Direct Normal Irradiation
+                </div>
+              </div>
+              <div>
+                <span style={{ color: '#718096', fontWeight: '500' }}>GHI (Global):</span>
+                <div style={{ color: '#2d3748', fontWeight: '600', marginTop: '4px' }}>
+                  {solarData.radiation.ghi?.toFixed(1) || 'N/A'} kWh/m²/Jahr
+                </div>
+                <div style={{ color: '#a0aec0', fontSize: '0.75rem', marginTop: '2px' }}>
+                  Global Horizontal Irradiation
+                </div>
+              </div>
+              <div>
+                <span style={{ color: '#718096', fontWeight: '500' }}>DIF (Diffus):</span>
+                <div style={{ color: '#2d3748', fontWeight: '600', marginTop: '4px' }}>
+                  {solarData.radiation.dif?.toFixed(1) || 'N/A'} kWh/m²/Jahr
+                </div>
+                <div style={{ color: '#a0aec0', fontSize: '0.75rem', marginTop: '2px' }}>
+                  Diffuse Horizontal Irradiation
+                </div>
+              </div>
+              <div>
+                <span style={{ color: '#718096', fontWeight: '500' }}>Gesamt (Geneigt):</span>
+                <div style={{ color: '#2d3748', fontWeight: '600', marginTop: '4px' }}>
+                  {solarData.radiation.annual_total?.toFixed(1) || 'N/A'} kWh/m²/Jahr
+                </div>
+                <div style={{ color: '#a0aec0', fontSize: '0.75rem', marginTop: '2px' }}>
+                  Auf geneigte Fläche
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Toggle-Switch für Tag/Jahr */}
       <div style={{ 
