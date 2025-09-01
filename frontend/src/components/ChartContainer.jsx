@@ -1,6 +1,5 @@
 import React from 'react';
 import SolarChart from './SolarChart';
-import MonthlyStats from './MonthlyStats';
 
 const ChartContainer = ({ solarData, inputs }) => {
   // API-Antwort normalisieren → Charts brauchen: { annual_kWh, metadata.monthly_data? }
@@ -39,14 +38,10 @@ const ChartContainer = ({ solarData, inputs }) => {
 
   return (
     <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      gap: '20px',
       width: '100%',
       boxSizing: 'border-box'
     }}>
       <SolarChart solarData={normalized} inputs={inputs} />
-      <MonthlyStats solarData={normalized} inputs={inputs} />
     </div>
   );
 };

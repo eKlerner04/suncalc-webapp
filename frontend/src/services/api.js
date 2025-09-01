@@ -2,7 +2,7 @@
 const API_BASE_URL = 'http://localhost:3000/api';
 
 // Solar-Daten vom Backend abrufen
-export const fetchSolarData = async (lat, lng, area = 10, tilt = 30, azimuth = 180) => {
+export const fetchSolarData = async (lat, lng, area = 10, tilt = 30, azimuth = 0) => {
   console.log('API: Sende Request an:', `${API_BASE_URL}/solar?lat=${lat}&lng=${lng}&area=${area}&tilt=${tilt}&azimuth=${azimuth}`);
   
   const response = await fetch(

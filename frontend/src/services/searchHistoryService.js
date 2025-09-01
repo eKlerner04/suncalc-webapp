@@ -30,11 +30,14 @@ export const addToSearchHistory = (searchData) => {
     };
     console.log('🆕 [SearchHistoryService] Neue Suche erstellt:', newSearch);
 
-    // Duplikate entfernen (gleiche Adresse + Koordinaten)
+    // Duplikate entfernen (gleiche Adresse + Koordinaten + Dachparameter)
     const filteredHistory = currentHistory.filter(item => 
       item.address !== searchData.address || 
       item.lat !== searchData.lat || 
-      item.lng !== searchData.lng
+      item.lng !== searchData.lng ||
+      item.area !== searchData.area ||
+      item.tilt !== searchData.tilt ||
+      item.azimuth !== searchData.azimuth
     );
     console.log('🧹 [SearchHistoryService] Nach Duplikat-Entfernung:', filteredHistory);
 

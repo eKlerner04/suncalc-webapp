@@ -1,7 +1,7 @@
 import React from 'react';
 import ChartContainer from './ChartContainer';
 
-export default function SolarResults({ solarData, timeUnit, setTimeUnit, onShowDetails }) {
+export default function SolarResults({ solarData, onShowDetails }) {
   return (
     <div style={{ 
       marginTop: '48px', 
@@ -107,79 +107,105 @@ export default function SolarResults({ solarData, timeUnit, setTimeUnit, onShowD
               <div>
                 <span style={{ color: '#718096', fontWeight: '500' }}>Jährlicher Ertrag:</span>
                 <div style={{ color: '#2d3748', fontWeight: '600', marginTop: '4px' }}>
-                  {solarData.annual_kWh?.toFixed(1) || 'N/A'} kWh
+                  {solarData.yield?.annual_kWh?.toFixed(1) || 'N/A'} kWh
                 </div>
               </div>
               <div>
                 <span style={{ color: '#718096', fontWeight: '500' }}>Monatlicher Ø:</span>
                 <div style={{ color: '#2d3748', fontWeight: '600', marginTop: '4px' }}>
-                  {solarData.annual_kWh ? (solarData.annual_kWh / 12).toFixed(1) : 'N/A'} kWh
+                  {solarData.yield?.annual_kWh ? (solarData.yield.annual_kWh / 12).toFixed(1) : 'N/A'} kWh
                 </div>
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <span style={{ color: '#718096', fontWeight: '500' }}>Datenquelle:</span>
+                <div style={{ marginTop: '4px' }}>
+                  {solarData.cache?.metadata?.pvgis_url ? (
+                    <a 
+                      href={solarData.cache.metadata.pvgis_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: '#3182ce',
+                        fontWeight: '600',
+                        textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        backgroundColor: '#ebf8ff',
+                        border: '1px solid #bee3f8',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = '#dbeafe';
+                        e.target.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = '#ebf8ff';
+                        e.target.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      🔗 PVGIS API
+                      <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>↗</span>
+                    </a>
+                  ) : solarData.cache?.metadata?.nasa_power_url ? (
+                    <a 
+                      href={solarData.cache.metadata.nasa_power_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: '#3182ce',
+                        fontWeight: '600',
+                        textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        backgroundColor: '#ebf8ff',
+                        border: '1px solid #bee3f8',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = '#dbeafe';
+                        e.target.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = '#ebf8ff';
+                        e.target.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      🚀 NASA POWER API
+                      <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>↗</span>
+                    </a>
+                  ) : (
+                    <span style={{ color: '#2d3748', fontWeight: '600' }}>
+                      {solarData.cache?.source || 'N/A'}
+                    </span>
+                  )}
+                </div>
+                {solarData.cache?.metadata?.pvgis_url || solarData.cache?.metadata?.nasa_power_url ? (
+                  <div style={{ 
+                    fontSize: '0.75rem', 
+                    color: '#64748b', 
+                    marginTop: '4px',
+                    fontStyle: 'italic'
+                  }}>
+                    Klicken Sie auf den Link, um die ursprüngliche API-Antwort zu überprüfen
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
         </div>
       </div>
       
-      {/* Toggle-Switch für Tag/Jahr */}
-      <div style={{ 
-        marginBottom: '24px',
-        textAlign: 'center'
-      }}>
-        <label style={{ 
-          marginRight: '16px', 
-          fontWeight: '600',
-          color: '#4a5568',
-          fontSize: '0.875rem'
-        }}>
-          Zeiteinheit:
-        </label>
-        <div style={{ 
-          display: 'inline-flex', 
-          backgroundColor: '#e2e8f0', 
-          borderRadius: '24px', 
-          padding: '4px',
-          cursor: 'pointer'
-        }}>
-          <button
-            onClick={() => setTimeUnit('day')}
-            style={{
-              padding: '12px 24px',
-              borderRadius: '20px',
-              border: 'none',
-              backgroundColor: timeUnit === 'day' ? '#3182ce' : 'transparent',
-              color: timeUnit === 'day' ? 'white' : '#4a5568',
-              cursor: 'pointer',
-              fontWeight: timeUnit === 'day' ? '600' : '500',
-              transition: 'all 0.2s ease',
-              fontSize: '0.875rem'
-            }}
-          >
-            Pro Tag
-          </button>
-          <button
-            onClick={() => setTimeUnit('year')}
-            style={{
-              padding: '12px 24px',
-              borderRadius: '20px',
-              border: 'none',
-              backgroundColor: timeUnit === 'day' ? 'transparent' : '#3182ce',
-              color: timeUnit === 'day' ? '#4a5568' : 'white',
-              cursor: 'pointer',
-              fontWeight: timeUnit === 'day' ? '500' : '600',
-              transition: 'all 0.2s ease',
-              fontSize: '0.875rem'
-            }}
-          >
-            Pro Jahr
-          </button>
-        </div>
-      </div>
+
       
       {/* Charts */}
       <ChartContainer 
         solarData={solarData} 
-        timeUnit={timeUnit}
       />
       
       {/* Details-Button */}

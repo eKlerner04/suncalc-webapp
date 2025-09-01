@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
   const lng = parseFloat(req.query.lng as string);
   const area = parseFloat(req.query.area as string) || 10;
   const tilt = parseFloat(req.query.tilt as string) || 30;
-  const azimuth = parseFloat(req.query.azimuth as string) || 180;
+  const azimuth = parseFloat(req.query.azimuth as string) || 0;
   
   // Prüfe ob Koordinaten gültig sind
   if (isNaN(lat) || isNaN(lng)) {

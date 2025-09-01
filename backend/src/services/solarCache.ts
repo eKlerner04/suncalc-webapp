@@ -1,4 +1,5 @@
 import { pb, SOLAR_COLLECTION, generateGridKey, SolarCell } from '../utils/pb';
+import { generateSolarKey } from '../utils/grid';
 import { pvgisService } from './pvgisService';
 import { nasaService } from './nasaService';
 import { PVGISResponse } from '../types/solar';
@@ -21,21 +22,22 @@ class SolarCacheService {
 
   async getSolarData(lat: number, lng: number, area: number, tilt: number, azimuth: number): Promise<{ data: PVGISResponse, source: string }> {
     const gridKey = generateGridKey(lat, lng);
-    console.log(` Cache-Check für ${gridKey} (lat=${lat}, lng=${lng})`);
+    const solarKey = generateSolarKey(lat, lng, area, tilt, azimuth);
+    console.log(` Cache-Check für ${solarKey} (lat=${lat}, lng=${lng}, area=${area}, tilt=${tilt}, azimuth=${azimuth})`);
 
     await popularityTrackerService.updatePopularityScore(gridKey, lat, lng);
 
-    const cachedData = await this.findInDatabase(gridKey);
+    const cachedData = await this.findInDatabase(solarKey);
     if (cachedData && this.isDataFresh(cachedData)) {
-      console.log(` Frische Daten aus Cache (${gridKey})`);
-      await this.updateLastAccess(gridKey);
+      console.log(` Frische Daten aus Cache (${solarKey})`);
+      await this.updateLastAccess(solarKey);
       return { data: cachedData.payload, source: 'local' };
     }
 
-    console.log(` Keine frischen Daten im Cache (${gridKey}), rufe externe API auf`);
+    console.log(` Keine frischen Daten im Cache (${solarKey}), rufe externe API auf`);
     const externalData = await this.fetchExternalData(lat, lng, area, tilt, azimuth);
     
-    await this.saveToDatabase(gridKey, lat, lng, externalData);
+    await this.saveToDatabase(solarKey, lat, lng, area, tilt, azimuth, externalData);
     
     return { data: externalData, source: externalData.source };
   }
@@ -108,26 +110,64 @@ class SolarCacheService {
     try {
       const record = await this.findInDatabase(gridKey);
       if (record) {
+        const newAccessCount = (record.accessCount || 0) + 1;
         await pb.collection(SOLAR_COLLECTION).update(record.id, {
-          lastAccessAt: new Date().toISOString()
+          lastAccessAt: new Date().toISOString(),
+          accessCount: newAccessCount
         });
-        console.log(` lastAccessAt für ${gridKey} aktualisiert`);
+        console.log(` lastAccessAt und accessCount für ${gridKey} aktualisiert (${newAccessCount})`);
       }
     } catch (error) {
-      console.error(` Fehler beim Aktualisieren von lastAccessAt für ${gridKey}:`, error);
+      console.error(` Fehler beim Aktualisieren von lastAccessAt und accessCount für ${gridKey}:`, error);
     }
   }
 
   private async fetchExternalData(lat: number, lng: number, area: number, tilt: number, azimuth: number): Promise<PVGISResponse> {
     console.log(` Rufe externe Solar-API auf für lat=${lat}, lng=${lng}, area=${area}, tilt=${tilt}, azimuth=${azimuth}`);
     
-    const pvgisData = await pvgisService.getSolarData(lat, lng, area, tilt, azimuth);
-    if (pvgisData) {
-      console.log(` PVGIS erfolgreich: ${pvgisData.annual_kWh} kWh`);
-      return pvgisData;
+    // Prüfe ob bereits Daten für diesen Standort existieren (um API-Konsistenz zu gewährleisten)
+    const existingData = await this.findExistingDataForLocation(lat, lng);
+    if (existingData) {
+      console.log(` Bestehende API-Quelle für Standort gefunden: ${existingData.source}`);
+      
+      // Verwende die gleiche API wie bei bestehenden Daten - KEIN FALLBACK!
+      if (existingData.source === 'pvgis') {
+        console.log(` Verwende PVGIS (konsistent mit bestehenden Daten)...`);
+        const pvgisData = await pvgisService.getSolarData(lat, lng, area, tilt, azimuth);
+        if (pvgisData) {
+          console.log(` PVGIS erfolgreich: ${pvgisData.annual_kWh} kWh`);
+          return pvgisData;
+        }
+        console.log(` PVGIS fehlgeschlagen, verwende Fallback-Daten (kein API-Wechsel!)`);
+        return this.generateFallbackData(lat, lng, area, tilt, azimuth, 'pvgis');
+      } else if (existingData.source === 'nasa_power') {
+        console.log(` Verwende NASA POWER (konsistent mit bestehenden Daten)...`);
+        const nasaData = await nasaService.getSolarData(lat, lng, area, tilt, azimuth);
+        if (nasaData) {
+          console.log(` NASA POWER erfolgreich: ${nasaData.annual_kWh} kWh`);
+          return nasaData;
+        }
+        console.log(` NASA POWER fehlgeschlagen, verwende Fallback-Daten (kein API-Wechsel!)`);
+        return this.generateFallbackData(lat, lng, area, tilt, azimuth, 'nasa_power');
+      }
     }
     
-    console.log(` PVGIS fehlgeschlagen, versuche NASA POWER...`);
+    // Keine bestehenden Daten - verwende Standard-Logik
+    const isInPVGISRegion = this.isInPVGISRegion(lat, lng);
+    console.log(` Standort in PVGIS-Region: ${isInPVGISRegion} (lat=${lat}, lng=${lng})`);
+    
+    if (isInPVGISRegion) {
+      console.log(` Versuche PVGIS für Europa/Afrika...`);
+      const pvgisData = await pvgisService.getSolarData(lat, lng, area, tilt, azimuth);
+      if (pvgisData) {
+        console.log(` PVGIS erfolgreich: ${pvgisData.annual_kWh} kWh`);
+        return pvgisData;
+      }
+      console.log(` PVGIS fehlgeschlagen, versuche NASA POWER als Fallback...`);
+    } else {
+      console.log(` Standort außerhalb Europa/Afrika, verwende direkt NASA POWER...`);
+    }
+    
     const nasaData = await nasaService.getSolarData(lat, lng, area, tilt, azimuth);
     if (nasaData) {
       console.log(` NASA POWER erfolgreich: ${nasaData.annual_kWh} kWh`);
@@ -138,7 +178,7 @@ class SolarCacheService {
     return this.generateFallbackData(lat, lng, area, tilt, azimuth);
   }
 
-  private generateFallbackData(lat: number, lng: number, area: number, tilt: number, azimuth: number): PVGISResponse {
+  private generateFallbackData(lat: number, lng: number, area: number, tilt: number, azimuth: number, preferredSource?: string): PVGISResponse {
     const baseEfficiency = 0.15; 
     const latitudeFactor = Math.cos((Math.abs(lat) * Math.PI) / 180); 
     const tiltFactor = Math.cos((tilt - 35) * Math.PI / 180); 
@@ -146,14 +186,17 @@ class SolarCacheService {
     const annualRadiation = 1200 * latitudeFactor * tiltFactor; 
     const annual_kWh = Math.round(annualRadiation * area * baseEfficiency);
     
-    console.log(` Fallback-Daten generiert: ${annual_kWh} kWh pro Jahr`);
+    // Verwende die bevorzugte API-Quelle für Fallback-Daten
+    const source = (preferredSource as 'pvgis' | 'nasa_power' | 'fallback') || 'fallback';
+    
+    console.log(` Fallback-Daten generiert: ${annual_kWh} kWh pro Jahr (Quelle: ${source})`);
     
     return {
       annual_kWh: annual_kWh,
       co2_saved: Math.round(annual_kWh * 0.5),
       efficiency: Math.round(baseEfficiency * 100),
       timestamp: new Date().toISOString(),
-      source: 'fallback',
+      source: source,
       metadata: {
         calculation_date: new Date().toISOString(),
         assumptions: {
@@ -165,16 +208,20 @@ class SolarCacheService {
     };
   }
 
-  private async saveToDatabase(gridKey: string, lat: number, lng: number, payload: PVGISResponse): Promise<void> {
+  private async saveToDatabase(solarKey: string, lat: number, lng: number, area: number, tilt: number, azimuth: number, payload: PVGISResponse): Promise<void> {
     try {
       const roundedCoords = this.roundCoordinates(lat, lng);
       
       const { score, isHot, locationWeight, recencyBonus } = await this.calculateInitialPopularityScore(lat, lng);
       
       const recordData = {
-        gridKey,
+        gridKey: solarKey,
+        solarKey: solarKey,
         latRounded: roundedCoords.latRounded,
         lngRounded: roundedCoords.lngRounded,
+        area: area,
+        tilt: tilt,
+        azimuth: azimuth,
         payload,
         source: payload.source,
         fetchedAt: new Date().toISOString(),
@@ -192,10 +239,10 @@ class SolarCacheService {
       
       await pb.collection(SOLAR_COLLECTION).create(recordData);
       
-      console.log(` Neue Daten für ${gridKey} in DB gespeichert (${payload.source})`);
+      console.log(` Neue Daten für ${solarKey} in DB gespeichert (${payload.source})`);
       console.log(` Popularitäts-Initialisierung: Score ${score}, isHot: ${isHot}`);
     } catch (error: any) {
-      console.error(` Fehler beim Speichern in DB für ${gridKey}:`, error);
+      console.error(` Fehler beim Speichern in DB für ${solarKey}:`, error);
       console.error(' Fehler-Details:', error.response?.data);
       
       try {
@@ -204,9 +251,13 @@ class SolarCacheService {
         const today = new Date().toISOString().split('T')[0];
         
         const simpleRecord = {
-          gridKey,
+          gridKey: solarKey,
+          solarKey: solarKey,
           latRounded: roundedCoords.latRounded,
           lngRounded: roundedCoords.lngRounded,
+          area: area,
+          tilt: tilt,
+          azimuth: azimuth,
           payload: JSON.stringify(payload), 
           source: payload.source,
           fetchedAt: today,
@@ -220,7 +271,7 @@ class SolarCacheService {
         };
         
         await pb.collection(SOLAR_COLLECTION).create(simpleRecord);
-        console.log(` Vereinfachter Datensatz für ${gridKey} gespeichert`);
+        console.log(` Vereinfachter Datensatz für ${solarKey} gespeichert`);
       } catch (simpleError: any) {
         console.error(` Auch vereinfachter Datensatz fehlgeschlagen:`, simpleError.response?.data);
       }
@@ -263,6 +314,47 @@ class SolarCacheService {
     if (absLat < 45) return 1.3;      
     if (absLat < 60) return 1.1;      
     return 1.0;                       
+  }
+
+  private async findExistingDataForLocation(lat: number, lng: number): Promise<{ source: string } | null> {
+    try {
+      const roundedCoords = this.roundCoordinates(lat, lng);
+      const gridKey = generateGridKey(lat, lng);
+      
+      console.log(` Suche nach bestehenden Daten für Standort: ${gridKey}`);
+      
+      const response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=latRounded%3D${roundedCoords.latRounded}%20%26%26%20lngRounded%3D${roundedCoords.lngRounded}`);
+      const data = await response.json();
+      
+      if (data.items && data.items.length > 0) {
+        // Finde den neuesten Datensatz für diesen Standort
+        const newestRecord = data.items.reduce((newest: any, current: any) => {
+          const newestDate = new Date(newest.fetchedAt);
+          const currentDate = new Date(current.fetchedAt);
+          return newestDate > currentDate ? newest : current;
+        });
+        
+        console.log(` Bestehende API-Quelle gefunden: ${newestRecord.source} (${newestRecord.fetchedAt})`);
+        return { source: newestRecord.source };
+      }
+      
+      console.log(` Keine bestehenden Daten für Standort ${gridKey} gefunden`);
+      return null;
+    } catch (error) {
+      console.error(` Fehler beim Suchen nach bestehenden Daten für Standort:`, error);
+      return null;
+    }
+  }
+
+  private isInPVGISRegion(lat: number, lng: number): boolean {
+    // PVGIS deckt Europa und Afrika ab
+    // Europa: 35°N bis 71°N, -25°W bis 45°E
+    // Afrika: 35°S bis 37°N, -18°W bis 55°E
+    
+    const isInEurope = lat >= 35 && lat <= 71 && lng >= -25 && lng <= 45;
+    const isInAfrica = lat >= -35 && lat <= 37 && lng >= -18 && lng <= 55;
+    
+    return isInEurope || isInAfrica;
   }
 }
 

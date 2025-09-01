@@ -26,6 +26,9 @@ export class PVGISService {
       pvgisUrl.searchParams.set('pvtechchoice', 'crystSi'); 
       pvgisUrl.searchParams.set('mountingplace', 'building'); 
       pvgisUrl.searchParams.set('raddatabase', 'PVGIS-SARAH2');
+      // Optimierungen für schnellere Antworten
+      pvgisUrl.searchParams.set('usehorizon', '0'); // Keine Horizon-Berechnung
+      pvgisUrl.searchParams.set('horizon', '0'); // Keine Horizon-Daten
       
       const m2_per_kwp = 6.5;
       const kwp = area / m2_per_kwp;
@@ -34,7 +37,14 @@ export class PVGISService {
       console.log(` PVGIS-Request: ${pvgisUrl.toString()}`);
       console.log(` Teste diese URL im Browser: ${pvgisUrl.toString()}`);
       
-      const response = await fetch(pvgisUrl.toString());
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 Sekunden Timeout
+      
+      const response = await fetch(pvgisUrl.toString(), {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -44,7 +54,7 @@ export class PVGISService {
       }
       
       const data = await response.json();
-      console.log(` PVGIS Response:`, JSON.stringify(data, null, 2));
+      console.log(` PVGIS Response erhalten (${JSON.stringify(data).length} Zeichen)`);
       
       if (data.outputs && data.outputs.totals && data.outputs.totals.fixed) {
         const annual_kWh = Math.round(data.outputs.totals.fixed.E_y); 
@@ -56,15 +66,12 @@ export class PVGISService {
         
         if (data.outputs && data.outputs.monthly && data.outputs.monthly.fixed) {
           monthly_data = data.outputs.monthly.fixed.map((month: any) => {
-            const monthly_kWh = month.E_m || 0;
-            console.log(` Monat ${month.month}: ${monthly_kWh} kWh`);
-            return Math.round(monthly_kWh);
+            return Math.round(month.E_m || 0);
           });
-          console.log(` Monatliche Daten extrahiert:`, monthly_data);
+          console.log(` Monatliche Daten extrahiert (${monthly_data.length} Monate)`);
           
           const totalMonthlyRadiation = monthly_data.reduce((sum: number, val: number) => sum + val, 0);
           annual_radiation = (totalMonthlyRadiation / area).toFixed(1);
-          console.log(` Jährliche Strahlung berechnet: ${annual_radiation} kWh/m²/Jahr`);
         } else {
           console.log(` Keine monatlichen Daten von PVGIS, generiere Schätzung`);
           const monthlyDistribution = [
@@ -72,10 +79,7 @@ export class PVGISService {
             0.20, 0.18, 0.14, 0.10, 0.06, 0.04  
           ];
           monthly_data = monthlyDistribution.map(ratio => Math.round(annual_kWh * ratio));
-          console.log(` Geschätzte monatliche Daten generiert:`, monthly_data);
-          
           annual_radiation = (annual_kWh / area).toFixed(1);
-          console.log(` Geschätzte Strahlung: ${annual_radiation} kWh/m²/Jahr`);
         }
         
         console.log(` PVGIS erfolgreich: ${annual_kWh} kWh pro Jahr`);
@@ -104,8 +108,12 @@ export class PVGISService {
       console.log(` PVGIS Response hat keine outputs.totals.fixed:`, data);
       return null;
       
-    } catch (error) {
-      console.error(' PVGIS-API-Fehler:', error);
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.error(' PVGIS-API-Timeout nach 15 Sekunden');
+      } else {
+        console.error(' PVGIS-API-Fehler:', error);
+      }
       return null;
     }
   }

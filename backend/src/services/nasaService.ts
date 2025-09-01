@@ -36,7 +36,14 @@ export class NASAService {
       console.log(` NASA POWER Request: ${nasaUrl.toString()}`);
       console.log(` Teste diese URL im Browser: ${nasaUrl.toString()}`);
       
-      const response = await fetch(nasaUrl.toString());
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 Sekunden Timeout
+      
+      const response = await fetch(nasaUrl.toString(), {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -89,8 +96,12 @@ export class NASAService {
       console.log(`⚠️ NASA POWER Response hat keine ALLSKY_SFC_SW_DWN in features:`, data);
       return null;
       
-    } catch (error) {
-      console.error('❌ NASA POWER API-Fehler:', error);
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.error('❌ NASA POWER API-Timeout nach 10 Sekunden');
+      } else {
+        console.error('❌ NASA POWER API-Fehler:', error);
+      }
       return null;
     }
   }

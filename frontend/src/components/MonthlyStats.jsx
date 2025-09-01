@@ -45,18 +45,15 @@ const MonthlyStats = ({ solarData, inputs }) => {
     );
   }
 
-  // Statistiken berechnen
-  const maxMonth = months[monthlyData.indexOf(Math.max(...monthlyData))];
-  const minMonth = months[monthlyData.indexOf(Math.min(...monthlyData))];
-  const average = Math.round(monthlyData.reduce((a, b) => a + b, 0) / 12);
+  // Berechne Anteile und Trends
   const total = monthlyData.reduce((a, b) => a + b, 0);
-
-  // Sommer/Winter-Verhältnis
-  const summerMonths = monthlyData.slice(4, 9); // Mai bis September
-  const winterMonths = [...monthlyData.slice(0, 3), ...monthlyData.slice(9, 12)]; // Jan-Mär, Okt-Dez
-  const summerTotal = summerMonths.reduce((a, b) => a + b, 0);
-  const winterTotal = winterMonths.reduce((a, b) => a + b, 0);
-  const summerRatio = Math.round((summerTotal / total) * 100);
+  
+  const getTrend = (index) => {
+    if (index === 0) return '📉'; // Januar hat keinen Vormonat
+    const current = monthlyData[index];
+    const previous = monthlyData[index - 1];
+    return current > previous ? '📈' : '📉';
+  };
 
   return (
     <div style={{ 
@@ -68,171 +65,106 @@ const MonthlyStats = ({ solarData, inputs }) => {
       width: '100%',
       boxSizing: 'border-box'
     }}>
-      <div style={{ marginBottom: '24px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1F2937', marginBottom: '8px' }}>
-          📈 Detaillierte Monatsstatistiken
+          📊 Monatliche Solarerträge
         </h3>
         <p style={{ color: '#6B7280', fontSize: '14px' }}>
           Aufschlüsselung des Solarertrags nach Monaten
         </p>
       </div>
 
-      {/* Hauptstatistiken */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-        gap: '15px', 
-        marginBottom: '20px',
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{ 
-          background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)', 
-          borderRadius: '8px', 
-          padding: '16px', 
-          color: 'white' 
-        }}>
-          <div style={{ fontSize: '24px', fontWeight: '700' }}>{maxMonth}</div>
-          <div style={{ color: '#BFDBFE', fontSize: '14px' }}>Bester Monat</div>
-          <div style={{ fontSize: '20px', fontWeight: '700', marginTop: '4px' }}>
-            {Math.max(...monthlyData)} kWh
-          </div>
-        </div>
-        
-        <div style={{ 
-          background: 'linear-gradient(135deg, #10B981, #047857)', 
-          borderRadius: '8px', 
-          padding: '16px', 
-          color: 'white' 
-        }}>
-          <div style={{ fontSize: '24px', fontWeight: '700' }}>{average}</div>
-          <div style={{ color: '#A7F3D0', fontSize: '14px' }}>Monatsdurchschnitt</div>
-          <div style={{ fontSize: '20px', fontWeight: '700', marginTop: '4px' }}>kWh</div>
-        </div>
-        
-        <div style={{ 
-          background: 'linear-gradient(135deg, #F59E0B, #D97706)', 
-          borderRadius: '8px', 
-          padding: '16px', 
-          color: 'white' 
-        }}>
-          <div style={{ fontSize: '24px', fontWeight: '700' }}>{minMonth}</div>
-          <div style={{ color: '#FDE68A', fontSize: '14px' }}>Schwächster Monat</div>
-          <div style={{ fontSize: '20px', fontWeight: '700', marginTop: '4px' }}>
-            {Math.min(...monthlyData)} kWh
-          </div>
-        </div>
-        
-        <div style={{ 
-          background: 'linear-gradient(135deg, #8B5CF6, #7C3AED)', 
-          borderRadius: '8px', 
-          padding: '16px', 
-          color: 'white' 
-        }}>
-          <div style={{ fontSize: '24px', fontWeight: '700' }}>{total}</div>
-          <div style={{ color: '#DDD6FE', fontSize: '14px' }}>Jahresgesamt</div>
-          <div style={{ fontSize: '20px', fontWeight: '700', marginTop: '4px' }}>kWh</div>
-        </div>
-      </div>
-
-      {/* Saisonalität */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-        gap: '20px', 
-        marginBottom: '20px',
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{ backgroundColor: '#FEF3C7', borderRadius: '8px', padding: '16px' }}>
-          <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#92400E', marginBottom: '12px' }}>
-            ☀️ Sommer-Performance (Mai-Sep)
-          </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#92400E' }}>Gesamtertrag:</span>
-              <span style={{ fontWeight: '600', color: '#92400E' }}>{summerTotal} kWh</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#92400E' }}>Anteil am Jahr:</span>
-              <span style={{ fontWeight: '600', color: '#92400E' }}>{summerRatio}%</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#92400E' }}>Durchschnitt:</span>
-              <span style={{ fontWeight: '600', color: '#92400E' }}>
-                {Math.round(summerTotal / 5)} kWh/Monat
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ backgroundColor: '#DBEAFE', borderRadius: '8px', padding: '16px' }}>
-          <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#1E40AF', marginBottom: '12px' }}>
-            ❄️ Winter-Performance (Okt-Mär)
-          </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#1E40AF' }}>Gesamtertrag:</span>
-              <span style={{ fontWeight: '600', color: '#1E40AF' }}>{winterTotal} kWh</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#1E40AF' }}>Anteil am Jahr:</span>
-              <span style={{ fontWeight: '600', color: '#1E40AF' }}>{100 - summerRatio}%</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#1E40AF' }}>Durchschnitt:</span>
-              <span style={{ fontWeight: '600', color: '#1E40AF' }}>
-                {Math.round(winterTotal / 7)} kWh/Monat
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Monatstabelle */}
-      <div style={{ 
-        overflowX: 'auto', 
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
+      {/* Einfache Tabelle */}
+      <div style={{ overflowX: 'auto' }}>
         <table style={{ 
           width: '100%', 
-          fontSize: '14px',
-          minWidth: '600px'
+          borderCollapse: 'collapse',
+          fontSize: '14px'
         }}>
           <thead>
-            <tr style={{ backgroundColor: '#F9FAFB' }}>
-              <th style={{ padding: '8px', textAlign: 'left', color: '#374151', fontWeight: '600' }}>Monat</th>
-              <th style={{ padding: '8px', textAlign: 'right', color: '#374151', fontWeight: '600' }}>kWh</th>
-              <th style={{ padding: '8px', textAlign: 'right', color: '#374151', fontWeight: '600' }}>Anteil</th>
-              <th style={{ padding: '8px', textAlign: 'center', color: '#374151', fontWeight: '600' }}>Trend</th>
+            <tr style={{ 
+              backgroundColor: '#F9FAFB',
+              borderBottom: '2px solid #E5E7EB'
+            }}>
+              <th style={{ 
+                padding: '12px 16px', 
+                textAlign: 'left', 
+                fontWeight: '600', 
+                color: '#374151',
+                borderRight: '1px solid #E5E7EB'
+              }}>
+                Monat
+              </th>
+              <th style={{ 
+                padding: '12px 16px', 
+                textAlign: 'right', 
+                fontWeight: '600', 
+                color: '#374151',
+                borderRight: '1px solid #E5E7EB'
+              }}>
+                kWh
+              </th>
+              <th style={{ 
+                padding: '12px 16px', 
+                textAlign: 'right', 
+                fontWeight: '600', 
+                color: '#374151',
+                borderRight: '1px solid #E5E7EB'
+              }}>
+                Anteil
+              </th>
+              <th style={{ 
+                padding: '12px 16px', 
+                textAlign: 'center', 
+                fontWeight: '600', 
+                color: '#374151'
+              }}>
+                Trend
+              </th>
             </tr>
           </thead>
           <tbody>
-            {monthlyData.map((kwh, index) => {
-              const percentage = Math.round((kwh / total) * 100);
-              const isHigh = kwh > average * 1.2;
-              const isLow = kwh < average * 0.8;
+            {monthlyData.map((value, index) => {
+              const percentage = Math.round((value / total) * 100);
+              const trend = getTrend(index);
               
               return (
-                <tr key={index} style={{ borderBottom: '1px solid #F3F4F6' }}>
-                  <td style={{ padding: '8px', color: '#374151', fontWeight: '500' }}>
+                <tr key={index} style={{ 
+                  borderBottom: '1px solid #F3F4F6',
+                  backgroundColor: index % 2 === 0 ? '#FFFFFF' : '#F9FAFB'
+                }}>
+                  <td style={{ 
+                    padding: '12px 16px', 
+                    fontWeight: '500', 
+                    color: '#374151',
+                    borderRight: '1px solid #E5E7EB'
+                  }}>
                     {months[index]}
                   </td>
-                  <td style={{ padding: '8px', textAlign: 'right', fontWeight: '600' }}>
-                    {kwh} kWh
+                  <td style={{ 
+                    padding: '12px 16px', 
+                    textAlign: 'right', 
+                    fontWeight: '600', 
+                    color: '#1F2937',
+                    borderRight: '1px solid #E5E7EB'
+                  }}>
+                    {value} kWh
                   </td>
-                  <td style={{ padding: '8px', textAlign: 'right', color: '#6B7280' }}>
+                  <td style={{ 
+                    padding: '12px 16px', 
+                    textAlign: 'right', 
+                    fontWeight: '500', 
+                    color: '#6B7280',
+                    borderRight: '1px solid #E5E7EB'
+                  }}>
                     {percentage}%
                   </td>
-                  <td style={{ padding: '8px', textAlign: 'center' }}>
-                    {isHigh ? (
-                      <span style={{ color: '#10B981' }}>📈</span>
-                    ) : isLow ? (
-                      <span style={{ color: '#EF4444' }}>📉</span>
-                    ) : (
-                      <span style={{ color: '#6B7280' }}>➡️</span>
-                    )}
+                  <td style={{ 
+                    padding: '12px 16px', 
+                    textAlign: 'center', 
+                    fontSize: '16px'
+                  }}>
+                    {trend}
                   </td>
                 </tr>
               );

@@ -28,7 +28,7 @@ const SolarChart = ({ solarData, inputs }) => {
   };
 
   const monthlyData = generateMonthlyData();
-  const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+  const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
   // Prüfe ob Daten vorhanden sind
   if (!monthlyData || monthlyData.every(val => val === 0)) {
@@ -53,9 +53,15 @@ const SolarChart = ({ solarData, inputs }) => {
     );
   }
 
-  // Finde den höchsten Wert für die Skalierung
-  const maxValue = Math.max(...monthlyData);
-  const chartHeight = 300;
+  // Berechne Anteile und Trends
+  const totalAnnual = monthlyData.reduce((sum, val) => sum + val, 0);
+  
+  const getTrend = (index) => {
+    if (index === 0) return '↓'; // Januar hat keinen Vormonat
+    const current = monthlyData[index];
+    const previous = monthlyData[index - 1];
+    return current > previous ? '↑' : '↓';
+  };
 
   return (
     <div style={{ 
@@ -67,95 +73,156 @@ const SolarChart = ({ solarData, inputs }) => {
       width: '100%',
       boxSizing: 'border-box'
     }}>
-      <div style={{ marginBottom: '16px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1F2937', marginBottom: '8px' }}>
-          📊 Monats-/Jahresdiagramm
+          Monatliche Solarerträge
         </h3>
         <p style={{ color: '#6B7280', fontSize: '14px' }}>
-          Visualisierung des Solarertrags über das Jahr
+          Aufschlüsselung des Solarertrags nach Monaten
         </p>
       </div>
       
-      {/* Einfaches Balkendiagramm ohne Chart.js */}
-      <div style={{ height: chartHeight, position: 'relative', marginBottom: '16px' }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'end', 
-          height: '100%', 
-          gap: '8px',
-          paddingBottom: '20px'
+      {/* Einfache Tabelle */}
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ 
+          width: '100%', 
+          borderCollapse: 'collapse',
+          fontSize: '14px'
         }}>
-          {monthlyData.map((value, index) => {
-            const height = (value / maxValue) * (chartHeight - 40);
-            const color = value === Math.max(...monthlyData) ? '#3B82F6' : 
-                         value === Math.min(...monthlyData) ? '#EF4444' : '#10B981';
-            
-            return (
-              <div key={index} style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{
-                  height: `${height}px`,
-                  backgroundColor: color,
-                  borderRadius: '4px 4px 0 0',
-                  minHeight: '4px',
-                  position: 'relative'
+          <thead>
+            <tr style={{ 
+              backgroundColor: '#F9FAFB',
+              borderBottom: '2px solid #E5E7EB'
+            }}>
+              <th style={{ 
+                padding: '12px 16px', 
+                textAlign: 'left', 
+                fontWeight: '600', 
+                color: '#374151',
+                borderRight: '1px solid #E5E7EB'
+              }}>
+                Monat
+              </th>
+              <th style={{ 
+                padding: '12px 16px', 
+                textAlign: 'right', 
+                fontWeight: '600', 
+                color: '#374151',
+                borderRight: '1px solid #E5E7EB'
+              }}>
+                kWh
+              </th>
+              <th style={{ 
+                padding: '12px 16px', 
+                textAlign: 'right', 
+                fontWeight: '600', 
+                color: '#374151',
+                borderRight: '1px solid #E5E7EB'
+              }}>
+                Anteil
+              </th>
+              <th style={{ 
+                padding: '12px 16px', 
+                textAlign: 'center', 
+                fontWeight: '600', 
+                color: '#374151'
+              }}>
+                Trend
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {monthlyData.map((value, index) => {
+              const percentage = Math.round((value / totalAnnual) * 100);
+              const trend = getTrend(index);
+              
+              return (
+                <tr key={index} style={{ 
+                  borderBottom: '1px solid #F3F4F6',
+                  backgroundColor: index % 2 === 0 ? '#FFFFFF' : '#F9FAFB'
                 }}>
-                  <div style={{
-                    position: 'absolute',
-                    top: '-25px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    color: '#374151'
+                  <td style={{ 
+                    padding: '12px 16px', 
+                    fontWeight: '500', 
+                    color: '#374151',
+                    borderRight: '1px solid #E5E7EB'
+                  }}>
+                    {months[index]}
+                  </td>
+                  <td style={{ 
+                    padding: '12px 16px', 
+                    textAlign: 'right', 
+                    fontWeight: '600', 
+                    color: '#1F2937',
+                    borderRight: '1px solid #E5E7EB'
                   }}>
                     {value} kWh
-                  </div>
-                </div>
-                <div style={{
-                  marginTop: '8px',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  color: '#6B7280'
-                }}>
-                  {months[index]}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      
-      {/* Statistik-Karten */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
-        gap: '16px', 
-        textAlign: 'center' 
-      }}>
-        <div style={{ backgroundColor: '#DBEAFE', borderRadius: '8px', padding: '12px' }}>
-          <div style={{ fontSize: '24px', fontWeight: '700', color: '#1D4ED8' }}>
-            {Math.max(...monthlyData)}
-          </div>
-          <div style={{ fontSize: '14px', color: '#1E40AF' }}>Höchster Monat</div>
-        </div>
-        <div style={{ backgroundColor: '#D1FAE5', borderRadius: '8px', padding: '12px' }}>
-          <div style={{ fontSize: '24px', fontWeight: '700', color: '#047857' }}>
-            {Math.round(monthlyData.reduce((a, b) => a + b, 0) / 12)}
-          </div>
-          <div style={{ fontSize: '14px', color: '#065F46' }}>Durchschnitt</div>
-        </div>
-        <div style={{ backgroundColor: '#FEF3C7', borderRadius: '8px', padding: '12px' }}>
-          <div style={{ fontSize: '24px', fontWeight: '700', color: '#D97706' }}>
-            {Math.min(...monthlyData)}
-          </div>
-          <div style={{ fontSize: '14px', color: '#B45309' }}>Niedrigster Monat</div>
-        </div>
-        <div style={{ backgroundColor: '#F3E8FF', borderRadius: '8px', padding: '12px' }}>
-          <div style={{ fontSize: '24px', fontWeight: '700', color: '#7C3AED' }}>
-            {solarData.annual_kWh}
-          </div>
-          <div style={{ fontSize: '14px', color: '#6D28D9' }}>Jahresgesamt</div>
-        </div>
+                  </td>
+                  <td style={{ 
+                    padding: '12px 16px', 
+                    textAlign: 'right', 
+                    fontWeight: '500', 
+                    color: '#6B7280',
+                    borderRight: '1px solid #E5E7EB'
+                  }}>
+                    {percentage}%
+                  </td>
+                  <td style={{ 
+                    padding: '12px 16px', 
+                    textAlign: 'center', 
+                    fontSize: '16px'
+                  }}>
+                    {trend}
+                  </td>
+                </tr>
+              );
+            })}
+            
+            {/* Gesamt-Zeile */}
+            <tr style={{ 
+              borderTop: '2px solid #E5E7EB',
+              backgroundColor: '#F3F4F6',
+              fontWeight: '700'
+            }}>
+              <td style={{ 
+                padding: '16px 16px', 
+                fontWeight: '700', 
+                color: '#1F2937',
+                borderRight: '1px solid #E5E7EB',
+                fontSize: '15px'
+              }}>
+                Gesamt
+              </td>
+              <td style={{ 
+                padding: '16px 16px', 
+                textAlign: 'right', 
+                fontWeight: '700', 
+                color: '#1F2937',
+                borderRight: '1px solid #E5E7EB',
+                fontSize: '15px'
+              }}>
+                {totalAnnual} kWh
+              </td>
+              <td style={{ 
+                padding: '16px 16px', 
+                textAlign: 'right', 
+                fontWeight: '700', 
+                color: '#1F2937',
+                borderRight: '1px solid #E5E7EB',
+                fontSize: '15px'
+              }}>
+                100%
+              </td>
+              <td style={{ 
+                padding: '16px 16px', 
+                textAlign: 'center', 
+                fontSize: '16px'
+              }}>
+                ↑
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );

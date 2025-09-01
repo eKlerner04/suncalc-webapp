@@ -1,4 +1,5 @@
 import { pb, SOLAR_COLLECTION } from '../../utils/pb';
+import { generateSolarKey } from '../../utils/grid';
 import { hotLocationsService } from './hotLocationsService';
 import { pvgisService } from '../pvgisService';
 import { nasaService } from '../nasaService';
@@ -103,61 +104,67 @@ export class PreFetchService {
     try {
       const startTime = Date.now();
       
-      console.log(`     Versuche PVGIS für ${location.gridKey}...`);
+      // Verwende Standard-Dachparameter für Pre-Fetch
+      const area = 15;
+      const tilt = 35;
+      const azimuth = 180;
+      const solarKey = generateSolarKey(location.latRounded, location.lngRounded, area, tilt, azimuth);
+      
+      console.log(`     Versuche PVGIS für ${solarKey}...`);
       const pvgisData = await pvgisService.getSolarData(
         location.latRounded, 
         location.lngRounded, 
-        15, 
-        30, 
-        180 
+        area, 
+        tilt, 
+        azimuth 
       );
 
       if (pvgisData) {
-        await this.updateCacheWithNewData(location.gridKey, pvgisData);
+        await this.updateCacheWithNewData(solarKey, pvgisData, area, tilt, azimuth);
         
         const duration = Date.now() - startTime;
-        console.log(`     PVGIS erfolgreich für ${location.gridKey} (${duration}ms)`);
+        console.log(`     PVGIS erfolgreich für ${solarKey} (${duration}ms)`);
         
         return {
-          gridKey: location.gridKey,
+          gridKey: solarKey,
           success: true,
           source: 'pvgis',
           timestamp: new Date().toISOString()
         };
       }
 
-      console.log(`     PVGIS fehlgeschlagen, versuche NASA POWER für ${location.gridKey}...`);
+      console.log(`     PVGIS fehlgeschlagen, versuche NASA POWER für ${solarKey}...`);
       const nasaData = await nasaService.getSolarData(
         location.latRounded, 
         location.lngRounded, 
-        15, 
-        30, 
-        180
+        area, 
+        tilt, 
+        azimuth
       );
 
       if (nasaData) {
-        await this.updateCacheWithNewData(location.gridKey, nasaData);
+        await this.updateCacheWithNewData(solarKey, nasaData, area, tilt, azimuth);
         
         const duration = Date.now() - startTime;
-        console.log(`     NASA POWER erfolgreich für ${location.gridKey} (${duration}ms)`);
+        console.log(`     NASA POWER erfolgreich für ${solarKey} (${duration}ms)`);
         
         return {
-          gridKey: location.gridKey,
+          gridKey: solarKey,
           success: true,
           source: 'nasa',
           timestamp: new Date().toISOString()
         };
       }
 
-      console.log(`     Alle APIs fehlgeschlagen, verwende Fallback für ${location.gridKey}...`);
-      const fallbackData = this.generateFallbackData(location);
-      await this.updateCacheWithNewData(location.gridKey, fallbackData);
+      console.log(`     Alle APIs fehlgeschlagen, verwende Fallback für ${solarKey}...`);
+      const fallbackData = this.generateFallbackData(location, area, tilt, azimuth);
+      await this.updateCacheWithNewData(solarKey, fallbackData, area, tilt, azimuth);
       
       const duration = Date.now() - startTime;
-      console.log(`     Fallback erfolgreich für ${location.gridKey} (${duration}ms)`);
+      console.log(`     Fallback erfolgreich für ${solarKey} (${duration}ms)`);
       
       return {
-        gridKey: location.gridKey,
+        gridKey: solarKey,
         success: true,
         source: 'fallback',
         timestamp: new Date().toISOString()
@@ -176,13 +183,13 @@ export class PreFetchService {
     }
   }
 
-  private async updateCacheWithNewData(gridKey: string, newData: any): Promise<void> {
+  private async updateCacheWithNewData(solarKey: string, newData: any, area: number, tilt: number, azimuth: number): Promise<void> {
     try {
-      const response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=gridKey%3D%22${gridKey}%22`);
+      const response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=gridKey%3D%22${solarKey}%22`);
       const data = await response.json();
       
       if (!data.items || data.items.length === 0) {
-        console.log(`     Kein Datensatz für ${gridKey} gefunden`);
+        console.log(`     Kein Datensatz für ${solarKey} gefunden`);
         return;
       }
 
@@ -194,22 +201,25 @@ export class PreFetchService {
         source: newData.source || 'prefetch',
         fetchedAt: now,
         lastAccessAt: now,
+        area: area,
+        tilt: tilt,
+        azimuth: azimuth
       });
 
-      console.log(`     Cache für ${gridKey} mit neuen Daten aktualisiert`);
+      console.log(`     Cache für ${solarKey} mit neuen Daten aktualisiert`);
       
     } catch (error) {
-      console.error(`     Fehler beim Aktualisieren des Caches für ${gridKey}:`, error);
+      console.error(`     Fehler beim Aktualisieren des Caches für ${solarKey}:`, error);
     }
   }
 
  
-  private generateFallbackData(location: HotLocation): any {
+  private generateFallbackData(location: HotLocation, area: number, tilt: number, azimuth: number): any {
     const baseEfficiency = 0.15; 
     const latitudeFactor = Math.cos((Math.abs(location.latRounded) * Math.PI) / 180);
-    const area = 15; 
+    const tiltFactor = Math.cos((tilt - 35) * Math.PI / 180);
     
-    const annualRadiation = 1200 * latitudeFactor; 
+    const annualRadiation = 1200 * latitudeFactor * tiltFactor; 
     const annual_kWh = Math.round(annualRadiation * area * baseEfficiency);
     
     return {
@@ -223,7 +233,10 @@ export class PreFetchService {
         assumptions: {
           losses_percent: 25,
           m2_per_kwp: 6.5,
-          co2_factor: 0.5
+          co2_factor: 0.5,
+          area: area,
+          tilt: tilt,
+          azimuth: azimuth
         }
       }
     };

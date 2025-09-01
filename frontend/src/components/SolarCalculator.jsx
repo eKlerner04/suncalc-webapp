@@ -11,7 +11,7 @@ export default function SolarCalculator() {
   const [solarData, setSolarData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [timeUnit, setTimeUnit] = useState('day'); // 'day' oder 'year'
+
   const [showDetails, setShowDetails] = useState(false);
   
   // State für benutzerdefinierte Koordinaten
@@ -613,8 +613,6 @@ export default function SolarCalculator() {
             }}>
               <SolarResults 
                 solarData={solarData} 
-                timeUnit={timeUnit}
-                setTimeUnit={setTimeUnit}
                 onShowDetails={() => setShowDetails(true)}
               />
             </div>
