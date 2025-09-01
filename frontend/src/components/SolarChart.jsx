@@ -1,19 +1,20 @@
 import React from 'react';
 
 const SolarChart = ({ solarData, inputs }) => {
-  // Monatsdaten generieren (falls nicht vorhanden, verwende Schätzung)
+  // Monatsdaten generieren - verwende immer die API-Daten wenn verfügbar
   const generateMonthlyData = () => {
-    // Prüfe ob echte monatliche Daten vorhanden sind
+    const annual_kWh = solarData?.annual_kWh || 0;
+    
+    // Verwende echte monatliche Daten von der API wenn verfügbar
     if (solarData?.metadata?.monthly_data && 
         Array.isArray(solarData.metadata.monthly_data) && 
         solarData.metadata.monthly_data.length === 12 &&
         solarData.metadata.monthly_data.some(val => val > 0)) {
-      console.log('✅ Verwende echte monatliche Daten:', solarData.metadata.monthly_data);
+      console.log('✅ Verwende echte monatliche Daten von API:', solarData.metadata.monthly_data);
       return solarData.metadata.monthly_data;
     }
     
     // Fallback: Schätzung basierend auf Jahresertrag
-    const annual_kWh = solarData?.annual_kWh || 0;
     console.log(`📊 Generiere geschätzte monatliche Daten für ${annual_kWh} kWh/Jahr`);
     
     // Realistische monatliche Verteilung für Deutschland/Europa
@@ -29,6 +30,16 @@ const SolarChart = ({ solarData, inputs }) => {
 
   const monthlyData = generateMonthlyData();
   const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  
+  // Bestimme Datenquelle für Beschreibung
+  const hasRealMonthlyData = solarData?.metadata?.monthly_data && 
+    Array.isArray(solarData.metadata.monthly_data) && 
+    solarData.metadata.monthly_data.length === 12 &&
+    solarData.metadata.monthly_data.some(val => val > 0);
+  
+  const dataSource = solarData?.cache?.source || solarData?.source || 'unbekannt';
+  const isPVGIS = dataSource === 'pvgis';
+  const isNASA = dataSource === 'nasa_power';
 
   // Prüfe ob Daten vorhanden sind
   if (!monthlyData || monthlyData.every(val => val === 0)) {
@@ -55,6 +66,10 @@ const SolarChart = ({ solarData, inputs }) => {
 
   // Berechne Anteile und Trends
   const totalAnnual = monthlyData.reduce((sum, val) => sum + val, 0);
+  const originalAnnual = solarData?.annual_kWh || 0;
+  
+  // Verwende die Summe der monatlichen Daten für die Gesamt-Zeile (realistischer)
+  const displayTotal = totalAnnual;
   
   const getTrend = (index) => {
     if (index === 0) return '↓'; // Januar hat keinen Vormonat
@@ -77,9 +92,30 @@ const SolarChart = ({ solarData, inputs }) => {
         <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1F2937', marginBottom: '8px' }}>
           Monatliche Solarerträge
         </h3>
-        <p style={{ color: '#6B7280', fontSize: '14px' }}>
+        <p style={{ color: '#6B7280', fontSize: '14px', marginBottom: '8px' }}>
           Aufschlüsselung des Solarertrags nach Monaten
         </p>
+        <div style={{ 
+          backgroundColor: '#F0F9FF', 
+          border: '1px solid #BAE6FD', 
+          borderRadius: '6px', 
+          padding: '8px 12px', 
+          fontSize: '12px',
+          color: '#0369A1',
+          marginBottom: '16px'
+        }}>
+          {hasRealMonthlyData ? (
+            isPVGIS ? (
+              <span><strong>Echte monatliche Daten</strong> von PVGIS API - basierend auf historischen Strahlungsmessungen für diesen Standort</span>
+            ) : isNASA ? (
+              <span><strong>Geschätzte monatliche Daten</strong> basierend auf NASA POWER Strahlungsdaten - realistisch für diesen Standort</span>
+            ) : (
+              <span><strong>Echte monatliche Daten</strong> von der API - spezifisch für diesen Standort</span>
+            )
+          ) : (
+            <span><strong>Geschätzte monatliche Daten</strong> - typische Verteilung für die Region</span>
+          )}
+        </div>
       </div>
       
       {/* Einfache Tabelle */}
@@ -133,7 +169,7 @@ const SolarChart = ({ solarData, inputs }) => {
           </thead>
           <tbody>
             {monthlyData.map((value, index) => {
-              const percentage = Math.round((value / totalAnnual) * 100);
+              const percentage = Math.round((value / displayTotal) * 100);
               const trend = getTrend(index);
               
               return (
@@ -201,7 +237,7 @@ const SolarChart = ({ solarData, inputs }) => {
                 borderRight: '1px solid #E5E7EB',
                 fontSize: '15px'
               }}>
-                {totalAnnual} kWh
+                {displayTotal} kWh
               </td>
               <td style={{ 
                 padding: '16px 16px', 
