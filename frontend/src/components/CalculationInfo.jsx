@@ -1,19 +1,44 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-const CalculationInfo = ({ solarData }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const CalculationInfo = ({ solarData, isOpen, onToggle, inputs }) => {
+  if (!solarData || !inputs) return null;
 
-  if (!solarData) return null;
-
+  // DIREKT aus Props extrahieren - keine Zwischenspeicherung
   const dataSource = solarData?.cache?.source || solarData?.source || 'unbekannt';
   const isPVGIS = dataSource === 'pvgis';
   const isNASA = dataSource === 'nasa_power';
+
+  // Alle Werte DIREKT aus inputs Props extrahieren (UI-Eingabeparameter)
+  const currentLat = inputs.lat || 0;
+  const currentLng = inputs.lng || 0;
+  const currentArea = inputs.area || 15;
+  const currentTilt = inputs.tilt || 35;
+  const currentAzimuth = inputs.azimuth || 180;
+  const currentAnnualKWh = solarData?.yield?.annual_kWh || 0;
+
+
+
+
+
+  // PVGIS Azimut-Konvertierung für Anzeige
+  const pvgisAzimuth = (() => {
+    let pvgisAz = currentAzimuth - 180;
+    if (pvgisAz > 180) pvgisAz -= 360;
+    if (pvgisAz < -180) pvgisAz += 360;
+    if (pvgisAz === -180) pvgisAz = 180; // Spezialfall für Nord
+    return pvgisAz;
+  })();
+
+  // Berechnungen für Beispiel
+  const kwPerM2 = 0.22; // kWp pro m²
+  const pStc = currentArea * kwPerM2; // kWp
+  const yf = currentAnnualKWh / pStc; // kWh/kWp·a
 
   return (
     <div style={{ marginBottom: '20px' }}>
       {/* Info-Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={onToggle}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -171,7 +196,7 @@ const CalculationInfo = ({ solarData }) => {
                         border: '1px solid #E2E8F0'
                       }}>
                         Y_f = E_y ÷ P_STC [kWh/kWp·a]<br/>
-                        Y_f = {solarData.yield?.annual_kWh || 0} ÷ {((solarData.inputs?.area || 0) * 0.22).toFixed(2)} = {solarData.efficiency || 'N/A'} kWh/kWp·a
+                        Y_f = {currentAnnualKWh} ÷ {pStc.toFixed(2)} = {yf.toFixed(0)} kWh/kWp·a
                       </div>
                     </div>
                     
@@ -186,7 +211,7 @@ const CalculationInfo = ({ solarData }) => {
                         border: '1px solid #E2E8F0'
                       }}>
                         CO2 = E_y × Grid-Faktor [kg]<br/>
-                        CO2 = {solarData.yield?.annual_kWh || 0} × 0.5 = {Math.round((solarData.yield?.annual_kWh || 0) * 0.5)} kg CO2/Jahr
+                        CO2 = {currentAnnualKWh} × 0.5 = {Math.round(currentAnnualKWh * 0.5)} kg CO2/Jahr
                       </div>
                     </div>
                   </div>
@@ -236,7 +261,7 @@ const CalculationInfo = ({ solarData }) => {
                       fontSize: '13px',
                       border: '1px solid #E2E8F0'
                     }}>
-                      P_STC = {solarData.inputs?.area} m² × 0.22 kW/m² = {((solarData.inputs?.area || 0) * 0.22).toFixed(2)} kWp
+                      P_STC = {currentArea} m² × 0.22 kW/m² = {pStc.toFixed(2)} kWp
                     </div>
                   </div>
                   
@@ -250,14 +275,9 @@ const CalculationInfo = ({ solarData }) => {
                       fontSize: '13px',
                       border: '1px solid #E2E8F0'
                     }}>
-                      PVGIS: slope={solarData.inputs?.tilt}°, azimuth={(() => {
-                        let pvgisAzimuth = (solarData.inputs?.azimuth || 0) - 180;
-                        if (pvgisAzimuth > 180) pvgisAzimuth -= 360;
-                        if (pvgisAzimuth < -180) pvgisAzimuth += 360;
-                        return pvgisAzimuth;
-                      })()}°<br/>
-                      PVGIS: peak_power={((solarData.inputs?.area || 0) * 0.22).toFixed(2)} kWp<br/>
-                      PVGIS Output: E_y = {solarData.yield?.annual_kWh || 'N/A'} kWh/Jahr
+                      PVGIS: slope={currentTilt}°, azimuth={pvgisAzimuth}°<br/>
+                      PVGIS: peak_power={pStc.toFixed(2)} kWp<br/>
+                      PVGIS Output: E_y = {currentAnnualKWh} kWh/Jahr
                     </div>
                   </div>
                   
@@ -272,7 +292,7 @@ const CalculationInfo = ({ solarData }) => {
                       border: '1px solid #E2E8F0'
                     }}>
                       Y_f = E_y ÷ P_STC [kWh/kWp·a]<br/>
-                      Y_f = {solarData.yield?.annual_kWh || 0} ÷ {((solarData.inputs?.area || 0) * 0.22).toFixed(2)} = {solarData.efficiency || 'N/A'} kWh/kWp·a
+                      Y_f = {currentAnnualKWh} ÷ {pStc.toFixed(2)} = {yf.toFixed(0)} kWh/kWp·a
                     </div>
                   </div>
                   

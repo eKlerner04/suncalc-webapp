@@ -42,11 +42,11 @@ class SolarCacheService {
     return { data: externalData, source: externalData.source };
   }
 
-  private async findInDatabase(gridKey: string): Promise<SolarCellRecord | null> {
+  private async findInDatabase(solarKey: string): Promise<SolarCellRecord | null> {
     try {
-      console.log(` Suche in DB nach gridKey: "${gridKey}"`);
+      console.log(` Suche in DB nach solarKey: "${solarKey}"`);
       
-      const response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=gridKey%3D%22${gridKey}%22`);
+      const response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=solarKey%3D%22${solarKey}%22`);
       const data = await response.json();
       
       console.log(` HTTP-API Suche Ergebnis: ${data.totalItems} Datensätze gefunden`);
@@ -61,13 +61,13 @@ class SolarCacheService {
         const record = oldestRecord as SolarCellRecord;
         
         if (!record.payload || record.payload === '' || record.payload === null) {
-          console.log(`Datensatz ${record.gridKey} hat keinen gültigen payload, behandle als Cache-Miss`);
+          console.log(`Datensatz ${record.solarKey} hat keinen gültigen payload, behandle als Cache-Miss`);
           return null; 
         }
         
         console.log(` Gefundener Datensatz:`, {
           id: record.id,
-          gridKey: record.gridKey,
+          solarKey: record.solarKey,
           source: record.source,
           lastAccessAt: record.lastAccessAt,
           ttlDays: record.ttlDays,
@@ -75,11 +75,11 @@ class SolarCacheService {
         });
         return record;
       } else {
-        console.log(` Kein Datensatz mit gridKey "${gridKey}" gefunden`);
+        console.log(` Kein Datensatz mit solarKey "${solarKey}" gefunden`);
         return null;
       }
     } catch (error) {
-      console.error(` Fehler beim Suchen in DB für ${gridKey}:`, error);
+      console.error(` Fehler beim Suchen in DB für ${solarKey}:`, error);
       return null;
     }
   }
@@ -106,19 +106,19 @@ class SolarCacheService {
     return isFresh;
   }
 
-  private async updateLastAccess(gridKey: string): Promise<void> {
+  private async updateLastAccess(solarKey: string): Promise<void> {
     try {
-      const record = await this.findInDatabase(gridKey);
+      const record = await this.findInDatabase(solarKey);
       if (record) {
         const newAccessCount = (record.accessCount || 0) + 1;
         await pb.collection(SOLAR_COLLECTION).update(record.id, {
           lastAccessAt: new Date().toISOString(),
           accessCount: newAccessCount
         });
-        console.log(` lastAccessAt und accessCount für ${gridKey} aktualisiert (${newAccessCount})`);
+        console.log(` lastAccessAt und accessCount für ${solarKey} aktualisiert (${newAccessCount})`);
       }
     } catch (error) {
-      console.error(` Fehler beim Aktualisieren von lastAccessAt und accessCount für ${gridKey}:`, error);
+      console.error(` Fehler beim Aktualisieren von lastAccessAt und accessCount für ${solarKey}:`, error);
     }
   }
 
@@ -215,7 +215,7 @@ class SolarCacheService {
       const { score, isHot, locationWeight, recencyBonus } = await this.calculateInitialPopularityScore(lat, lng);
       
       const recordData = {
-        gridKey: solarKey,
+        gridKey: generateGridKey(lat, lng),
         solarKey: solarKey,
         latRounded: roundedCoords.latRounded,
         lngRounded: roundedCoords.lngRounded,

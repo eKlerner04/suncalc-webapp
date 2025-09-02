@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ChartContainer from './ChartContainer';
 import CalculationInfo from './CalculationInfo';
 
 export default function SolarResults({ solarData, onShowDetails }) {
+  const [isCalculationInfoOpen, setIsCalculationInfoOpen] = useState(false);
+
+  // Schließe die Berechnungsdetails, wenn sich die solarData ändert
+  useEffect(() => {
+    setIsCalculationInfoOpen(false);
+  }, [solarData]);
+
+  // Erstelle einen eindeutigen Key basierend auf allen relevanten Daten
+  const calculationInfoKey = useMemo(() => {
+    if (!solarData) return 'no-data';
+    return `calc-${solarData.inputs?.lat}-${solarData.inputs?.lng}-${solarData.inputs?.area}-${solarData.inputs?.tilt}-${solarData.inputs?.azimuth}-${solarData.yield?.annual_kWh}-${solarData.cache?.source}`;
+  }, [solarData]);
   return (
     <div style={{ 
       marginTop: '48px', 
@@ -203,7 +215,13 @@ export default function SolarResults({ solarData, onShowDetails }) {
       </div>
       
       {/* Berechnungsdetails */}
-      <CalculationInfo solarData={solarData} />
+      <CalculationInfo 
+        key={calculationInfoKey}
+        solarData={solarData}
+        isOpen={isCalculationInfoOpen}
+        onToggle={() => setIsCalculationInfoOpen(!isCalculationInfoOpen)}
+        inputs={solarData?.inputs}
+      />
       
       {/* Charts */}
       <ChartContainer 

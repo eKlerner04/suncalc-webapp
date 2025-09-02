@@ -3,7 +3,6 @@ import Compass from './Compass';
 import SearchHistory from './SearchHistory';
 
 export default function RoofParameters({ coordinates, onInputChange, onRestoreSearch }) {
-  console.log('🏗️ [RoofParameters] Komponente wird gerendert, onRestoreSearch:', onRestoreSearch);
   
   return (
     <div style={{ 

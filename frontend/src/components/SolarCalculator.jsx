@@ -12,6 +12,8 @@ export default function SolarCalculator() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+
+
   const [showDetails, setShowDetails] = useState(false);
   
   // State für benutzerdefinierte Koordinaten
@@ -160,10 +162,10 @@ export default function SolarCalculator() {
     });
     setSearchQuery(searchItem.address);
     
-    // Automatisch Solarpotential berechnen
-    setTimeout(() => {
-      handleCalculateSolar();
-    }, 100);
+    // Solar-Daten zurücksetzen, damit neue Berechnung nötig ist
+    setSolarData(null);
+    
+    // KEINE automatische Berechnung - User muss selbst klicken
   };
 
 
