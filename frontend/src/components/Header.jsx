@@ -1,6 +1,11 @@
 export default function Header() {
   return (
     <header style={{ 
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 1000,
       background: '#0A2540',
       color: '#ffffff',
       padding: '32px 0',

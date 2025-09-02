@@ -23,7 +23,7 @@ export default function App() {
     <div className="layout">
       <Header />
       
-      <main className="main">
+      <main className="main" style={{ paddingTop: '200px' }}>
         <SolarCalculator />
       </main>
       

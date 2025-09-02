@@ -236,7 +236,7 @@ export default function LocationMap({
         position: 'absolute',
         top: '16px',
         left: '16px',
-        zIndex: 1000,
+        zIndex: 999,
         display: 'flex',
         flexDirection: 'column',
         gap: '8px'
@@ -314,7 +314,7 @@ export default function LocationMap({
           borderRadius: '8px',
           fontSize: '14px',
           fontWeight: '500',
-          zIndex: 1000,
+          zIndex: 999,
           maxWidth: '400px'
         }}>
           <strong>Koordinaten:</strong> {crosshairPosition?.lat?.toFixed(6)}, {crosshairPosition?.lng?.toFixed(6)}
