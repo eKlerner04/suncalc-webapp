@@ -12,9 +12,11 @@ export interface PVGISResponse {
     monthly_data?: number[]; // Monatliche kWh-Werte (Jan-Dez)
     assumptions: {
       losses_percent: number;
-      m2_per_kwp: number;
+      m2_per_kwp?: number; // Legacy
+      kw_per_m2?: number; // Neue Berechnung
+      p_stc_kwp?: number; // Anlagenleistung
       co2_factor: number;
-      kwp?: number;
+      kwp?: number; // Legacy
       annual_radiation?: string;
     };
   };

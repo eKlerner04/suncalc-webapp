@@ -130,7 +130,7 @@ const CalculationInfo = ({ solarData }) => {
                 boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
               }}>
                 <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>1. Leistungsumrechnung</div>
+                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>1. Anlagenleistung P_STC</div>
                   <div style={{ 
                     backgroundColor: '#F8FAFC', 
                     padding: '12px', 
@@ -139,13 +139,14 @@ const CalculationInfo = ({ solarData }) => {
                     fontSize: '12px',
                     border: '1px solid #E2E8F0'
                   }}>
-                    kWp = Dachfläche ÷ 6.5 m²/kWp<br/>
-                    kWp = {solarData.inputs?.area} ÷ 6.5 = {(solarData.inputs?.area / 6.5).toFixed(2)} kWp
+                    P_STC = Dachfläche × Leistungsdichte<br/>
+                    P_STC = {solarData.inputs?.area} m² × 0.22 kW/m² = {(solarData.inputs?.area * 0.22).toFixed(2)} kWp<br/>
+                    <span style={{ fontSize: '11px', color: '#6B7280' }}>// Moderne Module: 0.20-0.24 kW/m²</span>
                   </div>
                 </div>
                 
                 <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>2. Jährlicher Ertrag</div>
+                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>2. PVGIS-Abfrage</div>
                   <div style={{ 
                     backgroundColor: '#F8FAFC', 
                     padding: '12px', 
@@ -154,8 +155,15 @@ const CalculationInfo = ({ solarData }) => {
                     fontSize: '12px',
                     border: '1px solid #E2E8F0'
                   }}>
-                    E_y = PVGIS API (data.outputs.totals.fixed.E_y)<br/>
-                    E_y = {solarData.yield?.annual_kWh || 'N/A'} kWh/Jahr
+                    PVGIS Input: lat, lon, slope={solarData.inputs?.tilt}°, azimuth={(() => {
+                      let pvgisAzimuth = (solarData.inputs?.azimuth || 0) - 180;
+                      if (pvgisAzimuth > 180) pvgisAzimuth -= 360;
+                      if (pvgisAzimuth < -180) pvgisAzimuth += 360;
+                      return pvgisAzimuth;
+                    })()}°<br/>
+                    PVGIS Input: peak_power={((solarData.inputs?.area || 0) * 0.22).toFixed(2)} kWp, system_loss=14%<br/>
+                    PVGIS Output: E_y = {solarData.yield?.annual_kWh || 'N/A'} kWh/Jahr (absoluter Ertrag)<br/>
+                    <span style={{ fontSize: '11px', color: '#6B7280' }}>// Modus A: peak_power = P_STC → E_y ist Anlagenertrag</span>
                   </div>
                 </div>
                 
@@ -169,13 +177,14 @@ const CalculationInfo = ({ solarData }) => {
                     fontSize: '12px',
                     border: '1px solid #E2E8F0'
                   }}>
-                    E_m = PVGIS API (data.outputs.monthly.fixed[].E_m)<br/>
-                    E_m = Echte monatliche Daten vom Standort
+                    E_m[1..12] = PVGIS API (data.outputs.monthly.fixed[].E_m)<br/>
+                    E_m = Absolute monatliche kWh deiner Anlage<br/>
+                    <span style={{ fontSize: '11px', color: '#6B7280' }}>// Modus A: E_m sind bereits Anlagenerträge</span>
                   </div>
                 </div>
                 
                 <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>4. CO2-Einsparung</div>
+                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>4. Spezifischer Ertrag Y_f</div>
                   <div style={{ 
                     backgroundColor: '#F8FAFC', 
                     padding: '12px', 
@@ -184,13 +193,14 @@ const CalculationInfo = ({ solarData }) => {
                     fontSize: '12px',
                     border: '1px solid #E2E8F0'
                   }}>
-                    CO2 = E_y × 0.5 kg CO2/kWh<br/>
-                    CO2 = {solarData.yield?.annual_kWh || 0} × 0.5 = {Math.round((solarData.yield?.annual_kWh || 0) * 0.5)} kg CO2/Jahr
+                    Y_f = E_y ÷ P_STC [kWh/kWp·a]<br/>
+                    Y_f = {solarData.yield?.annual_kWh || 0} ÷ {((solarData.inputs?.area || 0) * 0.22).toFixed(2)} = {solarData.efficiency || 'N/A'} kWh/kWp·a<br/>
+                    <span style={{ fontSize: '11px', color: '#6B7280' }}>// Mitteleuropa: 900-1150 kWh/kWp·a</span>
                   </div>
                 </div>
                 
                 <div>
-                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>5. Effizienz</div>
+                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>5. CO2-Einsparung</div>
                   <div style={{ 
                     backgroundColor: '#F8FAFC', 
                     padding: '12px', 
@@ -199,8 +209,9 @@ const CalculationInfo = ({ solarData }) => {
                     fontSize: '12px',
                     border: '1px solid #E2E8F0'
                   }}>
-                    η = (E_y ÷ (Fläche × 1000)) × 100%<br/>
-                    η = ({solarData.yield?.annual_kWh || 0} ÷ ({solarData.inputs?.area} × 1000)) × 100 = {Math.round(((solarData.yield?.annual_kWh || 0) / ((solarData.inputs?.area || 1) * 1000)) * 100)}%
+                    CO2 = E_y × Grid-Faktor [kg]<br/>
+                    CO2 = {solarData.yield?.annual_kWh || 0} × 0.5 = {Math.round((solarData.yield?.annual_kWh || 0) * 0.5)} kg CO2/Jahr<br/>
+                    <span style={{ fontSize: '11px', color: '#6B7280' }}>// Deutschland: ~0.5 kg CO2/kWh</span>
                   </div>
                 </div>
               </div>
@@ -320,7 +331,7 @@ const CalculationInfo = ({ solarData }) => {
                 boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
               }}>
                 <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Schritt 1: Leistung berechnen</div>
+                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Schritt 1: P_STC berechnen</div>
                   <div style={{ 
                     backgroundColor: '#F8FAFC', 
                     padding: '12px', 
@@ -329,12 +340,12 @@ const CalculationInfo = ({ solarData }) => {
                     fontSize: '12px',
                     border: '1px solid #E2E8F0'
                   }}>
-                    kWp = {solarData.inputs?.area} m² ÷ 6.5 m²/kWp = {(solarData.inputs?.area / 6.5).toFixed(2)} kWp
+                    P_STC = {solarData.inputs?.area} m² × 0.22 kW/m² = {(solarData.inputs?.area * 0.22).toFixed(2)} kWp
                   </div>
                 </div>
                 
                 <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Schritt 2: Jährlicher Ertrag (von API)</div>
+                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Schritt 2: PVGIS-Abfrage</div>
                   <div style={{ 
                     backgroundColor: '#F8FAFC', 
                     padding: '12px', 
@@ -343,12 +354,20 @@ const CalculationInfo = ({ solarData }) => {
                     fontSize: '12px',
                     border: '1px solid #E2E8F0'
                   }}>
-                    E_y = {solarData.yield?.annual_kWh || 'N/A'} kWh/Jahr
+                    PVGIS: slope={solarData.inputs?.tilt}°, azimuth={(() => {
+                      let pvgisAzimuth = (solarData.inputs?.azimuth || 0) - 180;
+                      if (pvgisAzimuth > 180) pvgisAzimuth -= 360;
+                      if (pvgisAzimuth < -180) pvgisAzimuth += 360;
+                      return pvgisAzimuth;
+                    })()}°<br/>
+                    PVGIS: peak_power={((solarData.inputs?.area || 0) * 0.22).toFixed(2)} kWp<br/>
+                    PVGIS Output: E_y = {solarData.yield?.annual_kWh || 'N/A'} kWh/Jahr<br/>
+                    <span style={{ fontSize: '11px', color: '#6B7280' }}>// Modus A: E_y ist bereits Anlagenertrag</span>
                   </div>
                 </div>
                 
                 <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Schritt 3: Monatlicher Durchschnitt</div>
+                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Schritt 3: Spezifischer Ertrag</div>
                   <div style={{ 
                     backgroundColor: '#F8FAFC', 
                     padding: '12px', 
@@ -357,12 +376,13 @@ const CalculationInfo = ({ solarData }) => {
                     fontSize: '12px',
                     border: '1px solid #E2E8F0'
                   }}>
-                    E_monatlich = {solarData.yield?.annual_kWh || 0} kWh ÷ 12 Monate = {((solarData.yield?.annual_kWh || 0) / 12).toFixed(1)} kWh/Monat
+                    Y_f = E_y ÷ P_STC [kWh/kWp·a]<br/>
+                    Y_f = {solarData.yield?.annual_kWh || 0} ÷ {((solarData.inputs?.area || 0) * 0.22).toFixed(2)} = {solarData.efficiency || 'N/A'} kWh/kWp·a
                   </div>
                 </div>
                 
                 <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Schritt 4: CO2-Einsparung</div>
+                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Schritt 4: Monatswerte</div>
                   <div style={{ 
                     backgroundColor: '#F8FAFC', 
                     padding: '12px', 
@@ -371,12 +391,14 @@ const CalculationInfo = ({ solarData }) => {
                     fontSize: '12px',
                     border: '1px solid #E2E8F0'
                   }}>
-                    CO2 = {solarData.yield?.annual_kWh || 0} kWh × 0.5 kg CO2/kWh = {Math.round((solarData.yield?.annual_kWh || 0) * 0.5)} kg CO2/Jahr
+                    E_m[1..12] = PVGIS monatliche kWh<br/>
+                    Anteil_m[%] = 100 × E_m ÷ E_y<br/>
+                    <span style={{ fontSize: '11px', color: '#6B7280' }}>// Modus A: E_m sind bereits Anlagenerträge</span>
                   </div>
                 </div>
                 
                 <div>
-                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Schritt 5: Flächeneffizienz</div>
+                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Schritt 5: CO2-Einsparung</div>
                   <div style={{ 
                     backgroundColor: '#F8FAFC', 
                     padding: '12px', 
@@ -385,7 +407,8 @@ const CalculationInfo = ({ solarData }) => {
                     fontSize: '12px',
                     border: '1px solid #E2E8F0'
                   }}>
-                    η = {solarData.yield?.annual_kWh || 0} kWh ÷ ({solarData.inputs?.area} m² × 1000) × 100 = {Math.round(((solarData.yield?.annual_kWh || 0) / ((solarData.inputs?.area || 1) * 1000)) * 100)}%
+                    CO2 = E_y × Grid-Faktor<br/>
+                    CO2 = {solarData.yield?.annual_kWh || 0} × 0.5 = {Math.round((solarData.yield?.annual_kWh || 0) * 0.5)} kg CO2/Jahr
                   </div>
                 </div>
               </div>
