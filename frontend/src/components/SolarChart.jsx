@@ -262,215 +262,195 @@ const SolarChart = ({ solarData, inputs }) => {
       </div>
 
       {/* Balkendiagramm */}
-      <div style={{ 
-        marginTop: '32px',
-        paddingTop: '24px',
-        borderTop: '2px solid #F1F5F9'
-      }}>
+      <div style={{ marginTop: '32px' }}>
         <h3 style={{ 
           fontSize: '20px', 
           fontWeight: '600', 
           color: '#1F2937', 
-          marginBottom: '8px',
-          textAlign: 'left'
+          marginBottom: '8px'
         }}>
-          Monatlicher Solarertrag - Balkendiagramm
+          Monatliche Solarerträge - Balkendiagramm
         </h3>
         
         <div style={{ 
-          position: 'relative',
-          backgroundColor: '#F8FAFC',
-          borderRadius: '8px',
-          border: '1px solid #E2E8F0',
-          padding: '20px 20px 20px 80px',
-          minHeight: '300px'
+          backgroundColor: '#F9FAFB', 
+          borderRadius: '8px', 
+          padding: '20px',
+          border: '1px solid #E5E7EB',
+          minHeight: '400px'
         }}>
-          {/* Y-Achse Beschriftung */}
-          <div style={{
-            position: 'absolute',
-            left: '15px',
-            top: '20px',
-            bottom: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            fontSize: '12px',
-            color: '#6B7280',
-            fontWeight: '500',
-            width: '40px',
-            textAlign: 'right'
-          }}>
-            {(() => {
-              const maxValue = Math.max(...monthlyData);
-              // Berechne schöne, gleichmäßige Intervalle
-              const step = Math.ceil(maxValue / 4 / 50) * 50; // Runde auf nächste 50er-Stelle
-              const yAxisValues = [step * 4, step * 3, step * 2, step, 0];
-              return yAxisValues.map((value, index) => (
-                <span key={index}>{value}</span>
-              ));
-            })()}
-          </div>
-
-          {/* Y-Achse Label */}
-          <div style={{
-            position: 'absolute',
-            left: '8px',
-            top: '50%',
-            transform: 'translateY(-50%) rotate(-90deg)',
-            fontSize: '12px',
-            color: '#6B7280',
-            fontWeight: '500',
-            whiteSpace: 'nowrap'
-          }}>
-            kWh
-          </div>
-
-          {/* Y-Achse Linien */}
-          <div style={{
-            position: 'absolute',
-            left: '80px',
-            top: '20px',
-            right: '20px',
-            bottom: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            pointerEvents: 'none'
-          }}>
-            {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => (
-              <div key={index} style={{
-                height: '1px',
-                backgroundColor: '#E2E8F0',
-                width: '100%'
-              }} />
-            ))}
-          </div>
-
-          {/* Balken Container */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'end', 
-            justifyContent: 'space-between',
-            height: '240px',
-            gap: '4px',
-            marginLeft: '20px'
-          }}>
-            {monthlyData.map((value, index) => {
-              const maxValue = Math.max(...monthlyData);
-              // Verwende die gleiche Logik wie für die Y-Achse
-              const step = Math.ceil(maxValue / 4 / 50) * 50;
-              const maxYAxisValue = step * 4;
-              const heightPercentage = maxYAxisValue > 0 ? (value / maxYAxisValue) * 100 : 0;
-              const actualHeight = Math.max((heightPercentage / 100) * 240, value > 0 ? 8 : 0);
-              const monthAbbr = months[index].substring(0, 3);
-              const isHighest = value === maxValue && value > 0;
-              
-              return (
-                <div key={index} style={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center',
-                  flex: 1,
-                  height: '100%',
-                  justifyContent: 'flex-end'
-                }}>
-                  {/* Wert über dem Balken */}
-                  <div style={{
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    marginBottom: '4px'
+          {/* Y-Achse Labels und Diagramm */}
+          <div style={{ display: 'flex', alignItems: 'end', gap: '8px', height: '300px' }}>
+            {/* Y-Achse */}
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'space-between',
+              height: '100%',
+              minWidth: '40px',
+              paddingRight: '8px'
+            }}>
+              {(() => {
+                const maxValue = Math.max(...monthlyData);
+                const yAxisSteps = Math.ceil(maxValue / 50) * 50;
+                const steps = [];
+                for (let i = yAxisSteps; i >= 0; i -= 50) {
+                  steps.push(i);
+                }
+                return steps.map(value => (
+                  <div key={value} style={{ 
+                    fontSize: '12px', 
+                    color: '#6B7280',
+                    textAlign: 'right',
+                    lineHeight: '1'
                   }}>
                     {value}
                   </div>
-                  
-                  {/* Balken */}
-                  <div style={{
-                    width: '100%',
-                    maxWidth: '32px',
-                    height: `${actualHeight}px`,
-                    backgroundColor: isHighest ? '#10B981' : '#3B82F6',
-                    borderRadius: '4px 4px 0 0',
-                    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                    minHeight: value > 0 ? '8px' : '0px',
-                    boxShadow: isHighest ? '0 4px 8px rgba(16, 185, 129, 0.3)' : '0 2px 4px rgba(59, 130, 246, 0.2)',
-                    border: isHighest ? '2px solid #059669' : '1px solid #2563EB',
-                    transform: 'scaleY(1)',
-                    transformOrigin: 'bottom',
-                    alignSelf: 'flex-end'
-                  }}
-                  title={`${months[index]}: ${value} kWh (${Math.round((value / displayTotal) * 100)}%)`}
-                  >
-                  </div>
-                  
-                  {/* Monatsname */}
-                  <div style={{ 
-                    marginTop: '12px', 
-                    fontSize: '12px', 
-                    fontWeight: '600', 
-                    color: '#6B7280',
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap',
-                    transform: 'rotate(-45deg)',
-                    transformOrigin: 'center'
+                ));
+              })()}
+            </div>
+            
+            {/* Diagramm-Bereich */}
+            <div style={{ 
+              flex: 1, 
+              display: 'flex', 
+              alignItems: 'end', 
+              gap: '4px',
+              height: '100%',
+              position: 'relative'
+            }}>
+              {/* Y-Achse Linien */}
+              {(() => {
+                const maxValue = Math.max(...monthlyData);
+                const yAxisSteps = Math.ceil(maxValue / 50) * 50;
+                const steps = [];
+                for (let i = yAxisSteps; i >= 0; i -= 50) {
+                  steps.push(i);
+                }
+                return steps.map((value, index) => (
+                  <div
+                    key={value}
+                    style={{
+                      position: 'absolute',
+                      top: `${(index / (steps.length - 1)) * 100}%`,
+                      left: 0,
+                      right: 0,
+                      height: '1px',
+                      backgroundColor: '#E5E7EB',
+                      zIndex: 1
+                    }}
+                  />
+                ));
+              })()}
+              
+              {/* Balken */}
+              {monthlyData.map((value, index) => {
+                const maxValue = Math.max(...monthlyData);
+                const yAxisMax = Math.ceil(maxValue / 50) * 50; // Y-Achse Maximum (z.B. 300, 350, 400)
+                const chartHeight = 300; // Feste Diagramm-Höhe in Pixeln
+                const heightInPixels = yAxisMax > 0 ? (value / yAxisMax) * chartHeight : 0;
+                const isPeakMonth = value === maxValue;
+                
+                return (
+                  <div key={index} style={{ 
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    position: 'relative',
+                    zIndex: 2,
+                    height: `${chartHeight}px`,
+                    justifyContent: 'flex-end'
                   }}>
-                    {monthAbbr}
+                    {/* Balken */}
+                    <div style={{
+                      width: '100%',
+                      height: `${heightInPixels}px`,
+                      backgroundColor: isPeakMonth ? '#10B981' : '#3B82F6',
+                      borderRadius: '4px 4px 0 0',
+                      minHeight: value > 0 ? '4px' : '0px',
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    title={`${months[index]}: ${value} kWh`}
+                    >
+                      {/* Wert-Anzeige im Balken */}
+                      {value > 0 && (
+                        <div style={{
+                          color: 'white',
+                          fontSize: '10px',
+                          fontWeight: '600',
+                          textAlign: 'center',
+                          textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                          lineHeight: '1',
+                          transform: 'rotate(-90deg)',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {value}
+                        </div>
+                      )}
+                    </div>
+                    
+
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-
-        {/* X-Achse Beschriftung */}
-        <div style={{ 
-          marginTop: '8px', 
-          textAlign: 'center', 
-          fontSize: '12px', 
-          color: '#6B7280',
-          fontWeight: '500'
-        }}>
-          Monate
-        </div>
-
-        {/* Legende */}
-        <div style={{ 
-          marginTop: '16px', 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: '16px',
-          fontSize: '12px'
-        }}>
+          
+          {/* X-Achse Labels */}
           <div style={{ 
             display: 'flex', 
-            alignItems: 'center', 
-            gap: '6px'
+            marginTop: '12px',
+            marginLeft: '48px'
           }}>
-            <div style={{ 
-              width: '12px', 
-              height: '12px', 
-              backgroundColor: '#3B82F6', 
-              borderRadius: '2px'
-            }}></div>
-            <span style={{ color: '#6B7280' }}>Monatlicher Ertrag</span>
+            {months.map((month, index) => (
+              <div key={index} style={{ 
+                flex: 1, 
+                textAlign: 'center', 
+                fontSize: '12px', 
+                color: '#6B7280',
+                fontWeight: '500'
+              }}>
+                {month.substring(0, 3)}
+              </div>
+            ))}
           </div>
+          
+          {/* Legende */}
           <div style={{ 
+            marginTop: '16px', 
             display: 'flex', 
-            alignItems: 'center', 
-            gap: '6px'
+            justifyContent: 'center', 
+            gap: '20px',
+            fontSize: '12px'
           }}>
-            <div style={{ 
-              width: '12px', 
-              height: '12px', 
-              backgroundColor: '#10B981', 
-              borderRadius: '2px'
-            }}></div>
-            <span style={{ color: '#6B7280' }}>Höchster Ertrag</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ 
+                width: '12px', 
+                height: '12px', 
+                backgroundColor: '#3B82F6', 
+                borderRadius: '2px' 
+              }}></div>
+              <span style={{ color: '#6B7280' }}>Monatlicher Ertrag</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ 
+                width: '12px', 
+                height: '12px', 
+                backgroundColor: '#10B981', 
+                borderRadius: '2px' 
+              }}></div>
+              <span style={{ color: '#6B7280' }}>Höchster Ertrag</span>
+            </div>
           </div>
         </div>
-
-
       </div>
+
     </div>
   );
 };
