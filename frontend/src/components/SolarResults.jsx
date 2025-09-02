@@ -1,5 +1,6 @@
 import React from 'react';
 import ChartContainer from './ChartContainer';
+import CalculationInfo from './CalculationInfo';
 
 export default function SolarResults({ solarData, onShowDetails }) {
   return (
@@ -201,7 +202,8 @@ export default function SolarResults({ solarData, onShowDetails }) {
         </div>
       </div>
       
-
+      {/* Berechnungsdetails */}
+      <CalculationInfo solarData={solarData} />
       
       {/* Charts */}
       <ChartContainer 
