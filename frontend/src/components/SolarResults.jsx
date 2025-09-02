@@ -129,7 +129,16 @@ export default function SolarResults({ solarData, onShowDetails }) {
                   {solarData.yield?.annual_kWh ? (solarData.yield.annual_kWh / 12).toFixed(1) : 'N/A'} kWh
                 </div>
               </div>
-              <div style={{ gridColumn: '1 / -1' }}>
+              <div>
+                <span style={{ color: '#718096', fontWeight: '500' }}>Geladene Daten von:</span>
+                <div style={{ color: '#2d3748', fontWeight: '600', marginTop: '4px' }}>
+                  {solarData.cache?.source === 'pvgis' ? 'PVGIS API' : 
+                   solarData.cache?.source === 'nasa_power' ? 'NASA POWER API' : 
+                   solarData.cache?.source === 'local' ? 'Lokale Datenbank' : 
+                   solarData.cache?.source || 'Unbekannt'}
+                </div>
+              </div>
+              <div>
                 <span style={{ color: '#718096', fontWeight: '500' }}>Datenquelle:</span>
                 <div style={{ marginTop: '4px' }}>
                   {solarData.cache?.metadata?.pvgis_url ? (
@@ -212,6 +221,7 @@ export default function SolarResults({ solarData, onShowDetails }) {
             </div>
           </div>
         </div>
+
       </div>
       
       {/* Berechnungsdetails */}
@@ -234,7 +244,7 @@ export default function SolarResults({ solarData, onShowDetails }) {
           onClick={onShowDetails}
           style={{
             padding: '16px 32px',
-            backgroundColor: '#38a169',
+            backgroundColor: '#2d3748',
             color: 'white',
             border: 'none',
             borderRadius: '12px',
@@ -242,15 +252,17 @@ export default function SolarResults({ solarData, onShowDetails }) {
             fontSize: '1rem',
             fontWeight: '600',
             transition: 'all 0.2s ease',
-            boxShadow: '0 4px 14px rgba(56, 161, 105, 0.3)'
+            boxShadow: '0 2px 8px rgba(45, 55, 72, 0.2)'
           }}
           onMouseEnter={(e) => {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 8px 25px rgba(56, 161, 105, 0.4)';
+            e.target.style.transform = 'translateY(-1px)';
+            e.target.style.boxShadow = '0 4px 12px rgba(45, 55, 72, 0.3)';
+            e.target.style.backgroundColor = '#1a202c';
           }}
           onMouseLeave={(e) => {
             e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 4px 14px rgba(56, 161, 105, 0.3)';
+            e.target.style.boxShadow = '0 2px 8px rgba(45, 55, 72, 0.2)';
+            e.target.style.backgroundColor = '#2d3748';
           }}
         >
           Detaillierte Analyse anzeigen
