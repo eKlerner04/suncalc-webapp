@@ -38,7 +38,7 @@ const CalculationInfo = ({ solarData }) => {
           e.target.style.borderColor = '#E2E8F0';
         }}
       >
-        <span style={{ fontSize: '16px' }}>ℹ️</span>
+        <span style={{ fontSize: '16px' }}></span>
         Berechnungsdetails anzeigen
         <span style={{ 
           transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -100,7 +100,7 @@ const CalculationInfo = ({ solarData }) => {
                 alignItems: 'center',
                 gap: '8px'
               }}>
-                Berechnungsformeln
+                Formeln
               </h4>
               
 
