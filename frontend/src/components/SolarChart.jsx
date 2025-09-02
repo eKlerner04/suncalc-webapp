@@ -275,12 +275,12 @@ const SolarChart = ({ solarData, inputs }) => {
         <div style={{ 
           backgroundColor: '#F9FAFB', 
           borderRadius: '8px', 
-          padding: '20px',
+          padding: '30px',
           border: '1px solid #E5E7EB',
-          minHeight: '400px'
+          minHeight: '500px'
         }}>
           {/* Y-Achse Labels und Diagramm */}
-          <div style={{ display: 'flex', alignItems: 'end', gap: '8px', height: '300px' }}>
+          <div style={{ display: 'flex', alignItems: 'end', gap: '12px', height: '400px' }}>
             {/* Y-Achse */}
             <div style={{ 
               display: 'flex', 
@@ -292,9 +292,14 @@ const SolarChart = ({ solarData, inputs }) => {
             }}>
               {(() => {
                 const maxValue = Math.max(...monthlyData);
-                const yAxisSteps = Math.ceil(maxValue / 50) * 50;
+                
+                // Dynamische Y-Achse: beginnt immer bei 0, Maximum angepasst an Daten
+                const stepSize = Math.max(50, Math.ceil(maxValue / 8 / 50) * 50); // Mindestens 50, aber angepasst an Datenbereich
+                const yAxisMax = Math.ceil(maxValue / stepSize) * stepSize;
+                const yAxisMin = 0; // Immer bei 0 beginnen
+                
                 const steps = [];
-                for (let i = yAxisSteps; i >= 0; i -= 50) {
+                for (let i = yAxisMax; i >= yAxisMin; i -= stepSize) {
                   steps.push(i);
                 }
                 return steps.map(value => (
@@ -322,9 +327,12 @@ const SolarChart = ({ solarData, inputs }) => {
               {/* Y-Achse Linien */}
               {(() => {
                 const maxValue = Math.max(...monthlyData);
-                const yAxisSteps = Math.ceil(maxValue / 50) * 50;
+                const stepSize = Math.max(50, Math.ceil(maxValue / 8 / 50) * 50);
+                const yAxisMax = Math.ceil(maxValue / stepSize) * stepSize;
+                const yAxisMin = 0;
+                
                 const steps = [];
-                for (let i = yAxisSteps; i >= 0; i -= 50) {
+                for (let i = yAxisMax; i >= yAxisMin; i -= stepSize) {
                   steps.push(i);
                 }
                 return steps.map((value, index) => (
@@ -346,9 +354,13 @@ const SolarChart = ({ solarData, inputs }) => {
               {/* Balken */}
               {monthlyData.map((value, index) => {
                 const maxValue = Math.max(...monthlyData);
-                const yAxisMax = Math.ceil(maxValue / 50) * 50; // Y-Achse Maximum (z.B. 300, 350, 400)
-                const chartHeight = 300; // Feste Diagramm-Höhe in Pixeln
-                const heightInPixels = yAxisMax > 0 ? (value / yAxisMax) * chartHeight : 0;
+                const stepSize = Math.max(50, Math.ceil(maxValue / 8 / 50) * 50);
+                const yAxisMax = Math.ceil(maxValue / stepSize) * stepSize;
+                const yAxisMin = 0;
+                const yAxisRange = yAxisMax - yAxisMin;
+                
+                const chartHeight = 400; // Feste Diagramm-Höhe in Pixeln
+                const heightInPixels = yAxisRange > 0 ? (value / yAxisRange) * chartHeight : 0;
                 const isPeakMonth = value === maxValue;
                 
                 return (
@@ -362,6 +374,12 @@ const SolarChart = ({ solarData, inputs }) => {
                     height: `${chartHeight}px`,
                     justifyContent: 'flex-end'
                   }}>
+                    {/* Unsichtbarer Platzhalter für die Basislinie */}
+                    <div style={{
+                      width: '100%',
+                      height: `${chartHeight - heightInPixels}px`,
+                      minHeight: '0px'
+                    }}></div>
                     {/* Balken */}
                     <div style={{
                       width: '100%',
