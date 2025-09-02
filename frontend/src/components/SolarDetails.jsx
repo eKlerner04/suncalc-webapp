@@ -237,16 +237,7 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
               padding: '24px', 
               borderRadius: '12px',
               textAlign: 'center',
-              border: '1px solid #bbf7d0',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-4px)';
-              e.target.style.boxShadow = '0 8px 25px rgba(16, 185, 129, 0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              border: '1px solid #bbf7d0'
             }}>
               <div style={{ fontSize: '36px', fontWeight: '800', color: '#059669', marginBottom: '8px' }}>
                 {solarData.yield.annual_kWh.toLocaleString()}
@@ -262,16 +253,7 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
               padding: '24px', 
               borderRadius: '12px',
               textAlign: 'center',
-              border: '1px solid #7dd3fc',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-4px)';
-              e.target.style.boxShadow = '0 8px 25px rgba(14, 165, 233, 0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              border: '1px solid #7dd3fc'
             }}>
               <div style={{ fontSize: '36px', fontWeight: '800', color: '#0284c7', marginBottom: '8px' }}>
                 {solarData.co2.toLocaleString()}
@@ -287,16 +269,7 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
               padding: '24px', 
               borderRadius: '12px',
               textAlign: 'center',
-              border: '1px solid #fcd34d',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-4px)';
-              e.target.style.boxShadow = '0 8px 25px rgba(245, 158, 11, 0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              border: '1px solid #fcd34d'
             }}>
               <div style={{ fontSize: '36px', fontWeight: '800', color: '#d97706', marginBottom: '8px' }}>
                 {Math.round(solarData.yield.annual_kWh / 365)}
@@ -312,16 +285,7 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
               padding: '24px', 
               borderRadius: '12px',
               textAlign: 'center',
-              border: '1px solid #c4b5fd',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-4px)';
-              e.target.style.boxShadow = '0 8px 25px rgba(139, 92, 246, 0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              border: '1px solid #c4b5fd'
             }}>
               <div style={{ fontSize: '36px', fontWeight: '800', color: '#7c3aed', marginBottom: '8px' }}>
                 {Math.round(solarData.yield.annual_kWh / 12)}

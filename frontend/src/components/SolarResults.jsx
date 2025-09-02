@@ -140,36 +140,19 @@ export default function SolarResults({ solarData, onShowDetails }) {
               </div>
               <div>
                 <span style={{ color: '#718096', fontWeight: '500' }}>Datenquelle:</span>
-                <div style={{ marginTop: '4px' }}>
+                <div style={{ color: '#2d3748', fontWeight: '600', marginTop: '4px' }}>
                   {solarData.cache?.metadata?.pvgis_url ? (
                     <a 
                       href={solarData.cache.metadata.pvgis_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        color: '#3182ce',
+                        color: '#2d3748',
                         fontWeight: '600',
-                        textDecoration: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '4px 8px',
-                        borderRadius: '6px',
-                        backgroundColor: '#ebf8ff',
-                        border: '1px solid #bee3f8',
-                        transition: 'all 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = '#dbeafe';
-                        e.target.style.transform = 'translateY(-1px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = '#ebf8ff';
-                        e.target.style.transform = 'translateY(0)';
+                        textDecoration: 'underline'
                       }}
                     >
                       PVGIS API
-                      <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>↗</span>
                     </a>
                   ) : solarData.cache?.metadata?.nasa_power_url ? (
                     <a 
@@ -177,34 +160,15 @@ export default function SolarResults({ solarData, onShowDetails }) {
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        color: '#3182ce',
+                        color: '#2d3748',
                         fontWeight: '600',
-                        textDecoration: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '4px 8px',
-                        borderRadius: '6px',
-                        backgroundColor: '#ebf8ff',
-                        border: '1px solid #bee3f8',
-                        transition: 'all 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = '#dbeafe';
-                        e.target.style.transform = 'translateY(-1px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = '#ebf8ff';
-                        e.target.style.transform = 'translateY(0)';
+                        textDecoration: 'underline'
                       }}
                     >
                       NASA POWER API
-                      <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>↗</span>
                     </a>
                   ) : (
-                    <span style={{ color: '#2d3748', fontWeight: '600' }}>
-                      {solarData.cache?.source || 'N/A'}
-                    </span>
+                    solarData.cache?.source || 'N/A'
                   )}
                 </div>
                 {solarData.cache?.metadata?.pvgis_url || solarData.cache?.metadata?.nasa_power_url ? (
@@ -251,18 +215,7 @@ export default function SolarResults({ solarData, onShowDetails }) {
             cursor: 'pointer',
             fontSize: '1rem',
             fontWeight: '600',
-            transition: 'all 0.2s ease',
             boxShadow: '0 2px 8px rgba(45, 55, 72, 0.2)'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = 'translateY(-1px)';
-            e.target.style.boxShadow = '0 4px 12px rgba(45, 55, 72, 0.3)';
-            e.target.style.backgroundColor = '#1a202c';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 2px 8px rgba(45, 55, 72, 0.2)';
-            e.target.style.backgroundColor = '#2d3748';
           }}
         >
           Detaillierte Analyse anzeigen
