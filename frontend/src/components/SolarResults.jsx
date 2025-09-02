@@ -159,7 +159,7 @@ export default function SolarResults({ solarData, onShowDetails }) {
                         e.target.style.transform = 'translateY(0)';
                       }}
                     >
-                      🔗 PVGIS API
+                      PVGIS API
                       <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>↗</span>
                     </a>
                   ) : solarData.cache?.metadata?.nasa_power_url ? (
@@ -189,7 +189,7 @@ export default function SolarResults({ solarData, onShowDetails }) {
                         e.target.style.transform = 'translateY(0)';
                       }}
                     >
-                      🚀 NASA POWER API
+                      NASA POWER API
                       <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>↗</span>
                     </a>
                   ) : (
