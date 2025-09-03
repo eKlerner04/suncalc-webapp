@@ -57,8 +57,11 @@ app.get('/api/background-jobs/status', (req, res) => {
 // Background-Jobs manuell starten
 app.post('/api/background-jobs/cleanup', async (req, res) => {
   try {
-    await backgroundJobController.manualCleanup();
-    res.json({ message: 'Manueller Cleanup gestartet' });
+    const result = await backgroundJobController.manualCleanup();
+    res.json({ 
+      message: 'Manueller Cleanup abgeschlossen',
+      result: result
+    });
   } catch (error) {
     res.status(500).json({ error: 'Fehler beim manuellen Cleanup' });
   }

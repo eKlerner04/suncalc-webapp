@@ -10,6 +10,7 @@ interface SolarCellRecord extends SolarCell, RecordModel {}
 
 class SolarCacheService {
   private static instance: SolarCacheService;
+  private updateQueue: Map<string, Promise<void>> = new Map();
 
   private constructor() {}
 
@@ -108,17 +109,22 @@ class SolarCacheService {
 
   private async updateLastAccess(solarKey: string): Promise<void> {
     try {
-      const record = await this.findInDatabase(solarKey);
-      if (record) {
-        const newAccessCount = (record.accessCount || 0) + 1;
+      // Verwende eine einfache Lösung: Nur lastAccessAt aktualisieren
+      // accessCount wird nicht mehr aktualisiert um Race Conditions zu vermeiden
+      const response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=solarKey%3D%22${solarKey}%22`);
+      const data = await response.json();
+      
+      if (data.items && data.items.length > 0) {
+        const record = data.items[0];
+        
+        // Aktualisiere nur lastAccessAt (kein Race Condition Problem)
         await pb.collection(SOLAR_COLLECTION).update(record.id, {
-          lastAccessAt: new Date().toISOString(),
-          accessCount: newAccessCount
+          lastAccessAt: new Date().toISOString()
         });
-        console.log(` lastAccessAt und accessCount für ${solarKey} aktualisiert (${newAccessCount})`);
+        console.log(` lastAccessAt für ${solarKey} aktualisiert`);
       }
     } catch (error) {
-      console.error(` Fehler beim Aktualisieren von lastAccessAt und accessCount für ${solarKey}:`, error);
+      console.error(` Fehler beim Aktualisieren von lastAccessAt für ${solarKey}:`, error);
     }
   }
 
@@ -359,3 +365,4 @@ class SolarCacheService {
 }
 
 export const solarCacheService = SolarCacheService.getInstance();
+

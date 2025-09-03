@@ -31,6 +31,17 @@ export interface SolarCell {
   fetchedAt: string;
   lastAccessAt: string;
   ttlDays: number;
+  accessCount: number;
+  popularityScore: number;
+  isHot: boolean;
+  locationWeight: number;
+  recencyBonus: number;
+  lastDecayAt?: string;
+  decayCount?: number;
+  solarKey: string;
+  azimuth: number;
+  tilt: number;
+  area: number;
   created: string;
   updated: string;
 }

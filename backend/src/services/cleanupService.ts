@@ -52,14 +52,15 @@ export class CleanupService {
   }
 
   /**
-   * Führt einen Cleanup-Durchlauf aus
+   * Holt alle Datensätze in Batches
    */
-  private async runCleanup(): Promise<void> {
-    try {
-      const startTime = Date.now();
-
-      // Alle Standorte über HTTP-API holen
-      const apiUrl = `${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records`;
+  private async fetchAllRecords(): Promise<any[]> {
+    const allRecords: any[] = [];
+    let page = 1;
+    const perPage = 100;
+    
+    while (true) {
+      const apiUrl = `${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?page=${page}&perPage=${perPage}`;
       const response = await fetch(apiUrl);
       
       if (!response.ok) {
@@ -69,11 +70,36 @@ export class CleanupService {
       const data = await response.json();
       
       if (!data.items || data.items.length === 0) {
+        break; // Keine weiteren Datensätze
+      }
+      
+      allRecords.push(...data.items);
+      console.log(`[CLEANUP] Batch ${page}: ${data.items.length} Datensätze geladen (Total: ${allRecords.length})`);
+      
+      if (data.items.length < perPage) {
+        break; // Letzte Seite erreicht
+      }
+      
+      page++;
+    }
+    
+    return allRecords;
+  }
+
+  /**
+   * Führt einen Cleanup-Durchlauf aus
+   */
+  private async runCleanup(): Promise<void> {
+    try {
+      const startTime = Date.now();
+
+      // Alle Standorte über HTTP-API holen (alle Datensätze in Batches)
+      const allRecords = await this.fetchAllRecords();
+      
+      if (!allRecords || allRecords.length === 0) {
         console.log('[CLEANUP] Keine Standorte gefunden');
         return;
       }
-
-      const allRecords = data.items;
       const now = new Date();
       let deletedCount = 0;
       let errorCount = 0;
@@ -82,7 +108,8 @@ export class CleanupService {
 
       // Verarbeite alle gefundenen Datensätze
       for (const record of allRecords) {
-        if (!this.isRunning) break; // Stoppe bei Shutdown
+        // Bei manuellem Cleanup ignorieren wir isRunning
+        // if (!this.isRunning) break; // Stoppe bei Shutdown
 
         try {
           const ttlDays = record.ttlDays || this.config.ttlDays;
@@ -91,6 +118,8 @@ export class CleanupService {
           // Berechne Ablaufzeit
           const expiry = new Date(lastAccessAt.getTime() + ttlDays * 24 * 60 * 60 * 1000);
           const isExpired = expiry < now;
+
+
 
           if (isExpired) {
             console.log(`[CLEANUP] Standort ${record.gridKey} ist abgelaufen (${Math.round((now.getTime() - expiry.getTime()) / (24 * 60 * 60 * 1000))} Tage über TTL)`);
@@ -123,10 +152,61 @@ export class CleanupService {
   async manualCleanup(): Promise<{ success: boolean; message: string; deletedCount?: number }> {
     try {
       console.log('[CLEANUP] Starte manuellen Cleanup...');
-      await this.runCleanup();
+      
+      // Verwende die exakt gleiche Logik wie runCleanup()
+      const startTime = Date.now();
+
+      // Alle Standorte über HTTP-API holen (alle Datensätze in Batches)
+      const allRecords = await this.fetchAllRecords();
+      
+      if (!allRecords || allRecords.length === 0) {
+        console.log('[CLEANUP] Keine Standorte gefunden');
+        return {
+          success: true,
+          message: 'Manueller Cleanup erfolgreich abgeschlossen - keine Standorte gefunden'
+        };
+      }
+
+      const now = new Date();
+      let deletedCount = 0;
+      let errorCount = 0;
+
+      console.log(`[CLEANUP] ${allRecords.length} Standorte zur Überprüfung gefunden`);
+
+      // Verarbeite alle gefundenen Datensätze
+      for (const record of allRecords) {
+        try {
+          const ttlDays = record.ttlDays || this.config.ttlDays;
+          const lastAccessAt = new Date(record.lastAccessAt);
+          
+          // Berechne Ablaufzeit
+          const expiry = new Date(lastAccessAt.getTime() + ttlDays * 24 * 60 * 60 * 1000);
+          const isExpired = expiry < now;
+
+          if (isExpired) {
+            console.log(`[CLEANUP] Standort ${record.gridKey} ist abgelaufen (${Math.round((now.getTime() - expiry.getTime()) / (24 * 60 * 60 * 1000))} Tage über TTL)`);
+            
+            // Lösche abgelaufenen Standort
+            await pb.collection(SOLAR_COLLECTION).delete(record.id);
+            console.log(`[CLEANUP] Gelöscht: ${record.gridKey} (TTL: ${ttlDays} Tage, abgelaufen: ${Math.round((now.getTime() - expiry.getTime()) / (24 * 60 * 60 * 1000))} Tage)`);
+            deletedCount++;
+          } else {
+            const daysUntilExpiry = Math.round((expiry.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+            console.log(`[CLEANUP] Standort ${record.gridKey} ist noch gültig (läuft in ${daysUntilExpiry} Tagen ab)`);
+          }
+        } catch (recordError) {
+          console.error(`[CLEANUP] Fehler beim Verarbeiten von ${record.gridKey}:`, recordError);
+          errorCount++;
+        }
+      }
+
+      const duration = Date.now() - startTime;
+      console.log(`[CLEANUP] Cleanup abgeschlossen in ${duration}ms: ${deletedCount} Standorte gelöscht, ${errorCount} Fehler`);
+
       return {
         success: true,
-        message: 'Manueller Cleanup erfolgreich abgeschlossen'
+        message: `Manueller Cleanup erfolgreich abgeschlossen - ${deletedCount} Standorte gelöscht`,
+        deletedCount
       };
     } catch (error: any) {
       console.error('[CLEANUP] Fehler beim manuellen Cleanup:', error);

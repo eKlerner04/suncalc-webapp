@@ -1,4 +1,5 @@
 import { startBackgroundJobs, stopBackgroundJobs, getStatus } from './backgroundJobs';
+import { cleanupService } from './cleanupService';
 
 export class BackgroundJobController {
   private currentMode: 'simple' | 'bullmq' = 'simple';
@@ -51,12 +52,17 @@ export class BackgroundJobController {
     console.log('[CLEANUP] Starte manuellen Cleanup...');
     
     try {
-      
-      const status = getStatus();
+      const status = this.getStatus();
       console.log('[CLEANUP] Background Jobs Status:', status);
+      
+      // Rufe den echten Cleanup-Service auf
+      const result = await cleanupService.manualCleanup();
       console.log('[CLEANUP] Manueller Cleanup abgeschlossen');
+      
+      return result;
     } catch (error) {
       console.error('[ERROR] Fehler beim Cleanup:', error);
+      throw error;
     }
   }
 
