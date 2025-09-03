@@ -92,30 +92,9 @@ const SolarChart = ({ solarData, inputs }) => {
         <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1F2937', marginBottom: '8px' }}>
           Monatliche Solarerträge
         </h3>
-        <p style={{ color: '#6B7280', fontSize: '14px', marginBottom: '8px' }}>
+        <p style={{ color: '#6B7280', fontSize: '14px', marginBottom: '16px' }}>
           Aufschlüsselung des Solarertrags nach Monaten
         </p>
-        <div style={{ 
-          backgroundColor: '#F0F9FF', 
-          border: '1px solid #BAE6FD', 
-          borderRadius: '6px', 
-          padding: '8px 12px', 
-          fontSize: '12px',
-          color: '#0369A1',
-          marginBottom: '16px'
-        }}>
-          {hasRealMonthlyData ? (
-            isPVGIS ? (
-              <span><strong>Echte monatliche Daten</strong> von PVGIS API - basierend auf historischen Strahlungsmessungen für diesen Standort</span>
-            ) : isNASA ? (
-              <span><strong>Geschätzte monatliche Daten</strong> basierend auf NASA POWER Strahlungsdaten - realistisch für diesen Standort</span>
-            ) : (
-              <span><strong>Echte monatliche Daten</strong> von der API - spezifisch für diesen Standort</span>
-            )
-          ) : (
-            <span><strong>Geschätzte monatliche Daten</strong> - typische Verteilung für die Region</span>
-          )}
-        </div>
       </div>
       
       {/* Einfache Tabelle */}
