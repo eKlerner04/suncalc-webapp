@@ -230,7 +230,11 @@ export default function SolarCalculator() {
         <SolarDetails 
           solarData={solarData} 
           inputs={solarData.inputs} 
-          onBack={() => setShowDetails(false)}
+          onBack={() => {
+            setShowDetails(false);
+            // Nach dem Zurückschalten nach oben scrollen
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
         />
       ) : (
         <div style={{ width: '100%', maxWidth: '100%', margin: '0 auto' }}>
