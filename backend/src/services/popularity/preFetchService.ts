@@ -120,7 +120,7 @@ export class PreFetchService {
       );
 
       if (pvgisData) {
-        await this.updateCacheWithNewData(solarKey, pvgisData, area, tilt, azimuth);
+        await this.updateCacheWithNewData(solarKey, pvgisData, area, tilt, azimuth, location.gridKey);
         
         const duration = Date.now() - startTime;
         console.log(`     PVGIS erfolgreich für ${solarKey} (${duration}ms)`);
@@ -143,7 +143,7 @@ export class PreFetchService {
       );
 
       if (nasaData) {
-        await this.updateCacheWithNewData(solarKey, nasaData, area, tilt, azimuth);
+        await this.updateCacheWithNewData(solarKey, nasaData, area, tilt, azimuth, location.gridKey);
         
         const duration = Date.now() - startTime;
         console.log(`     NASA POWER erfolgreich für ${solarKey} (${duration}ms)`);
@@ -158,7 +158,7 @@ export class PreFetchService {
 
       console.log(`     Alle APIs fehlgeschlagen, verwende Fallback für ${solarKey}...`);
       const fallbackData = this.generateFallbackData(location, area, tilt, azimuth);
-      await this.updateCacheWithNewData(solarKey, fallbackData, area, tilt, azimuth);
+      await this.updateCacheWithNewData(solarKey, fallbackData, area, tilt, azimuth, location.gridKey);
       
       const duration = Date.now() - startTime;
       console.log(`     Fallback erfolgreich für ${solarKey} (${duration}ms)`);
@@ -183,13 +183,21 @@ export class PreFetchService {
     }
   }
 
-  private async updateCacheWithNewData(solarKey: string, newData: any, area: number, tilt: number, azimuth: number): Promise<void> {
+  private async updateCacheWithNewData(solarKey: string, newData: any, area: number, tilt: number, azimuth: number, originalGridKey: string): Promise<void> {
     try {
-      const response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=gridKey%3D%22${solarKey}%22`);
-      const data = await response.json();
+      // Suche zuerst nach dem ursprünglichen Datensatz über gridKey
+      let response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=gridKey%3D%22${originalGridKey}%22`);
+      let data = await response.json();
+      
+      // Falls nicht gefunden, suche nach dem solarKey
+      if (!data.items || data.items.length === 0) {
+        console.log(`     Kein Datensatz für ${originalGridKey} gefunden, versuche ${solarKey}...`);
+        response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=gridKey%3D%22${solarKey}%22`);
+        data = await response.json();
+      }
       
       if (!data.items || data.items.length === 0) {
-        console.log(`     Kein Datensatz für ${solarKey} gefunden`);
+        console.log(`     Kein Datensatz für ${originalGridKey} oder ${solarKey} gefunden`);
         return;
       }
 
@@ -200,16 +208,16 @@ export class PreFetchService {
         payload: newData,
         source: newData.source || 'prefetch',
         fetchedAt: now,
-        lastAccessAt: now,
+        // lastAccessAt wird NICHT aktualisiert, damit Score-Decay korrekt funktioniert
         area: area,
         tilt: tilt,
         azimuth: azimuth
       });
 
-      console.log(`     Cache für ${solarKey} mit neuen Daten aktualisiert`);
+      console.log(`     Cache für ${record.gridKey} mit neuen Daten aktualisiert`);
       
     } catch (error) {
-      console.error(`     Fehler beim Aktualisieren des Caches für ${solarKey}:`, error);
+      console.error(`     Fehler beim Aktualisieren des Caches für ${originalGridKey}:`, error);
     }
   }
 
