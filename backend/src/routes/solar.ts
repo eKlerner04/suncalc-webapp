@@ -31,7 +31,10 @@ router.get('/', async (req, res) => {
     
     const response = {
       inputs: { lat, lng, area, tilt, azimuth },
-      yield: { annual_kWh },
+      yield: { 
+        annual_kWh,
+        monthly_data: solarData.metadata?.monthly_data || null // Monatliche Daten direkt verfügbar machen
+      },
       co2,
       cache: {
         source,
