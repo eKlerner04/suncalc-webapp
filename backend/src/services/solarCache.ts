@@ -1,7 +1,6 @@
 import { pb, SOLAR_COLLECTION, generateGridKey, SolarCell } from '../utils/pb';
 import { generateSolarKey } from '../utils/grid';
 import { pvgisService } from './pvgisService';
-import { nasaService } from './nasaService';
 import { PVGISResponse } from '../types/solar';
 import { RecordModel } from 'pocketbase';
 import { popularityTrackerService } from './popularity/popularityTracker';
@@ -147,55 +146,69 @@ class SolarCacheService {
         console.log(` PVGIS fehlgeschlagen, verwende Fallback-Daten (kein API-Wechsel!)`);
         return this.generateFallbackData(lat, lng, area, tilt, azimuth, 'pvgis');
       } else if (existingData.source === 'nasa_power') {
-        console.log(` Verwende NASA POWER (konsistent mit bestehenden Daten)...`);
-        const nasaData = await nasaService.getSolarData(lat, lng, area, tilt, azimuth);
-        if (nasaData) {
-          console.log(` NASA POWER erfolgreich: ${nasaData.annual_kWh} kWh`);
-          return nasaData;
+        // Bestehende NASA-Daten werden weiterhin unterstützt, aber neue Anfragen verwenden PVGIS
+        console.log(` Bestehende NASA POWER Daten gefunden, aber neue Anfragen verwenden PVGIS...`);
+        const pvgisData = await pvgisService.getSolarData(lat, lng, area, tilt, azimuth);
+        if (pvgisData) {
+          console.log(` PVGIS erfolgreich: ${pvgisData.annual_kWh} kWh`);
+          return pvgisData;
         }
-        console.log(` NASA POWER fehlgeschlagen, verwende Fallback-Daten (kein API-Wechsel!)`);
-        return this.generateFallbackData(lat, lng, area, tilt, azimuth, 'nasa_power');
+        console.log(` PVGIS fehlgeschlagen, verwende Fallback-Daten...`);
+        return this.generateFallbackData(lat, lng, area, tilt, azimuth, 'pvgis');
       }
     }
     
-    // Keine bestehenden Daten - verwende Standard-Logik
-    const isInPVGISRegion = this.isInPVGISRegion(lat, lng);
-    console.log(` Standort in PVGIS-Region: ${isInPVGISRegion} (lat=${lat}, lng=${lng})`);
-    
-    if (isInPVGISRegion) {
-      console.log(` Versuche PVGIS für Europa/Afrika...`);
-      const pvgisData = await pvgisService.getSolarData(lat, lng, area, tilt, azimuth);
-      if (pvgisData) {
-        console.log(` PVGIS erfolgreich: ${pvgisData.annual_kWh} kWh`);
-        return pvgisData;
-      }
-      console.log(` PVGIS fehlgeschlagen, versuche NASA POWER als Fallback...`);
-    } else {
-      console.log(` Standort außerhalb Europa/Afrika, verwende direkt NASA POWER...`);
+    // Neue Logik: PVGIS weltweit versuchen, dann Fallback
+    console.log(` Versuche PVGIS weltweit für lat=${lat}, lng=${lng}...`);
+    const pvgisData = await pvgisService.getSolarData(lat, lng, area, tilt, azimuth);
+    if (pvgisData) {
+      console.log(` PVGIS erfolgreich: ${pvgisData.annual_kWh} kWh`);
+      return pvgisData;
     }
     
-    const nasaData = await nasaService.getSolarData(lat, lng, area, tilt, azimuth);
-    if (nasaData) {
-      console.log(` NASA POWER erfolgreich: ${nasaData.annual_kWh} kWh`);
-      return nasaData;
-    }
-    
-    console.log(` Alle APIs fehlgeschlagen, verwende Fallback-Daten`);
-    return this.generateFallbackData(lat, lng, area, tilt, azimuth);
+    console.log(` PVGIS fehlgeschlagen, verwende einfache Fallback-Berechnung`);
+    return this.generateFallbackData(lat, lng, area, tilt, azimuth, 'pvgis');
   }
 
   private generateFallbackData(lat: number, lng: number, area: number, tilt: number, azimuth: number, preferredSource?: string): PVGISResponse {
-    const baseEfficiency = 0.15; 
-    const latitudeFactor = Math.cos((Math.abs(lat) * Math.PI) / 180); 
-    const tiltFactor = Math.cos((tilt - 35) * Math.PI / 180); 
+    // Verbesserte Fallback-Berechnung basierend auf geografischen Faktoren
+    const baseEfficiency = 0.20; // Moderne Module: 20% Effizienz
+    const systemEfficiency = 0.85; // Systemverluste: 15%
     
-    const annualRadiation = 1200 * latitudeFactor * tiltFactor; 
-    const annual_kWh = Math.round(annualRadiation * area * baseEfficiency);
+    // Breitengrad-Faktor (höhere Breitengrade = weniger Sonneneinstrahlung)
+    const latitudeFactor = Math.cos((Math.abs(lat) * Math.PI) / 180);
+    
+    // Dachneigung-Faktor (optimal bei ~30-35°)
+    const optimalTilt = 30;
+    const tiltFactor = Math.cos((tilt - optimalTilt) * Math.PI / 180);
+    
+    // Azimut-Faktor (Süd = optimal)
+    const azimuthFactor = Math.cos((azimuth - 180) * Math.PI / 180); // 180° = Süd
+    
+    // Basis-Sonneneinstrahlung (kWh/m²/Jahr) - variiert je nach Breitengrad
+    let baseRadiation = 1200; // Basis für mittlere Breitengrade
+    
+    if (Math.abs(lat) < 30) {
+      baseRadiation = 1800; // Tropen/Subtropen
+    } else if (Math.abs(lat) < 45) {
+      baseRadiation = 1400; // Gemäßigte Zone
+    } else if (Math.abs(lat) < 60) {
+      baseRadiation = 1000; // Höhere Breitengrade
+    } else {
+      baseRadiation = 800; // Polare Regionen
+    }
+    
+    // Berechne jährliche Einstrahlung
+    const annualRadiation = baseRadiation * latitudeFactor * tiltFactor * Math.max(0.3, azimuthFactor);
+    
+    // Berechne jährlichen Ertrag
+    const annual_kWh = Math.round(annualRadiation * area * baseEfficiency * systemEfficiency);
     
     // Verwende die bevorzugte API-Quelle für Fallback-Daten
     const source = (preferredSource as 'pvgis' | 'nasa_power' | 'fallback') || 'fallback';
     
     console.log(` Fallback-Daten generiert: ${annual_kWh} kWh pro Jahr (Quelle: ${source})`);
+    console.log(` Fallback-Parameter: lat=${lat}, baseRadiation=${baseRadiation}, latitudeFactor=${latitudeFactor.toFixed(2)}, tiltFactor=${tiltFactor.toFixed(2)}, azimuthFactor=${azimuthFactor.toFixed(2)}`);
     
     return {
       annual_kWh: annual_kWh,
@@ -206,9 +219,13 @@ class SolarCacheService {
       metadata: {
         calculation_date: new Date().toISOString(),
         assumptions: {
-          losses_percent: 25,
-          m2_per_kwp: 6.5,
-          co2_factor: 0.5
+          losses_percent: 15,
+          m2_per_kwp: 5.0,
+          co2_factor: 0.5,
+          base_radiation: baseRadiation,
+          latitude_factor: latitudeFactor,
+          tilt_factor: tiltFactor,
+          azimuth_factor: azimuthFactor
         }
       }
     };
@@ -352,16 +369,7 @@ class SolarCacheService {
     }
   }
 
-  private isInPVGISRegion(lat: number, lng: number): boolean {
-    // PVGIS deckt Europa und Afrika ab
-    // Europa: 35°N bis 71°N, -25°W bis 45°E
-    // Afrika: 35°S bis 37°N, -18°W bis 55°E
-    
-    const isInEurope = lat >= 35 && lat <= 71 && lng >= -25 && lng <= 45;
-    const isInAfrica = lat >= -35 && lat <= 37 && lng >= -18 && lng <= 55;
-    
-    return isInEurope || isInAfrica;
-  }
+
 }
 
 export const solarCacheService = SolarCacheService.getInstance();
