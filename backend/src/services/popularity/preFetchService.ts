@@ -2,7 +2,7 @@ import { pb, SOLAR_COLLECTION } from '../../utils/pb';
 import { generateSolarKey } from '../../utils/grid';
 import { hotLocationsService } from './hotLocationsService';
 import { pvgisService } from '../pvgisService';
-import { nasaService } from '../nasaService';
+
 import { HotLocation, PreFetchResult } from '../../types/popularity';
 
 
@@ -133,30 +133,7 @@ export class PreFetchService {
         };
       }
 
-      console.log(`     PVGIS fehlgeschlagen, versuche NASA POWER für ${solarKey}...`);
-      const nasaData = await nasaService.getSolarData(
-        location.latRounded, 
-        location.lngRounded, 
-        area, 
-        tilt, 
-        azimuth
-      );
-
-      if (nasaData) {
-        await this.updateCacheWithNewData(solarKey, nasaData, area, tilt, azimuth, location.gridKey);
-        
-        const duration = Date.now() - startTime;
-        console.log(`     NASA POWER erfolgreich für ${solarKey} (${duration}ms)`);
-        
-        return {
-          gridKey: solarKey,
-          success: true,
-          source: 'nasa',
-          timestamp: new Date().toISOString()
-        };
-      }
-
-      console.log(`     Alle APIs fehlgeschlagen, verwende Fallback für ${solarKey}...`);
+      console.log(`     PVGIS fehlgeschlagen, verwende Fallback für ${solarKey}...`);
       const fallbackData = this.generateFallbackData(location, area, tilt, azimuth);
       await this.updateCacheWithNewData(solarKey, fallbackData, area, tilt, azimuth, location.gridKey);
       
@@ -262,11 +239,9 @@ export class PreFetchService {
     
     if (successful > 0) {
       const pvgisCount = results.filter(r => r.success && r.source === 'pvgis').length;
-      const nasaCount = results.filter(r => r.success && r.source === 'nasa').length;
       const fallbackCount = results.filter(r => r.success && r.source === 'fallback').length;
       
       console.log(`    PVGIS: ${pvgisCount}`);
-      console.log(`    NASA: ${nasaCount}`);
       console.log(`    Fallback: ${fallbackCount}`);
     }
     

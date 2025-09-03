@@ -205,7 +205,7 @@ class SolarCacheService {
     const annual_kWh = Math.round(annualRadiation * area * baseEfficiency * systemEfficiency);
     
     // Verwende die bevorzugte API-Quelle für Fallback-Daten
-    const source = (preferredSource as 'pvgis' | 'nasa_power' | 'fallback') || 'fallback';
+    const source = (preferredSource as 'pvgis' | 'fallback') || 'fallback';
     
     console.log(` Fallback-Daten generiert: ${annual_kWh} kWh pro Jahr (Quelle: ${source})`);
     console.log(` Fallback-Parameter: lat=${lat}, baseRadiation=${baseRadiation}, latitudeFactor=${latitudeFactor.toFixed(2)}, tiltFactor=${tiltFactor.toFixed(2)}, azimuthFactor=${azimuthFactor.toFixed(2)}`);

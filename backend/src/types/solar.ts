@@ -4,11 +4,10 @@ export interface PVGISResponse {
   co2_saved: number;
   efficiency: number;
   timestamp: string;
-  source: 'pvgis' | 'nasa_power' | 'fallback' | 'local' | 'local_stale';
+  source: 'pvgis' | 'fallback' | 'local' | 'local_stale';
   metadata?: {
     pvgis_url?: string;
     pvgis_database?: string; // Welche PVGIS-Datenbank verwendet wurde
-    nasa_power_url?: string;
     calculation_date: string;
     monthly_data?: number[]; // Monatliche kWh-Werte (Jan-Dez)
     assumptions: {
