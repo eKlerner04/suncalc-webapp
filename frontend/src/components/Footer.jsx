@@ -98,7 +98,7 @@ export default function Footer() {
           color: '#94a3b8',
           fontWeight: '400'
         }}>
-          © 2024 SunCalc - Universität Göttingen
+          © 2025 SunCalc - Universität Göttingen
         </p>
       </div>
     </footer>

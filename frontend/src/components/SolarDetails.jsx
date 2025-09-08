@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ChartContainer from './ChartContainer';
 import Header from './Header';
 
 const SolarDetails = ({ solarData, inputs, onBack }) => {
+  // Beim Laden der Komponente nach oben scrollen
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   // Koordinaten in Grad/Minuten/Sekunden umrechnen
   const decimalToDMS = (decimal) => {
     const degrees = Math.floor(Math.abs(decimal));
