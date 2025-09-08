@@ -1,5 +1,6 @@
 import React from 'react';
 import ChartContainer from './ChartContainer';
+import Header from './Header';
 
 const SolarDetails = ({ solarData, inputs, onBack }) => {
   // Koordinaten in Grad/Minuten/Sekunden umrechnen
@@ -31,103 +32,57 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
   const lngDMS = decimalToDMS(inputs.lng);
 
   return (
-    <div style={{ 
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: '#f8fafc',
-      padding: '0',
-      boxSizing: 'border-box',
-      overflowX: 'hidden',
-      zIndex: 1000
-    }}>
-      {/* Custom Header für Solar-Details */}
-      <header style={{ 
-        background: '#0A2540',
-        color: '#ffffff',
-        padding: '32px 0',
-        borderBottom: '1px solid #1e293b',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)'
-      }}>
+    <div className="layout">
+      <Header />
+      
+      <main className="main">
+        {/* Navigation Bar */}
         <div style={{ 
-          maxWidth: '100%', 
-          margin: '0 auto', 
-          padding: '0 40px',
-          textAlign: 'center'
+          padding: '16px 32px',
+          marginBottom: '32px',
+          borderBottom: '1px solid #e2e8f0',
+          backgroundColor: '#ffffff'
         }}>
-          <h1 style={{ 
-            margin: '0 0 8px 0',
-            fontSize: '3rem',
-            fontWeight: '800',
-            color: '#ffffff',
-            letterSpacing: '-0.03em',
-            lineHeight: '1.1'
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'flex-start',
+            maxWidth: '1200px',
+            margin: '0 auto'
           }}>
-            Solar-Details
-          </h1>
-          <p style={{ 
-            margin: '0',
-            fontSize: '1.25rem',
-            color: '#e2e8f0',
-            fontWeight: '400',
-            lineHeight: '1.4'
-          }}>
-            Detaillierte Analyse deines Solarpotentials
-          </p>
+            <button
+              onClick={onBack}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#f8fafc',
+                color: '#374151',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: '500',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#f1f5f9';
+                e.target.style.borderColor = '#cbd5e1';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = '#f8fafc';
+                e.target.style.borderColor = '#e2e8f0';
+              }}
+            >
+              ← Zurück zur Berechnung
+            </button>
+          </div>
         </div>
-      </header>
 
-      {/* Navigation Bar */}
-      <div style={{ 
-        padding: '16px 32px',
-        marginBottom: '32px',
-        borderBottom: '1px solid #e2e8f0',
-        backgroundColor: '#ffffff'
-      }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'flex-start',
+        {/* Main Content Container */}
+        <div style={{
           maxWidth: '1200px',
-          margin: '0 auto'
+          margin: '0 auto',
+          padding: '0 32px 32px 32px'
         }}>
-          <button
-            onClick={onBack}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#f8fafc',
-              color: '#374151',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: '500',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#f1f5f9';
-              e.target.style.borderColor = '#cbd5e1';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#f8fafc';
-              e.target.style.borderColor = '#e2e8f0';
-            }}
-          >
-            ← Zurück zur Berechnung
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content Container */}
-      <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '0 32px 32px 32px',
-        overflowY: 'auto',
-        height: 'calc(100vh - 200px)'
-      }}>
 
         {/* Standort-Informationen */}
         <div style={{ 
@@ -332,7 +287,8 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
         }}>
           <ChartContainer solarData={solarData} inputs={inputs} />
         </div>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };
