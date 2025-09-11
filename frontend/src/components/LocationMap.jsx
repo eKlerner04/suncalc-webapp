@@ -185,7 +185,8 @@ export default function LocationMap({
       width: '100%', 
       height: '100%',
       borderRadius: '12px',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      zIndex: 1
     }}>
       <MapContainer
         ref={mapRef}
@@ -194,7 +195,8 @@ export default function LocationMap({
         style={{ 
           height: '100%', 
           width: '100%',
-          borderRadius: '12px'
+          borderRadius: '12px',
+          overflow: 'hidden'
         }}
         zoomControl={false}
         attributionControl={true}
@@ -323,7 +325,7 @@ export default function LocationMap({
         </div>
       )}
 
-      {/* CSS für Animationen */}
+      {/* CSS für Animationen und Leaflet-Attribution */}
       <style jsx>{`
         @keyframes pulse {
           0% { transform: scale(1); opacity: 1; }
@@ -339,6 +341,39 @@ export default function LocationMap({
         .crosshair-marker {
           background: transparent !important;
           border: none !important;
+        }
+        
+        /* Leaflet-Attribution korrekt positionieren */
+        :global(.leaflet-control-attribution) {
+          background: rgba(255, 255, 255, 0.9) !important;
+          border-radius: 4px !important;
+          font-size: 10px !important;
+          padding: 2px 6px !important;
+          margin: 0 !important;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+          z-index: 1000 !important;
+          position: absolute !important;
+          bottom: 2px !important;
+          right: 2px !important;
+          max-width: calc(100% - 4px) !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+        
+        :global(.leaflet-control-attribution a) {
+          color: #0078A8 !important;
+          text-decoration: none !important;
+        }
+        
+        :global(.leaflet-control-attribution a:hover) {
+          text-decoration: underline !important;
+        }
+        
+        /* Sicherstellen, dass die Attribution innerhalb des Containers bleibt */
+        :global(.leaflet-container) {
+          position: relative !important;
+          overflow: hidden !important;
         }
       `}</style>
     </div>
