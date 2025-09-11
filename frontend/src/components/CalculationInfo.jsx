@@ -4,7 +4,12 @@ const CalculationInfo = ({ solarData, isOpen, onToggle, inputs }) => {
   if (!solarData || !inputs) return null;
 
   // DIREKT aus Props extrahieren - keine Zwischenspeicherung
-  const dataSource = solarData?.cache?.source || solarData?.source || 'unbekannt';
+  // Prüfe sowohl cache.source als auch die ursprüngliche Quelle in den gecachten Daten
+  const cacheSource = solarData?.cache?.source || 'unbekannt';
+  const originalSource = solarData?.cache?.solarData?.source || solarData?.source || 'unbekannt';
+  
+  // Verwende die ursprüngliche Quelle für die Berechnungsdetails, auch wenn sie aus dem Cache kommt
+  const dataSource = cacheSource === 'local' ? originalSource : cacheSource;
   const isPVGIS = dataSource === 'pvgis';
   const isNASA = dataSource === 'nasa_power';
 
@@ -215,16 +220,140 @@ const CalculationInfo = ({ solarData, isOpen, onToggle, inputs }) => {
                       </div>
                     </div>
                   </div>
+                ) : isNASA ? (
+                  <div style={{ 
+                    backgroundColor: '#F8FAFC', 
+                    borderRadius: '8px', 
+                    padding: '16px',
+                    border: '1px solid #E2E8F0'
+                  }}>
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>1. NASA POWER API-Abfrage</div>
+                      <div style={{ 
+                        backgroundColor: '#FFFFFF', 
+                        padding: '12px', 
+                        borderRadius: '6px', 
+                        fontFamily: 'monospace',
+                        fontSize: '13px',
+                        border: '1px solid #E2E8F0'
+                      }}>
+                        NASA POWER Input: lat={currentLat}, lon={currentLng}<br/>
+                        NASA POWER Output: Solarstrahlung (kWh/m²/Jahr)
+                      </div>
+                    </div>
+                    
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>2. Anlagenleistung P_STC</div>
+                      <div style={{ 
+                        backgroundColor: '#FFFFFF', 
+                        padding: '12px', 
+                        borderRadius: '6px', 
+                        fontFamily: 'monospace',
+                        fontSize: '13px',
+                        border: '1px solid #E2E8F0'
+                      }}>
+                        P_STC = Dachfläche × Leistungsdichte<br/>
+                        P_STC = {currentArea} m² × 0.22 kW/m² = {pStc.toFixed(2)} kWp
+                      </div>
+                    </div>
+                    
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>3. Ertragsberechnung</div>
+                      <div style={{ 
+                        backgroundColor: '#FFFFFF', 
+                        padding: '12px', 
+                        borderRadius: '6px', 
+                        fontFamily: 'monospace',
+                        fontSize: '13px',
+                        border: '1px solid #E2E8F0'
+                      }}>
+                        E_y = Solarstrahlung × P_STC × Systemeffizienz<br/>
+                        E_y = NASA_Strahlung × {pStc.toFixed(2)} × 0.85 = {currentAnnualKWh} kWh/Jahr
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>4. CO2-Einsparung</div>
+                      <div style={{ 
+                        backgroundColor: '#FFFFFF', 
+                        padding: '12px', 
+                        borderRadius: '6px', 
+                        fontFamily: 'monospace',
+                        fontSize: '13px',
+                        border: '1px solid #E2E8F0'
+                      }}>
+                        CO2 = E_y × Grid-Faktor [kg]<br/>
+                        CO2 = {currentAnnualKWh} × 0.5 = {Math.round(currentAnnualKWh * 0.5)} kg CO2/Jahr
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <div style={{ 
                     backgroundColor: '#F8FAFC', 
                     borderRadius: '8px', 
                     padding: '16px',
-                    border: '1px solid #E2E8F0',
-                    textAlign: 'center',
-                    color: '#64748B'
+                    border: '1px solid #E2E8F0'
                   }}>
-                    Formeln für {isNASA ? 'NASA POWER' : 'interne Berechnung'} werden hier angezeigt
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>1. Fallback-Berechnung</div>
+                      <div style={{ 
+                        backgroundColor: '#FFFFFF', 
+                        padding: '12px', 
+                        borderRadius: '6px', 
+                        fontFamily: 'monospace',
+                        fontSize: '13px',
+                        border: '1px solid #E2E8F0'
+                      }}>
+                        Basis-Strahlung = f(Breitengrad, Dachneigung, Ausrichtung)<br/>
+                        Breitengrad-Faktor = cos(|{currentLat}| × π/180)<br/>
+                        Dachneigung-Faktor = cos(({currentTilt} - 30) × π/180)
+                      </div>
+                    </div>
+                    
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>2. Anlagenleistung P_STC</div>
+                      <div style={{ 
+                        backgroundColor: '#FFFFFF', 
+                        padding: '12px', 
+                        borderRadius: '6px', 
+                        fontFamily: 'monospace',
+                        fontSize: '13px',
+                        border: '1px solid #E2E8F0'
+                      }}>
+                        P_STC = Dachfläche × Leistungsdichte<br/>
+                        P_STC = {currentArea} m² × 0.22 kW/m² = {pStc.toFixed(2)} kWp
+                      </div>
+                    </div>
+                    
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>3. Ertragsberechnung</div>
+                      <div style={{ 
+                        backgroundColor: '#FFFFFF', 
+                        padding: '12px', 
+                        borderRadius: '6px', 
+                        fontFamily: 'monospace',
+                        fontSize: '13px',
+                        border: '1px solid #E2E8F0'
+                      }}>
+                        E_y = Basis-Strahlung × Faktoren × P_STC × Effizienz<br/>
+                        E_y = {solarData?.cache?.solarData?.metadata?.assumptions?.base_radiation || 1200} × {pStc.toFixed(2)} × 0.20 × 0.85 = {currentAnnualKWh} kWh/Jahr
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>4. CO2-Einsparung</div>
+                      <div style={{ 
+                        backgroundColor: '#FFFFFF', 
+                        padding: '12px', 
+                        borderRadius: '6px', 
+                        fontFamily: 'monospace',
+                        fontSize: '13px',
+                        border: '1px solid #E2E8F0'
+                      }}>
+                        CO2 = E_y × Grid-Faktor [kg]<br/>
+                        CO2 = {currentAnnualKWh} × 0.5 = {Math.round(currentAnnualKWh * 0.5)} kg CO2/Jahr
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -326,16 +455,138 @@ const CalculationInfo = ({ solarData, isOpen, onToggle, inputs }) => {
                     </div>
                   </div>
                 </div>
+              ) : isNASA ? (
+                <div style={{ 
+                  backgroundColor: '#F8FAFC', 
+                  borderRadius: '8px', 
+                  padding: '16px',
+                  border: '1px solid #E2E8F0'
+                }}>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Schritt 1: NASA POWER API</div>
+                    <div style={{ 
+                      backgroundColor: '#FFFFFF', 
+                      padding: '12px', 
+                      borderRadius: '6px', 
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      border: '1px solid #E2E8F0'
+                    }}>
+                      NASA POWER: lat={currentLat}, lon={currentLng}<br/>
+                      Output: Solarstrahlung = {solarData?.cache?.solarData?.metadata?.assumptions?.base_radiation || 1200} kWh/m²/Jahr
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Schritt 2: P_STC berechnen</div>
+                    <div style={{ 
+                      backgroundColor: '#FFFFFF', 
+                      padding: '12px', 
+                      borderRadius: '6px', 
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      border: '1px solid #E2E8F0'
+                    }}>
+                      P_STC = {currentArea} m² × 0.22 kW/m² = {pStc.toFixed(2)} kWp
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Schritt 3: Ertrag berechnen</div>
+                    <div style={{ 
+                      backgroundColor: '#FFFFFF', 
+                      padding: '12px', 
+                      borderRadius: '6px', 
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      border: '1px solid #E2E8F0'
+                    }}>
+                      E_y = Strahlung × P_STC × Effizienz<br/>
+                      E_y = {solarData?.cache?.solarData?.metadata?.assumptions?.base_radiation || 1200} × {pStc.toFixed(2)} × 0.85 = {currentAnnualKWh} kWh/Jahr
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Schritt 4: CO2-Einsparung</div>
+                    <div style={{ 
+                      backgroundColor: '#FFFFFF', 
+                      padding: '12px', 
+                      borderRadius: '6px', 
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      border: '1px solid #E2E8F0'
+                    }}>
+                      CO2 = E_y × Grid-Faktor<br/>
+                      CO2 = {currentAnnualKWh} × 0.5 = {Math.round(currentAnnualKWh * 0.5)} kg CO2/Jahr
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div style={{ 
                   backgroundColor: '#F8FAFC', 
                   borderRadius: '8px', 
                   padding: '16px',
-                  border: '1px solid #E2E8F0',
-                  textAlign: 'center',
-                  color: '#64748B'
+                  border: '1px solid #E2E8F0'
                 }}>
-                  Beispielrechnung für {isNASA ? 'NASA POWER' : 'interne Berechnung'} wird hier angezeigt
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Schritt 1: Fallback-Berechnung</div>
+                    <div style={{ 
+                      backgroundColor: '#FFFFFF', 
+                      padding: '12px', 
+                      borderRadius: '6px', 
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      border: '1px solid #E2E8F0'
+                    }}>
+                      Basis-Strahlung = {solarData?.cache?.solarData?.metadata?.assumptions?.base_radiation || 1200} kWh/m²/Jahr<br/>
+                      Breitengrad-Faktor = {solarData?.cache?.solarData?.metadata?.assumptions?.latitude_factor?.toFixed(2) || '0.85'}<br/>
+                      Dachneigung-Faktor = {solarData?.cache?.solarData?.metadata?.assumptions?.tilt_factor?.toFixed(2) || '0.95'}
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Schritt 2: P_STC berechnen</div>
+                    <div style={{ 
+                      backgroundColor: '#FFFFFF', 
+                      padding: '12px', 
+                      borderRadius: '6px', 
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      border: '1px solid #E2E8F0'
+                    }}>
+                      P_STC = {currentArea} m² × 0.22 kW/m² = {pStc.toFixed(2)} kWp
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Schritt 3: Ertrag berechnen</div>
+                    <div style={{ 
+                      backgroundColor: '#FFFFFF', 
+                      padding: '12px', 
+                      borderRadius: '6px', 
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      border: '1px solid #E2E8F0'
+                    }}>
+                      E_y = Basis × Faktoren × P_STC × Effizienz<br/>
+                      E_y = {solarData?.cache?.solarData?.metadata?.assumptions?.base_radiation || 1200} × {pStc.toFixed(2)} × 0.20 × 0.85 = {currentAnnualKWh} kWh/Jahr
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div style={{ fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Schritt 4: CO2-Einsparung</div>
+                    <div style={{ 
+                      backgroundColor: '#FFFFFF', 
+                      padding: '12px', 
+                      borderRadius: '6px', 
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      border: '1px solid #E2E8F0'
+                    }}>
+                      CO2 = E_y × Grid-Faktor<br/>
+                      CO2 = {currentAnnualKWh} × 0.5 = {Math.round(currentAnnualKWh * 0.5)} kg CO2/Jahr
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
