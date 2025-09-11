@@ -197,7 +197,7 @@ export default function LocationMap({
           borderRadius: '12px'
         }}
         zoomControl={false}
-        attributionControl={false}
+        attributionControl={true}
         doubleClickZoom={false}
         scrollWheelZoom={true}
         dragging={true}
