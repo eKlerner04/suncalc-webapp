@@ -192,15 +192,17 @@ export class ScoreDecayService {
       return { updated: false, decayed: false };
     }
 
-    // Score aktualisieren
-    await this.updateRecordScore(record.id, newScore);
+    // Prüfe ob Score reduziert wurde
+    const decayed = newScore < oldScore;
+    
+    // Score aktualisieren (mit Decay-Information)
+    await this.updateRecordScore(record.id, newScore, decayed);
     
     // isHot-Status aktualisieren (konsistent mit Popularity-System)
     // Ein Standort ist "heiß" wenn Score >= 50 (wie im Popularity-System)
     const isHot = newScore >= 50;
     await this.updateHotStatus(record.id, isHot);
 
-    const decayed = newScore < oldScore;
     return { updated: true, decayed };
   }
 
@@ -226,11 +228,23 @@ export class ScoreDecayService {
   /**
    * Aktualisiert den Score eines Records in der Datenbank
    */
-  private async updateRecordScore(recordId: string, newScore: number): Promise<void> {
+  private async updateRecordScore(recordId: string, newScore: number, decayed: boolean = false): Promise<void> {
     try {
-      await pb.collection('solar_cells').update(recordId, {
+      const updateData: any = {
         popularityScore: newScore
-      });
+      };
+
+      // Wenn Score reduziert wurde, decayCount und lastDecayAt aktualisieren
+      if (decayed) {
+        // Hole aktuellen Record um decayCount zu inkrementieren
+        const currentRecord = await pb.collection('solar_cells').getOne(recordId);
+        const currentDecayCount = currentRecord.decayCount || 0;
+        
+        updateData.decayCount = currentDecayCount + 1;
+        updateData.lastDecayAt = new Date().toISOString();
+      }
+
+      await pb.collection('solar_cells').update(recordId, updateData);
     } catch (error) {
       console.error(`[SCORE-DECAY] Fehler beim Aktualisieren des Scores für ${recordId}:`, error);
       throw error;

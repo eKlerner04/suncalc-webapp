@@ -255,7 +255,9 @@ class SolarCacheService {
         popularityScore: score,
         isHot,
         locationWeight,
-        recencyBonus
+        recencyBonus,
+        decayCount: 0,
+        lastDecayAt: null
       };
       
       console.log(' Versuche Datensatz zu speichern:', JSON.stringify(recordData, null, 2));
@@ -290,7 +292,9 @@ class SolarCacheService {
           popularityScore: 0,
           isHot: false,
           locationWeight: 1.0,
-          recencyBonus: 1.0
+          recencyBonus: 1.0,
+          decayCount: 0,
+          lastDecayAt: null
         };
         
         await pb.collection(SOLAR_COLLECTION).create(simpleRecord);
