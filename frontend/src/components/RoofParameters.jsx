@@ -433,12 +433,22 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
                 outline: 'none',
                 cursor: 'pointer',
                 WebkitAppearance: 'none',
-                appearance: 'none'
+                appearance: 'none',
+                transition: 'all 0.2s ease'
               }}
               onInput={(e) => {
                 const value = e.target.value;
                 const percentage = (value / 90) * 100;
                 e.target.style.background = `linear-gradient(to right, #e2e8f0 0%, #1e293b ${percentage}%, #e2e8f0 ${percentage}%)`;
+              }}
+              onFocus={(e) => {
+                e.target.style.outline = '3px solid #0ea5e9';
+                e.target.style.outlineOffset = '4px';
+                e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+              }}
+              onBlur={(e) => {
+                e.target.style.outline = 'none';
+                e.target.style.boxShadow = 'none';
               }}
             />
             <div style={{

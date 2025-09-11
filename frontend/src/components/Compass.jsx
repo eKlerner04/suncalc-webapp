@@ -11,18 +11,25 @@ export default function Compass({ azimuth, onInputChange }) {
       padding: '20px'
     }}>
       {/* Elegante Windrose */}
-      <div style={{
-        position: 'relative',
-        width: '220px',
-        height: '220px',
-        borderRadius: '50%',
-        background: 'conic-gradient(from 0deg, #f8fafc 0deg, #e2e8f0 45deg, #f1f5f9 90deg, #e2e8f0 135deg, #f8fafc 180deg, #e2e8f0 225deg, #f1f5f9 270deg, #e2e8f0 315deg, #f8fafc 360deg)',
-        border: '3px solid #e2e8f0',
-        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12), inset 0 2px 8px rgba(255, 255, 255, 0.9), inset 0 -1px 2px rgba(0, 0, 0, 0.05)',
-        cursor: 'pointer',
-        userSelect: 'none',
-        transition: 'all 0.3s ease'
-      }}>
+      <div 
+        role="slider"
+        aria-label="Dachausrichtung einstellen"
+        aria-valuemin="0"
+        aria-valuemax="359"
+        aria-valuenow={azimuth}
+        aria-valuetext={`${azimuth} Grad`}
+        style={{
+          position: 'relative',
+          width: '220px',
+          height: '220px',
+          borderRadius: '50%',
+          background: 'conic-gradient(from 0deg, #f8fafc 0deg, #e2e8f0 45deg, #f1f5f9 90deg, #e2e8f0 135deg, #f8fafc 180deg, #e2e8f0 225deg, #f1f5f9 270deg, #e2e8f0 315deg, #f8fafc 360deg)',
+          border: '3px solid #e2e8f0',
+          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12), inset 0 2px 8px rgba(255, 255, 255, 0.9), inset 0 -1px 2px rgba(0, 0, 0, 0.05)',
+          cursor: 'pointer',
+          userSelect: 'none',
+          transition: 'all 0.3s ease'
+        }}>
         {/* Äußerer Ring für bessere Definition */}
         <div style={{
           position: 'absolute',
@@ -66,7 +73,7 @@ export default function Compass({ azimuth, onInputChange }) {
           ></div>
         ))}
         
-        {/* Himmelsrichtungen - außerhalb positioniert */}
+        {/* Himmelsrichtungen - außerhalb positioniert mit verbesserter Farbunabhängigkeit */}
         <div style={{
           position: 'absolute',
           top: '-25px',
@@ -79,7 +86,7 @@ export default function Compass({ azimuth, onInputChange }) {
           background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
           padding: '4px 12px',
           borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.8)',
+          border: '2px solid #1e293b', /* Stärkerer Rahmen für bessere Sichtbarkeit */
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
         }}>N</div>
         <div style={{
@@ -94,7 +101,7 @@ export default function Compass({ azimuth, onInputChange }) {
           background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
           padding: '4px 12px',
           borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.8)',
+          border: '2px solid #1e293b', /* Stärkerer Rahmen für bessere Sichtbarkeit */
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
         }}>S</div>
         <div style={{
@@ -109,7 +116,7 @@ export default function Compass({ azimuth, onInputChange }) {
           background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
           padding: '4px 12px',
           borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.8)',
+          border: '2px solid #1e293b', /* Stärkerer Rahmen für bessere Sichtbarkeit */
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
         }}>W</div>
         <div style={{
@@ -124,7 +131,7 @@ export default function Compass({ azimuth, onInputChange }) {
           background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
           padding: '4px 12px',
           borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.8)',
+          border: '2px solid #1e293b', /* Stärkerer Rahmen für bessere Sichtbarkeit */
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
         }}>O</div>
         
