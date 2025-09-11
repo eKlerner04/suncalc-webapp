@@ -44,8 +44,31 @@ html {
 
 /* Focus Styles für Accessibility */
 *:focus {
-  outline: 2px solid #667eea;
+  outline: 3px solid #0ea5e9;
   outline-offset: 2px;
+  box-shadow: 0 0 0 1px #0ea5e9;
+}
+
+/* Spezielle Focus-Styles für Buttons */
+button:focus {
+  outline: 3px solid #0ea5e9;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px #0ea5e9, 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+/* Focus-Styles für Input-Felder */
+input:focus {
+  outline: 3px solid #0ea5e9;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px #0ea5e9, 0 0 0 3px rgba(14, 165, 233, 0.1);
+  border-color: #0ea5e9;
+}
+
+/* Focus-Styles für Range-Slider */
+input[type="range"]:focus {
+  outline: 3px solid #0ea5e9;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 1px #0ea5e9;
 }
 
 /* Custom Scrollbar */

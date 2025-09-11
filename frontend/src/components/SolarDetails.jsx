@@ -1,11 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ChartContainer from './ChartContainer';
 import Header from './Header';
 
 const SolarDetails = ({ solarData, inputs, onBack }) => {
-  // Beim Laden der Komponente nach oben scrollen
+  const backButtonRef = useRef(null);
+
+  // Beim Laden der Komponente nach oben scrollen und Button fokussieren
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Button nach kurzer Verzögerung fokussieren
+    setTimeout(() => {
+      if (backButtonRef.current) {
+        backButtonRef.current.focus();
+      }
+    }, 100);
   }, []);
 
   // Koordinaten in Grad/Minuten/Sekunden umrechnen
@@ -56,7 +64,10 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
             margin: '0 auto'
           }}>
             <button
+              ref={backButtonRef}
               onClick={onBack}
+              tabIndex={1}
+              aria-label="Zurück zur Solarpotential-Berechnung"
               style={{
                 padding: '12px 24px',
                 backgroundColor: '#f8fafc',
@@ -69,12 +80,29 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
                 transition: 'all 0.3s ease'
               }}
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#f1f5f9';
-                e.target.style.borderColor = '#cbd5e1';
+                if (document.activeElement !== e.target) {
+                  e.target.style.backgroundColor = '#f1f5f9';
+                  e.target.style.borderColor = '#cbd5e1';
+                }
               }}
               onMouseLeave={(e) => {
+                if (document.activeElement !== e.target) {
+                  e.target.style.backgroundColor = '#f8fafc';
+                  e.target.style.borderColor = '#e2e8f0';
+                }
+              }}
+              onFocus={(e) => {
+                e.target.style.backgroundColor = '#e0f2fe';
+                e.target.style.borderColor = '#0ea5e9';
+                e.target.style.outline = '3px solid #0ea5e9';
+                e.target.style.outlineOffset = '2px';
+                e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+              }}
+              onBlur={(e) => {
                 e.target.style.backgroundColor = '#f8fafc';
                 e.target.style.borderColor = '#e2e8f0';
+                e.target.style.outline = 'none';
+                e.target.style.boxShadow = 'none';
               }}
             >
               ← Zurück zur Berechnung

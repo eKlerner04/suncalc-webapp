@@ -183,6 +183,8 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
             min="0.01"
             step="0.01"
             value={coordinates.area}
+            tabIndex={4}
+            aria-label="Modulfläche in Quadratmetern eingeben"
             onChange={(e) => {
               const value = parseFloat(e.target.value);
               if (value < 0.01) {
@@ -412,7 +414,17 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
               min="0"
               max="90"
               value={coordinates.tilt}
+              tabIndex={5}
+              aria-label="Dachneigung in Grad einstellen"
               onChange={(e) => onInputChange('tilt', e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                  const currentValue = parseInt(coordinates.tilt);
+                  const step = e.key === 'ArrowLeft' ? -1 : 1;
+                  const newValue = Math.max(0, Math.min(90, currentValue + step));
+                  onInputChange('tilt', newValue.toString());
+                }
+              }}
               style={{
                 width: '100%',
                 height: '8px',

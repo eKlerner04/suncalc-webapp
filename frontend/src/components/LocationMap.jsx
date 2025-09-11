@@ -48,7 +48,7 @@ L.Icon.Default.mergeOptions({
 });
 
 // Fadenkreuz-Komponente (für Mausbewegungen und Klicks)
-function Crosshair({ onLocationSelect, setCrosshairPosition }) {
+function Crosshair({ onLocationSelect, setCrosshairPosition, centerPosition }) {
   const map = useMapEvents({
     click: (e) => {
       console.log('Crosshair: Karte wurde geklickt:', e.latlng);
@@ -58,6 +58,17 @@ function Crosshair({ onLocationSelect, setCrosshairPosition }) {
     mousemove: (e) => {
       // Fadenkreuz bei Mausbewegung anzeigen
       map.fire('crosshair:show', { latlng: e.latlng });
+    },
+    keydown: (e) => {
+      // Keyboard-Support für Marker setzen
+      if (e.originalEvent.key === 'Enter' || e.originalEvent.key === ' ') {
+        e.originalEvent.preventDefault();
+        if (centerPosition) {
+          console.log('Crosshair: Marker per Tastatur gesetzt:', centerPosition);
+          setCrosshairPosition(centerPosition);
+          onLocationSelect(centerPosition.lat, centerPosition.lng);
+        }
+      }
     }
   });
 
@@ -79,6 +90,7 @@ export default function LocationMap({
   const [isSearching, setIsSearching] = useState(false);
   const [currentAddress, setCurrentAddress] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [centerPosition, setCenterPosition] = useState(null);
   const mapRef = useRef(null);
   const searchTimeoutRef = useRef(null);
 
@@ -116,6 +128,25 @@ export default function LocationMap({
       mapRef.current.setView([selectedLat, selectedLng], currentZoom);
     }
   }, [selectedLat, selectedLng]);
+
+  // Kartenzentrum für Keyboard-Support verfolgen
+  useEffect(() => {
+    if (mapRef.current) {
+      const map = mapRef.current;
+      
+      const updateCenter = () => {
+        const center = map.getCenter();
+        setCenterPosition({ lat: center.lat, lng: center.lng });
+      };
+      
+      map.on('moveend', updateCenter);
+      updateCenter(); // Initial setzen
+      
+      return () => {
+        map.off('moveend', updateCenter);
+      };
+    }
+  }, []);
 
   // Adresssuche mit Debouncing
   useEffect(() => {
@@ -180,14 +211,37 @@ export default function LocationMap({
   };
 
   return (
-    <div style={{ 
-      position: 'relative', 
-      width: '100%', 
-      height: '100%',
-      borderRadius: '12px',
-      overflow: 'hidden',
-      zIndex: 1
-    }}>
+    <div 
+      style={{ 
+        position: 'relative', 
+        width: '100%', 
+        height: '100%',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        zIndex: 1
+      }}
+      tabIndex={0}
+      aria-label="Interaktive Karte - Klicken Sie auf einen Standort oder verwenden Sie Enter zum Setzen des Markers"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (centerPosition) {
+            console.log('Karte: Marker per Tastatur gesetzt:', centerPosition);
+            setCrosshairPosition(centerPosition);
+            onLocationSelect(centerPosition.lat, centerPosition.lng);
+          }
+        }
+      }}
+      onFocus={(e) => {
+        e.target.style.outline = '3px solid #0ea5e9';
+        e.target.style.outlineOffset = '2px';
+        e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+      }}
+      onBlur={(e) => {
+        e.target.style.outline = 'none';
+        e.target.style.boxShadow = 'none';
+      }}
+    >
       <MapContainer
         ref={mapRef}
         center={[initialLat || 51.5413, initialLng || 9.9158]}
@@ -216,8 +270,9 @@ export default function LocationMap({
         
         {/* Fadenkreuz-Komponente */}
         <Crosshair 
-          onLocationSelect={onLocationSelect} 
+          onLocationSelect={onLocationSelect}
           setCrosshairPosition={setCrosshairPosition}
+          centerPosition={centerPosition}
         />
         
         {/* Marker für ausgewählten Standort - Standard Leaflet */}

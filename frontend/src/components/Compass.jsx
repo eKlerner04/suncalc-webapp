@@ -379,10 +379,21 @@ export default function Compass({ azimuth, onInputChange }) {
           min="0"
           max="359"
           value={azimuth}
+          tabIndex={6}
+          aria-label="Dachausrichtung in Grad einstellen"
           onChange={(e) => {
             const value = parseInt(e.target.value) || 0;
             const clampedValue = Math.max(0, Math.min(359, value));
             onInputChange('azimuth', clampedValue.toString());
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+              e.preventDefault();
+              const currentValue = parseInt(azimuth) || 0;
+              const step = e.key === 'ArrowUp' ? 1 : -1;
+              const newValue = Math.max(0, Math.min(359, currentValue + step));
+              onInputChange('azimuth', newValue.toString());
+            }
           }}
           onBlur={(e) => {
             const value = parseInt(e.target.value) || 0;

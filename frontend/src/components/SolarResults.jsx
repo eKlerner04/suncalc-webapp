@@ -146,10 +146,26 @@ export default function SolarResults({ solarData, onShowDetails }) {
                       href={solarData.cache.metadata.pvgis_url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      tabIndex={9}
+                      aria-label="PVGIS API-Datenquelle in neuem Tab öffnen"
                       style={{
                         color: '#2d3748',
                         fontWeight: '600',
-                        textDecoration: 'underline'
+                        textDecoration: 'underline',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.backgroundColor = '#e0f2fe';
+                        e.target.style.outline = '3px solid #0ea5e9';
+                        e.target.style.outlineOffset = '2px';
+                        e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                        e.target.style.outline = 'none';
+                        e.target.style.boxShadow = 'none';
                       }}
                     >
                       PVGIS API
@@ -159,10 +175,26 @@ export default function SolarResults({ solarData, onShowDetails }) {
                       href={solarData.cache.metadata.nasa_power_url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      tabIndex={9}
+                      aria-label="NASA POWER API-Datenquelle in neuem Tab öffnen"
                       style={{
                         color: '#2d3748',
                         fontWeight: '600',
-                        textDecoration: 'underline'
+                        textDecoration: 'underline',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.backgroundColor = '#e0f2fe';
+                        e.target.style.outline = '3px solid #0ea5e9';
+                        e.target.style.outlineOffset = '2px';
+                        e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                        e.target.style.outline = 'none';
+                        e.target.style.boxShadow = 'none';
                       }}
                     >
                       NASA POWER API
@@ -206,6 +238,8 @@ export default function SolarResults({ solarData, onShowDetails }) {
       <div style={{ textAlign: 'center', marginTop: '32px' }}>
         <button
           onClick={onShowDetails}
+          tabIndex={8}
+          aria-label="Detaillierte Solar-Analyse anzeigen"
           style={{
             padding: '16px 32px',
             backgroundColor: '#2d3748',
@@ -215,7 +249,17 @@ export default function SolarResults({ solarData, onShowDetails }) {
             cursor: 'pointer',
             fontSize: '1rem',
             fontWeight: '600',
-            boxShadow: '0 2px 8px rgba(45, 55, 72, 0.2)'
+            boxShadow: '0 2px 8px rgba(45, 55, 72, 0.2)',
+            transition: 'all 0.2s ease'
+          }}
+          onFocus={(e) => {
+            e.target.style.outline = '3px solid #0ea5e9';
+            e.target.style.outlineOffset = '2px';
+            e.target.style.boxShadow = '0 0 0 1px #0ea5e9, 0 4px 12px rgba(14, 165, 233, 0.3)';
+          }}
+          onBlur={(e) => {
+            e.target.style.outline = 'none';
+            e.target.style.boxShadow = '0 2px 8px rgba(45, 55, 72, 0.2)';
           }}
         >
           Detaillierte Analyse anzeigen

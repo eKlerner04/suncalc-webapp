@@ -44,6 +44,8 @@ const CalculationInfo = ({ solarData, isOpen, onToggle, inputs }) => {
       {/* Info-Button */}
       <button
         onClick={onToggle}
+        tabIndex={10}
+        aria-label="Berechnungsdetails anzeigen oder verstecken"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -60,12 +62,29 @@ const CalculationInfo = ({ solarData, isOpen, onToggle, inputs }) => {
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
         }}
         onMouseEnter={(e) => {
-          e.target.style.backgroundColor = '#F1F5F9';
-          e.target.style.borderColor = '#CBD5E1';
+          if (document.activeElement !== e.target) {
+            e.target.style.backgroundColor = '#F1F5F9';
+            e.target.style.borderColor = '#CBD5E1';
+          }
         }}
         onMouseLeave={(e) => {
+          if (document.activeElement !== e.target) {
+            e.target.style.backgroundColor = '#F8FAFC';
+            e.target.style.borderColor = '#E2E8F0';
+          }
+        }}
+        onFocus={(e) => {
+          e.target.style.backgroundColor = '#e0f2fe';
+          e.target.style.borderColor = '#0ea5e9';
+          e.target.style.outline = '3px solid #0ea5e9';
+          e.target.style.outlineOffset = '2px';
+          e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+        }}
+        onBlur={(e) => {
           e.target.style.backgroundColor = '#F8FAFC';
           e.target.style.borderColor = '#E2E8F0';
+          e.target.style.outline = 'none';
+          e.target.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
         }}
       >
         <span style={{ fontSize: '16px' }}></span>

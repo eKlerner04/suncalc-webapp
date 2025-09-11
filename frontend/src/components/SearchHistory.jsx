@@ -90,6 +90,8 @@ export default function SearchHistory({ onRestoreSearch }) {
         </h3>
         <button
           onClick={clearHistory}
+          tabIndex={10}
+          aria-label="Gesamten Suchverlauf löschen"
           style={{
             padding: '6px 12px',
             fontSize: '0.75rem',
@@ -101,12 +103,29 @@ export default function SearchHistory({ onRestoreSearch }) {
             transition: 'all 0.2s ease'
           }}
           onMouseEnter={(e) => {
-            e.target.style.background = '#f1f5f9';
-            e.target.style.borderColor = '#94a3b8';
+            if (document.activeElement !== e.target) {
+              e.target.style.background = '#f1f5f9';
+              e.target.style.borderColor = '#94a3b8';
+            }
           }}
           onMouseLeave={(e) => {
+            if (document.activeElement !== e.target) {
+              e.target.style.background = 'transparent';
+              e.target.style.borderColor = '#cbd5e1';
+            }
+          }}
+          onFocus={(e) => {
+            e.target.style.background = '#e0f2fe';
+            e.target.style.borderColor = '#0ea5e9';
+            e.target.style.outline = '3px solid #0ea5e9';
+            e.target.style.outlineOffset = '2px';
+            e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+          }}
+          onBlur={(e) => {
             e.target.style.background = 'transparent';
             e.target.style.borderColor = '#cbd5e1';
+            e.target.style.outline = 'none';
+            e.target.style.boxShadow = 'none';
           }}
         >
           Verlauf löschen
@@ -154,6 +173,9 @@ export default function SearchHistory({ onRestoreSearch }) {
           searchHistory.map((item) => (
           <div
             key={item.id}
+            tabIndex={11 + searchHistory.indexOf(item)}
+            role="button"
+            aria-label={`Suchverlauf wiederherstellen: ${item.address}`}
             style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -166,12 +188,33 @@ export default function SearchHistory({ onRestoreSearch }) {
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = '#f8fafc';
-              e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+              if (document.activeElement !== e.target) {
+                e.target.style.background = '#f8fafc';
+                e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+              }
             }}
             onMouseLeave={(e) => {
+              if (document.activeElement !== e.target) {
+                e.target.style.background = '#ffffff';
+                e.target.style.boxShadow = 'none';
+              }
+            }}
+            onFocus={(e) => {
+              e.target.style.background = '#e0f2fe';
+              e.target.style.outline = '3px solid #0ea5e9';
+              e.target.style.outlineOffset = '2px';
+              e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+            }}
+            onBlur={(e) => {
               e.target.style.background = '#ffffff';
+              e.target.style.outline = 'none';
               e.target.style.boxShadow = 'none';
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                restoreSearch(item);
+              }
             }}
             onClick={() => restoreSearch(item)}
           >
@@ -209,6 +252,8 @@ export default function SearchHistory({ onRestoreSearch }) {
                 e.stopPropagation();
                 removeFromHistory(item.id);
               }}
+              tabIndex={11 + searchHistory.indexOf(item) + 100}
+              aria-label={`Eintrag löschen: ${item.address}`}
               style={{
                 padding: '4px 8px',
                 fontSize: '0.75rem',
@@ -220,12 +265,36 @@ export default function SearchHistory({ onRestoreSearch }) {
                 transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => {
-                e.target.style.background = '#fef2f2';
-                e.target.style.borderColor = '#fca5a5';
+                if (document.activeElement !== e.target) {
+                  e.target.style.background = '#fef2f2';
+                  e.target.style.borderColor = '#fca5a5';
+                }
               }}
               onMouseLeave={(e) => {
+                if (document.activeElement !== e.target) {
+                  e.target.style.background = 'transparent';
+                  e.target.style.borderColor = '#fecaca';
+                }
+              }}
+              onFocus={(e) => {
+                e.target.style.background = '#fef2f2';
+                e.target.style.borderColor = '#ef4444';
+                e.target.style.outline = '3px solid #0ea5e9';
+                e.target.style.outlineOffset = '2px';
+                e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+              }}
+              onBlur={(e) => {
                 e.target.style.background = 'transparent';
                 e.target.style.borderColor = '#fecaca';
+                e.target.style.outline = 'none';
+                e.target.style.boxShadow = 'none';
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  removeFromHistory(item.id);
+                }
               }}
             >
               ×

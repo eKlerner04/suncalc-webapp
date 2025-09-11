@@ -75,15 +75,6 @@ export default function SolarCalculator() {
     }, 500);
   };
 
-  const handleAddressSelect = (result) => {
-    setSearchQuery(result.displayName);
-    setCoordinates(prev => ({
-      ...prev,
-      lat: result.lat.toString(),
-      lng: result.lng.toString()
-    }));
-    setShowSearchResults(false);
-  };
 
   const clearSearch = () => {
     setSearchQuery('');
@@ -166,6 +157,19 @@ export default function SolarCalculator() {
     setSolarData(null);
     
     // KEINE automatische Berechnung - User muss selbst klicken
+  };
+
+  // Adresse aus Suchergebnissen auswählen
+  const handleAddressSelect = (result) => {
+    console.log('Adresse ausgewählt:', result);
+    setCoordinates(prev => ({
+      ...prev,
+      lat: result.lat.toString(),
+      lng: result.lng.toString()
+    }));
+    setSearchQuery(result.displayName);
+    setShowSearchResults(false);
+    setSearchResults([]);
   };
 
 
@@ -293,11 +297,32 @@ export default function SolarCalculator() {
                 border: '2px solid #e2e8f0',
                 backgroundColor: '#ffffff'
               }}>
-                <LocationMap
-                  onLocationSelect={handleMapLocationSelect}
-                  selectedLat={coordinates.lat ? parseFloat(coordinates.lat) : null}
-                  selectedLng={coordinates.lng ? parseFloat(coordinates.lng) : null}
-                />
+                <div 
+                  tabIndex={9}
+                  aria-label="Interaktive Karte - Klicken Sie auf einen Standort oder verwenden Sie Enter zum Setzen des Markers"
+                  style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    border: '2px solid #e2e8f0',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#0ea5e9';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(14, 165, 233, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                >
+                  <LocationMap
+                    onLocationSelect={handleMapLocationSelect}
+                    selectedLat={coordinates.lat ? parseFloat(coordinates.lat) : null}
+                    selectedLng={coordinates.lng ? parseFloat(coordinates.lng) : null}
+                  />
+                </div>
               </div>
               
               {/* Adress-Suchfeld */}
@@ -335,6 +360,20 @@ export default function SolarCalculator() {
                     value={searchQuery}
                     onChange={handleSearchInput}
                     placeholder="Geben Sie eine Adresse oder einen Ort ein..."
+                    tabIndex={1}
+                    aria-label="Adresse oder Ort eingeben"
+                    onKeyDown={(e) => {
+                      if (e.key === 'ArrowDown' && searchResults.length > 0) {
+                        e.preventDefault();
+                        // Fokus auf erstes Suchergebnis setzen
+                        const firstResult = document.querySelector('[tabindex="7"]');
+                        if (firstResult) firstResult.focus();
+                      }
+                      if (e.key === 'Escape') {
+                        setShowSearchResults(false);
+                        setSearchResults([]);
+                      }
+                    }}
                     style={{
                       flex: 1,
                       padding: '16px 16px',
@@ -397,6 +436,9 @@ export default function SolarCalculator() {
                       <div
                         key={index}
                         onClick={() => handleAddressSelect(result)}
+                        tabIndex={7 + index}
+                        role="button"
+                        aria-label={`Adresse auswählen: ${result.name}`}
                         style={{
                           padding: '12px 16px',
                           borderBottom: index < searchResults.length - 1 ? '1px solid #f1f5f9' : 'none',
@@ -406,10 +448,53 @@ export default function SolarCalculator() {
                           transition: 'all 0.2s ease'
                         }}
                         onMouseEnter={(e) => {
-                          e.target.style.background = '#f8fafc';
+                          if (document.activeElement !== e.target) {
+                            e.target.style.background = '#f8fafc';
+                          }
                         }}
                         onMouseLeave={(e) => {
+                          if (document.activeElement !== e.target) {
+                            e.target.style.background = 'transparent';
+                          }
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.background = '#e0f2fe';
+                          e.target.style.outline = '3px solid #0ea5e9';
+                          e.target.style.outlineOffset = '2px';
+                          e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+                        }}
+                        onBlur={(e) => {
                           e.target.style.background = 'transparent';
+                          e.target.style.outline = 'none';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleAddressSelect(result);
+                          }
+                          if (e.key === 'ArrowDown' && index < searchResults.length - 1) {
+                            e.preventDefault();
+                            const nextResult = document.querySelector(`[tabindex="${8 + index}"]`);
+                            if (nextResult) nextResult.focus();
+                          }
+                          if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            if (index === 0) {
+                              // Zurück zum Suchfeld
+                              const searchInput = document.querySelector('#address');
+                              if (searchInput) searchInput.focus();
+                            } else {
+                              const prevResult = document.querySelector(`[tabindex="${6 + index}"]`);
+                              if (prevResult) prevResult.focus();
+                            }
+                          }
+                          if (e.key === 'Escape') {
+                            setShowSearchResults(false);
+                            setSearchResults([]);
+                            const searchInput = document.querySelector('#address');
+                            if (searchInput) searchInput.focus();
+                          }
                         }}
                       >
                         <div style={{ 
@@ -554,6 +639,8 @@ export default function SolarCalculator() {
             <button 
               onClick={handleCalculateSolar}
               disabled={loading || !coordinates.lat || !coordinates.lng}
+              tabIndex={1}
+              aria-label="Solarpotential berechnen"
               style={{
                 padding: '24px 48px',
                 backgroundColor: loading || !coordinates.lat || !coordinates.lng ? '#cbd5e0' : '#1e293b',

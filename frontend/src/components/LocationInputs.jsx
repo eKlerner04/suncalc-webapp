@@ -32,6 +32,8 @@ export default function LocationInputs({ coordinates, onInputChange }) {
             value={coordinates.lat}
             onChange={(e) => onInputChange('lat', e.target.value)}
             placeholder="Klicke auf die Karte oder gib Koordinaten ein"
+            tabIndex={2}
+            aria-label="Breitengrad eingeben"
             style={{
               width: '100%',
               padding: '16px',
@@ -74,6 +76,8 @@ export default function LocationInputs({ coordinates, onInputChange }) {
             value={coordinates.lng}
             onChange={(e) => onInputChange('lng', e.target.value)}
             placeholder="Klicke auf die Karte oder gib Koordinaten ein"
+            tabIndex={3}
+            aria-label="Längengrad eingeben"
             style={{
               width: '100%',
               padding: '16px',

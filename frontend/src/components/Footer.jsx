@@ -24,6 +24,8 @@ export default function Footer() {
             href="https://www.uni-goettingen.de/de/439238.html" 
             target="_blank" 
             rel="noreferrer"
+            tabIndex={1}
+            aria-label="Impressum der Universität Göttingen öffnen"
             style={{
               color: '#64748b',
               textDecoration: 'none',
@@ -33,12 +35,29 @@ export default function Footer() {
               fontWeight: '500'
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#e2e8f0';
-              e.target.style.color = '#374151';
+              if (document.activeElement !== e.target) {
+                e.target.style.backgroundColor = '#e2e8f0';
+                e.target.style.color = '#374151';
+              }
             }}
             onMouseLeave={(e) => {
+              if (document.activeElement !== e.target) {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = '#64748b';
+              }
+            }}
+            onFocus={(e) => {
+              e.target.style.backgroundColor = '#e0f2fe';
+              e.target.style.color = '#0ea5e9';
+              e.target.style.outline = '3px solid #0ea5e9';
+              e.target.style.outlineOffset = '2px';
+              e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+            }}
+            onBlur={(e) => {
               e.target.style.backgroundColor = 'transparent';
               e.target.style.color = '#64748b';
+              e.target.style.outline = 'none';
+              e.target.style.boxShadow = 'none';
             }}
           >
             Impressum
@@ -48,6 +67,8 @@ export default function Footer() {
             href="https://www.uni-goettingen.de/de/591645.html" 
             target="_blank" 
             rel="noreferrer"
+            tabIndex={2}
+            aria-label="Datenschutzerklärung der Universität Göttingen öffnen"
             style={{
               color: '#64748b',
               textDecoration: 'none',
@@ -57,12 +78,29 @@ export default function Footer() {
               fontWeight: '500'
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#e2e8f0';
-              e.target.style.color = '#374151';
+              if (document.activeElement !== e.target) {
+                e.target.style.backgroundColor = '#e2e8f0';
+                e.target.style.color = '#374151';
+              }
             }}
             onMouseLeave={(e) => {
+              if (document.activeElement !== e.target) {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = '#64748b';
+              }
+            }}
+            onFocus={(e) => {
+              e.target.style.backgroundColor = '#e0f2fe';
+              e.target.style.color = '#0ea5e9';
+              e.target.style.outline = '3px solid #0ea5e9';
+              e.target.style.outlineOffset = '2px';
+              e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+            }}
+            onBlur={(e) => {
               e.target.style.backgroundColor = 'transparent';
               e.target.style.color = '#64748b';
+              e.target.style.outline = 'none';
+              e.target.style.boxShadow = 'none';
             }}
           >
             Datenschutzerklärung
@@ -72,6 +110,8 @@ export default function Footer() {
             href="https://www.uni-goettingen.de/de/635204.html" 
             target="_blank" 
             rel="noreferrer"
+            tabIndex={3}
+            aria-label="Barrierefreiheits-Informationen der Universität Göttingen öffnen"
             style={{
               color: '#64748b',
               textDecoration: 'none',
@@ -81,12 +121,29 @@ export default function Footer() {
               fontWeight: '500'
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#e2e8f0';
-              e.target.style.color = '#374151';
+              if (document.activeElement !== e.target) {
+                e.target.style.backgroundColor = '#e2e8f0';
+                e.target.style.color = '#374151';
+              }
             }}
             onMouseLeave={(e) => {
+              if (document.activeElement !== e.target) {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = '#64748b';
+              }
+            }}
+            onFocus={(e) => {
+              e.target.style.backgroundColor = '#e0f2fe';
+              e.target.style.color = '#0ea5e9';
+              e.target.style.outline = '3px solid #0ea5e9';
+              e.target.style.outlineOffset = '2px';
+              e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+            }}
+            onBlur={(e) => {
               e.target.style.backgroundColor = 'transparent';
               e.target.style.color = '#64748b';
+              e.target.style.outline = 'none';
+              e.target.style.boxShadow = 'none';
             }}
           >
             Barrierefreiheit
