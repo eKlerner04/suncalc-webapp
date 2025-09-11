@@ -37,6 +37,9 @@ sudo apt install git
 ```bash
 git clone https://github.com/eKlerner04/suncalc-webapp.git
 cd suncalc-webapp
+
+git clone https://gitlab.gwdg.de/e.klerner/suncalc-webapp.git
+cd suncalc-webapp
 ```
 
 2. **Backend-Abhängigkeiten installieren:**
@@ -167,5 +170,3 @@ suncalc-webapp/
 - Vollständige Tastaturnavigation
 - WCAG 2.1 AA Barrierefreiheit
 - Responsive Design
-
-
