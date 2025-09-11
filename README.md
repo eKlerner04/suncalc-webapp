@@ -1,177 +1,171 @@
-# SunCalc WebApp
+# SunCalc - Solarpotential für Dächer berechnen
 
-Eine Webanwendung zur Berechnung des Solarpotentials von Dächern.
+Eine interaktive Webanwendung zur Berechnung des Solarpotentials für Dächer mit React Frontend und Node.js Backend.
 
-**Entwickelt von:** Emil Klerner  
-**Universität:** Georg-August-Universität Göttingen  
-**Semester:** IV - Praktikum Webentwicklung
+## Schnellstart
 
-## 📂 Repository
+### Systemweite Abhängigkeiten
 
-**Repository-URL:** [GitHub Repository](https://github.com/emilklerner/suncalc-webapp)  
-**Zugriff für:** lorenz.glissmann@uni-goettingen.de (Zugriff gewährt)
-
-### Alternative: ZIP-Download
-Falls Repository-Zugriff nicht möglich ist, kann das Projekt als ZIP-Datei heruntergeladen werden.
-
-## 📋 Systemweite Abhängigkeiten
-
-### Voraussetzungen
-- **Node.js** (Version 18 oder höher)
-- **npm** (kommt mit Node.js)
-- **Git** (für Repository-Zugriff)
-
-### Installation der Abhängigkeiten
-
-#### 1. Node.js installieren
+**Node.js** (Version 18 oder höher)
 ```bash
 # macOS (mit Homebrew)
 brew install node
 
-# Windows (Download von nodejs.org)
-# https://nodejs.org/
-
-# Linux (Ubuntu/Debian)
+# Ubuntu/Debian
 sudo apt update
 sudo apt install nodejs npm
 
-# Überprüfen der Installation
-node --version  # sollte 18+ sein
-npm --version
+# Windows
+# Download von https://nodejs.org/
 ```
 
-#### 2. Git installieren
+**Git** (für Repository-Klonen)
 ```bash
 # macOS (mit Homebrew)
 brew install git
 
-# Windows (Download von git-scm.com)
-# https://git-scm.com/
-
-# Linux (Ubuntu/Debian)
+# Ubuntu/Debian
 sudo apt install git
+
+# Windows
+# Download von https://git-scm.com/
 ```
 
-## 🚀 Schnellstart
+### Lokale Abhängigkeiten installieren
 
-### 1. Repository klonen
+1. **Repository klonen:**
 ```bash
-git clone <REPOSITORY-URL>
+git clone https://github.com/eKlerner04/suncalc-webapp.git
 cd suncalc-webapp
 ```
 
-### 2. Lokale Abhängigkeiten installieren
-
-#### Backend-Abhängigkeiten
+2. **Backend-Abhängigkeiten installieren:**
 ```bash
 cd backend
 npm install
 ```
 
-#### Frontend-Abhängigkeiten
+3. **Frontend-Abhängigkeiten installieren:**
 ```bash
-cd frontend
+cd ../frontend
 npm install
 ```
 
-### 3. Anwendung im Entwicklungsmodus starten
+## Entwicklung
 
-#### Backend starten (Terminal 1)
+### 1. Backend starten
 ```bash
 cd backend
-npm run dev
-# oder für Produktionsmodus:
-npm run build && npm start
+npm start
 ```
-Das Backend läuft dann auf `http://localhost:3000`
+Das Backend läuft auf `http://localhost:3000`
 
-#### Frontend starten (Terminal 2)
+### 2. Frontend starten
 ```bash
 cd frontend
 npm run dev
 ```
-Das Frontend läuft dann auf `http://localhost:5173`
+Das Frontend läuft auf `http://localhost:5173`
 
-### 4. Anwendung testen
-1. Öffne `http://localhost:5173` im Browser
-2. Klicke "Solar-Potential berechnen (Göttingen)"
-3. Das Frontend kommuniziert mit dem Backend und zeigt die Ergebnisse an
+### 3. Pocketbase starten
+```bash
+cd backend
+./pb/pocketbase serve --http="127.0.0.1:8090" --dir="./pb_data"
+```
+Pocketbase läuft auf `http://127.0.0.1:8090`
 
-## 🔧 Build-Instruktionen
+## Background-Jobs testen
+
+Die verschiedenen Background-Jobs können manuell getestet werden:
+
+cd backend und dann einen der Background-Jobs testen.
+
+### 1. Pre-Fetch (Alle 6 Stunden)
+```bash
+curl -X POST http://localhost:3000/api/locations/prefetch/run
+```
+
+### 2. Score-Degration (Alle 24 Stunden)
+```bash
+curl -X POST http://localhost:3000/api/locations/decay/run
+```
+
+### 3. CleanUp (Alle 6 Stunden)
+```bash
+curl -X POST http://localhost:3000/api/background-jobs/cleanup
+```
+
+## Build
 
 ### Backend bauen
+
 ```bash
 cd backend
 npm run build
-# Erstellt dist/ Ordner mit kompiliertem TypeScript
 ```
 
 ### Frontend bauen
+
 ```bash
 cd frontend
 npm run build
-# Erstellt dist/ Ordner mit optimiertem React-Build
 ```
 
-### Produktions-Deployment
-```bash
-# Backend
-cd backend
-npm run build
-npm start
+## Tastaturnavigation
 
-# Frontend (für statisches Hosting)
-cd frontend
-npm run build
-# dist/ Ordner kann auf jeden Web-Server deployed werden
-```
+Die Anwendung ist vollständig per Tastatur bedienbar:
 
-## 📁 Projektstruktur
+- **Tab:** Durch alle Elemente navigieren
+- **Enter/Space:** Elemente aktivieren
+- **Pfeiltasten:** Slider bedienen
+- **Escape:** Modals schließen
+
+### Tab-Reihenfolge:
+1. Suchfeld
+2. Berechnen-Button  
+3. Breitengrad-Eingabe
+4. Längengrad-Eingabe
+5. Modulfläche-Eingabe
+6. Dachneigung-Slider
+7. Dachausrichtung-Kompass
+8. Suchergebnisse
+9. Karte
+10. Suchhistorie
+
+## Projektstruktur
 
 ```
 suncalc-webapp/
-├── backend/              # Node.js + Express Backend
+├── frontend/          # React Frontend
 │   ├── src/
-│   │   ├── routes/      # API-Routen
-│   │   ├── services/    # Geschäftslogik
-│   │   └── utils/       # Hilfsfunktionen
+│   │   ├── components/    # React Komponenten
+│   │   └── services/      # API Services
 │   └── package.json
-├── frontend/             # React Frontend
+├── backend/           # Node.js Backend
 │   ├── src/
-│   │   ├── components/  # React-Komponenten
-│   │   ├── services/    # API-Services
-│   │   └── App.jsx      # Hauptkomponente
+│   │   ├── routes/       # API Endpunkte
+│   │   ├── services/     # Business Logic
+│   │   └── utils/        # Utilities
 │   └── package.json
-└── docs/                 # Dokumentation
+└── README.md
 ```
 
-## 🔧 Entwicklung
+## Technologien
 
-### Backend-Entwicklung
-- **Entwicklungsmodus:** `npm run dev` (mit Auto-Reload)
-- **Produktionsmodus:** `npm run build && npm run start:prod`
+- **Frontend:** React 19.1.1, Vite 7.1.2, Leaflet.js 1.9.4
+- **Backend:** Node.js, Express.js 5.1.0, TypeScript 5.5.4
+- **Datenbank:** Pocketbase 0.22.0 (SQLite)
+- **APIs:** PVGIS, Nominatim
 
-### Frontend-Entwicklung
-- **Entwicklungsmodus:** `npm run dev` (mit Hot Reload)
-- **Produktionsmodus:** `npm run build`
+## Features
 
-## 📚 Weitere Dokumentation
+- Standort-Ermittlung (Adresse, Karte, Koordinaten)
+- Dachparameter-Konfiguration
+- Solarpotential-Berechnung
+- Interaktive Visualisierungen
+- Suchhistorie (LocalStorage)
+- Vollständige Tastaturnavigation
+- WCAG 2.1 AA Barrierefreiheit
+- Responsive Design
 
-- **Architektur:** Siehe `docs/ARCHITECTURE.md`
-- **Frontend-Details:** Siehe `frontend/README.md`
 
-## 🐛 Häufige Probleme
-
-### Backend startet nicht
-- Stelle sicher, dass Port 3000 frei ist
-- Verwende `npm start` (nicht `npm run start:prod`)
-
-### Frontend kann Backend nicht erreichen
-- Überprüfe, ob das Backend läuft
-- Schaue in die Browser-Konsole für CORS-Fehler
-- Überprüfe die Backend-Logs
-
-### Port-Konflikte
-- Backend: Port 3000
-- Frontend: Port 5173
-- Stelle sicher, dass beide Ports frei sind
