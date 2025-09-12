@@ -114,6 +114,146 @@ cd frontend
 npm run build
 ```
 
+## Deployment auf GWDG-Server
+
+### Server-Setup
+
+1. **Node.js 22.x installieren:**
+```bash
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+
+2. **Caddy installieren:**
+```bash
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update
+sudo apt install caddy
+```
+
+3. **Pocketbase Systemd-Service erstellen:**
+```bash
+sudo nano /lib/systemd/system/pocketbase.service
+```
+
+Inhalt der Datei:
+```ini
+[Unit]
+Description = pocketbase
+
+[Service]
+Type = simple
+User = cloud
+Group = cloud
+LimitNOFILE = 4096
+Restart = always
+RestartSec = 5s
+StandardOutput = append:/home/cloud/pb/std.log
+StandardError = append:/home/cloud/pb/std.log
+WorkingDirectory = /home/cloud/pb
+ExecStart = /home/cloud/pb/pocketbase serve
+
+[Install]
+WantedBy = multi-user.target
+```
+
+4. **Services aktivieren:**
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable pocketbase
+sudo systemctl start pocketbase
+sudo systemctl enable caddy
+sudo systemctl start caddy
+```
+
+### Caddy-Konfiguration
+
+Erstelle `/etc/caddy/Caddyfile`:
+```caddy
+c100-085.cloud.gwdg.de { # Deine Domain
+    # Pocketbase auf /pb/*
+    handle_path /pb/* {
+        reverse_proxy 127.0.0.1:8090
+    }
+    
+    # Backend API auf /api/*
+    handle /api/* {
+        reverse_proxy 127.0.0.1:3000
+    }
+    
+    # Frontend statische Dateien
+    handle {
+        root * /srv
+        file_server
+    }
+}
+```
+
+5. **Verzeichnisse einrichten:**
+```bash
+sudo mkdir -p /srv
+sudo chown -R caddy:caddy /srv
+```
+
+### Deployment-Prozess
+
+1. **Code auf Server kopieren:**
+```bash
+git clone https://gitlab.gwdg.de/e.klerner/suncalc-webapp.git
+cd suncalc-webapp
+```
+
+2. **Backend bauen und starten:**
+```bash
+cd backend
+npm install
+NODE_ENV=production npm run build
+# Als Service starten (siehe unten)
+```
+
+3. **Frontend bauen:**
+```bash
+cd frontend
+npm install
+npm run build  # Setzt automatisch NODE_ENV=production
+# dist/ Inhalt nach /srv kopieren
+sudo cp -r dist/* /srv/
+```
+
+4. **Caddy neu starten:**
+```bash
+sudo systemctl restart caddy
+```
+
+### Backend als Systemd-Service
+
+Erstelle `/lib/systemd/system/suncalc-backend.service`:
+```ini
+[Unit]
+Description = SunCalc Backend
+
+[Service]
+Type = simple
+User = cloud
+Group = cloud
+WorkingDirectory = /home/cloud/suncalc-webapp/backend
+ExecStart = /usr/bin/node dist/server.js
+Restart = always
+RestartSec = 5s
+
+[Install]
+WantedBy = multi-user.target
+```
+
+Aktivieren:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable suncalc-backend
+sudo systemctl start suncalc-backend
+```
+
 ## Tastaturnavigation
 
 Die Anwendung ist vollständig per Tastatur bedienbar:

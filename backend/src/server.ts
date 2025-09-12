@@ -8,9 +8,19 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  // CORS für Produktion und Entwicklung
+  const allowedOrigins = process.env.NODE_ENV === 'production' 
+    ? ['https://c100-085.cloud.gwdg.de']  // Produktions-Domain
+    : ['http://localhost:5173', 'http://127.0.0.1:5173'];  // Entwicklung
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Credentials', 'true');
   next();
 });
 app.use(express.json());

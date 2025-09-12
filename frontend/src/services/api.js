@@ -1,5 +1,7 @@
 // Einfacher API-Service für die Backend-Kommunikation
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? '/api'  // Relativer Pfad für Produktion (Caddy Reverse Proxy)
+  : 'http://localhost:3000/api';  // Lokale Entwicklung
 
 // Solar-Daten vom Backend abrufen
 export const fetchSolarData = async (lat, lng, area = 10, tilt = 30, azimuth = 0) => {
@@ -23,7 +25,10 @@ export const fetchSolarData = async (lat, lng, area = 10, tilt = 30, azimuth = 0
 
 export const checkBackendHealth = async () => {
   try {
-    const response = await fetch('http://localhost:3000/health');
+    const healthUrl = process.env.NODE_ENV === 'production' 
+      ? '/health'  // Relativer Pfad für Produktion
+      : 'http://localhost:3000/health';  // Lokale Entwicklung
+    const response = await fetch(healthUrl);
     return response.ok;
   } catch (error) {
     return false;
