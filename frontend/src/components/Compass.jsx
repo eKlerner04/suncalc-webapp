@@ -417,10 +417,6 @@ export default function Compass({ azimuth, onInputChange }) {
             outline: 'none',
             transition: 'all 0.2s ease'
           }}
-          onFocus={(e) => {
-            e.target.style.borderColor = '#3182ce';
-            e.target.style.boxShadow = '0 0 0 3px rgba(49, 130, 206, 0.1)';
-          }}
           onBlur={(e) => {
             e.target.style.borderColor = '#e2e8f0';
             e.target.style.boxShadow = 'none';

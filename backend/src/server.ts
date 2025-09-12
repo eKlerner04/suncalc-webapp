@@ -14,7 +14,7 @@ app.use((req, res, next) => {
     : ['http://localhost:5173', 'http://127.0.0.1:5173'];  // Entwicklung
   
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
+  if (origin && allowedOrigins.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
   }
   

@@ -1,0 +1,3 @@
+2025/09/12 11:52:48 Server started at http://127.0.0.1:8090
+├─ REST API: http://127.0.0.1:8090/api/
+└─ Admin UI: http://127.0.0.1:8090/_/
