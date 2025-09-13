@@ -78,7 +78,10 @@ Pocketbase läuft auf `http://127.0.0.1:8090`
 
 Die verschiedenen Background-Jobs können manuell getestet werden:
 
-cd backend und dann einen der Background-Jobs testen.
+### Lokale Tests (Development)
+```bash
+cd backend
+```
 
 ### 1. Pre-Fetch (Alle 6 Stunden)
 ```bash
@@ -93,6 +96,14 @@ curl -X POST http://localhost:3000/api/locations/decay/run
 ### 3. CleanUp (Alle 6 Stunden)
 ```bash
 curl -X POST http://localhost:3000/api/background-jobs/cleanup
+```
+
+### Produktions-Tests (Server)
+```bash
+# Auf dem Server ausführen
+curl -sS -X POST https://c110-055.cloud.gwdg.de/api/background-jobs/cleanup
+curl -sS -X POST https://c110-055.cloud.gwdg.de/api/locations/prefetch/run
+curl -sS -X POST https://c110-055.cloud.gwdg.de/api/locations/decay/run
 ```
 
 ## Build
