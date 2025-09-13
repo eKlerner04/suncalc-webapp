@@ -8,48 +8,41 @@ import {
 export default function SearchHistory({ onRestoreSearch }) {
   const [searchHistory, setSearchHistory] = useState([]);
 
-  // Suchverlauf beim Laden der Komponente abrufen
   useEffect(() => {
-    console.log('🚀 [SearchHistory] Komponente geladen, lade Suchverlauf...');
+    console.log('[SearchHistory] Komponente geladen, lade Suchverlauf...');
     loadSearchHistoryFromService();
   }, []);
 
-  // Suchverlauf aus dem Service laden
   const loadSearchHistoryFromService = () => {
-    console.log('📚 [SearchHistory] Lade Suchverlauf aus dem Service...');
+    console.log('[SearchHistory] Lade Suchverlauf aus dem Service...');
     const history = loadSearchHistory();
-    console.log('📖 [SearchHistory] Geladener Verlauf:', history);
+    console.log('[SearchHistory] Geladener Verlauf:', history);
     setSearchHistory(history);
-    console.log('🔄 [SearchHistory] State aktualisiert, Länge:', history.length);
+    console.log('[SearchHistory] State aktualisiert, Länge:', history.length);
   };
 
-  // Suche aus dem Verlauf wiederherstellen
   const restoreSearch = (searchItem) => {
     onRestoreSearch(searchItem);
   };
 
-  // Suchverlauf aktualisieren (wird von außen aufgerufen)
   useEffect(() => {
     const interval = setInterval(() => {
       loadSearchHistoryFromService();
-    }, 1000); // Alle Sekunde aktualisieren
+    }, 1000);
     
     return () => clearInterval(interval);
   }, []);
 
-  // Eintrag aus dem Verlauf löschen
   const removeFromHistory = (id) => {
     const updatedHistory = removeFromSearchHistory(id);
     setSearchHistory(updatedHistory);
   };
 
-  // Verlauf komplett löschen
   const clearHistory = () => {
     clearSearchHistory();
     setSearchHistory([]);
   };
 
-  // Datum formatieren
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString('de-DE', {
@@ -61,9 +54,8 @@ export default function SearchHistory({ onRestoreSearch }) {
     });
   };
 
-  console.log('🎨 [SearchHistory] Rendere Komponente, Verlaufslänge:', searchHistory.length);
+  console.log('[SearchHistory] Rendere Komponente, Verlaufslänge:', searchHistory.length);
   
-  // Immer anzeigen, auch wenn kein Verlauf vorhanden ist
 
   return (
     <div style={{
@@ -137,7 +129,6 @@ export default function SearchHistory({ onRestoreSearch }) {
         gap: '12px'
       }}>
         {searchHistory.length === 0 ? (
-          // Info-Nachricht wenn kein Verlauf vorhanden
           <div style={{
             padding: '24px',
             background: '#ffffff',
@@ -169,7 +160,6 @@ export default function SearchHistory({ onRestoreSearch }) {
             </div>
           </div>
         ) : (
-          // Normale Suchergebnisse anzeigen
           searchHistory.map((item) => (
           <div
             key={item.id}

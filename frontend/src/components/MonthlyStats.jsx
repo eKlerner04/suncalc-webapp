@@ -1,7 +1,6 @@
 import React from 'react';
 
 const MonthlyStats = ({ solarData, inputs }) => {
-  // Monatsdaten generieren (gleiche Logik wie im Chart)
   const generateMonthlyData = () => {
     if (solarData?.metadata?.monthly_data && 
         Array.isArray(solarData.metadata.monthly_data) && 
@@ -22,7 +21,6 @@ const MonthlyStats = ({ solarData, inputs }) => {
   const monthlyData = generateMonthlyData();
   const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
-  // Prüfe ob Daten vorhanden sind
   if (!monthlyData || monthlyData.every(val => val === 0)) {
     return (
       <div style={{ 
@@ -45,11 +43,10 @@ const MonthlyStats = ({ solarData, inputs }) => {
     );
   }
 
-  // Berechne Anteile und Trends
   const total = monthlyData.reduce((a, b) => a + b, 0);
   
   const getTrend = (index) => {
-    if (index === 0) return '📉'; // Januar hat keinen Vormonat
+    if (index === 0) return '📉'; 
     const current = monthlyData[index];
     const previous = monthlyData[index - 1];
     return current > previous ? '📈' : '📉';
@@ -227,7 +224,7 @@ const MonthlyStats = ({ solarData, inputs }) => {
                   })()}
                 </div>
                 
-                {/* Diagramm-Bereich */}
+
                 <div style={{ 
                   flex: 1, 
                   display: 'flex', 
@@ -236,7 +233,6 @@ const MonthlyStats = ({ solarData, inputs }) => {
                   height: '100%',
                   position: 'relative'
                 }}>
-                  {/* Y-Achse Linien */}
                   {(() => {
                     const maxValue = Math.max(...monthlyData);
                     const yAxisSteps = Math.ceil(maxValue / 50) * 50;
@@ -321,7 +317,6 @@ const MonthlyStats = ({ solarData, inputs }) => {
                 ))}
               </div>
               
-              {/* Legende */}
               <div style={{ 
                 marginTop: '16px', 
                 display: 'flex', 

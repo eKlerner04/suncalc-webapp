@@ -81,7 +81,7 @@ export class PreFetchService {
           await new Promise(resolve => setTimeout(resolve, 1000));
           
         } catch (error) {
-          console.error(`❌ Fehler beim Pre-Fetch für ${location.gridKey}:`, error);
+          console.error(`Fehler beim Pre-Fetch für ${location.gridKey}:`, error);
           results.push({
             gridKey: location.gridKey,
             success: false,
@@ -95,7 +95,7 @@ export class PreFetchService {
       this.showPreFetchSummary(results);
       
     } catch (error) {
-      console.error('❌ Fehler beim Pre-Fetch-Durchlauf:', error);
+      console.error('Fehler beim Pre-Fetch-Durchlauf:', error);
     }
   }
 
@@ -104,7 +104,6 @@ export class PreFetchService {
     try {
       const startTime = Date.now();
       
-      // Verwende Standard-Dachparameter für Pre-Fetch
       const area = 15;
       const tilt = 35;
       const azimuth = 180;
@@ -162,11 +161,9 @@ export class PreFetchService {
 
   private async updateCacheWithNewData(solarKey: string, newData: any, area: number, tilt: number, azimuth: number, originalGridKey: string): Promise<void> {
     try {
-      // Suche zuerst nach dem ursprünglichen Datensatz über gridKey
       let response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=gridKey%3D%22${originalGridKey}%22`);
       let data = await response.json();
       
-      // Falls nicht gefunden, suche nach dem solarKey
       if (!data.items || data.items.length === 0) {
         console.log(`     Kein Datensatz für ${originalGridKey} gefunden, versuche ${solarKey}...`);
         response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=gridKey%3D%22${solarKey}%22`);
@@ -185,7 +182,6 @@ export class PreFetchService {
         payload: newData,
         source: newData.source || 'prefetch',
         fetchedAt: now,
-        // lastAccessAt wird NICHT aktualisiert, damit Score-Decay korrekt funktioniert
         area: area,
         tilt: tilt,
         azimuth: azimuth
@@ -253,14 +249,11 @@ export class PreFetchService {
     }
   }
 
-  /**
-   * Führt manuell einen Pre-Fetch für einen spezifischen Standort durch
-   */
+    
   async manualPreFetch(gridKey: string): Promise<PreFetchResult | null> {
     try {
       console.log(` Manueller Pre-Fetch für ${gridKey}...`);
       
-      // Finde den Standort
       const hotLocations = await hotLocationsService.getHotLocations();
       const location = hotLocations.find(loc => loc.gridKey === gridKey);
       
@@ -269,7 +262,6 @@ export class PreFetchService {
         return null;
       }
       
-      // Führe Pre-Fetch durch
       const result = await this.preFetchLocation(location);
       console.log(` Manueller Pre-Fetch für ${gridKey} abgeschlossen`);
       

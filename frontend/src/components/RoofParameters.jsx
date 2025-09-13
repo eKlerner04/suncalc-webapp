@@ -29,7 +29,7 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
             Modulfläche: <span style={{ color: '#00000', fontWeight: '700' }}>{coordinates.area} m²</span>
           </label>
           
-                  {/* Dachfläche - Einfache Darstellung */}
+        
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -69,7 +69,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
               }
             `}
           </style>
-            {/* Einfache Dachfläche-Visualisierung */}
             <div style={{
               position: 'relative',
               width: '100%',
@@ -78,7 +77,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
               justifyContent: 'center',
               alignItems: 'center'
             }}>
-              {/* Solarpanel-Design wie im Bild */}
               <div style={{
                 width: `${Math.min(90, Math.max(40, coordinates.area * 2.2))}%`,
                 height: `${Math.min(70, Math.max(30, coordinates.area * 1.6))}%`,
@@ -91,7 +89,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
                 overflow: 'hidden',
                 animation: 'panelExpand 0.8s ease-out'
               }}>
-                {/* Innerer Rahmen */}
                 <div style={{
                   position: 'absolute',
                   top: '6px',
@@ -102,7 +99,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
                   borderRadius: '4px'
                 }} />
                 
-                {/* Vertikale Teilung (mittlere Linie) - nur ab 15 m² */}
                 {coordinates.area >= 15 && (
                   <div style={{
                     position: 'absolute',
@@ -115,7 +111,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
                   }} />
                 )}
                 
-                {/* Solarzellen-Gitter - Linke Seite (immer sichtbar) */}
                 <div style={{
                   position: 'absolute',
                   top: '12px',
@@ -128,7 +123,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
                   gap: '2px'
                 }}>
                   {Array.from({ length: 12 }, (_, i) => {
-                    // Berechne, wie viele Zellen bei der aktuellen Fläche sichtbar sein sollen
                     const visibleCells = Math.min(12, Math.ceil(coordinates.area * 0.8));
                     const isVisible = i < visibleCells;
                     
@@ -146,7 +140,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
                   })}
                 </div>
                 
-                {/* Solarzellen-Gitter - Rechte Seite (nur ab 15 m²) */}
                 {coordinates.area >= 15 && (
                   <div style={{
                     position: 'absolute',
@@ -222,7 +215,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
             }}
           />
           
-          {/* Warnung für Mindestfläche - nur bei ungültigen Werten */}
           {parseFloat(coordinates.area) < 0.01 && (
             <div style={{
               marginTop: '8px',
@@ -235,7 +227,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
             </div>
           )}
           
-          {/* CSS-Animationen für Dachfläche */}
           <style>
             {`
               @keyframes tileMove {
@@ -271,7 +262,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
             width: '100%',
             padding: '0px 0'
           }}>
-            {/* Dach-Animation - Graphisch verbessert */}
             <div style={{
               display: 'flex',
               justifyContent: 'center',
@@ -289,7 +279,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
                 width: '140px',
                 height: '70px'
               }}>
-                {/* Haus - komplett neu gebaut */}
                 <div style={{
                   position: 'absolute',
                   bottom: '0',
@@ -351,7 +340,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
                   }} />
                 </div>
                 
-                {/* Dach - schicke schräge Linie mit festem rechten Ende */}
                 <div style={{
                   position: 'absolute',
                   top: '20px',
@@ -367,7 +355,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
                   filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))'
                 }} />
                 
-                {/* Sonne - verbessert */}
                 <div style={{
                   position: 'absolute',
                   top: '-100px',
@@ -380,7 +367,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
                   animation: 'pulse 3s ease-in-out infinite'
                 }} />
                 
-                {/* Sonnenstrahlen */}
                 <div style={{
                   position: 'absolute',
                   top: '-100px',
@@ -392,7 +378,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
                   animation: 'rotate 8s linear infinite'
                 }} />
                 
-                {/* CSS-Animationen */}
                 <style>
                   {`
                     @keyframes pulse {
@@ -485,7 +470,6 @@ export default function RoofParameters({ coordinates, onInputChange, onRestoreSe
         </div>
       </div>
 
-      {/* Suchverlauf */}
       <SearchHistory onRestoreSearch={onRestoreSearch} />
     </div>
   );

@@ -56,7 +56,7 @@ export class HotLocationsService {
 
       return hotLocations;
     } catch (error) {
-      console.error('❌ Fehler beim Holen der "heißen" Standorte:', error);
+      console.error('Fehler beim Holen der "heißen" Standorte:', error);
       return [];
     }
   }
@@ -66,7 +66,7 @@ export class HotLocationsService {
       const allHotLocations = await this.getHotLocations();
       return allHotLocations.slice(0, limit);
     } catch (error) {
-      console.error(`❌ Fehler beim Holen der Top-${limit} Standorte:`, error);
+      console.error(`Fehler beim Holen der Top-${limit} Standorte:`, error);
       return [];
     }
   }
@@ -85,9 +85,9 @@ export class HotLocationsService {
       );
 
       if (locationsNeedingPreFetch.length > 0) {
-        console.log(`🚨 ${locationsNeedingPreFetch.length} Standorte benötigen Pre-Fetch (laufen in ≤${thresholdDays} Tagen ab)`);
+        console.log(` ${locationsNeedingPreFetch.length} Standorte benötigen Pre-Fetch (laufen in ≤${thresholdDays} Tagen ab)`);
         locationsNeedingPreFetch.forEach(location => {
-          console.log(`   ⚠️ ${location.gridKey}: Läuft in ${location.daysUntilExpiry} Tagen ab (Score: ${location.popularityScore})`);
+          console.log(`    ${location.gridKey}: Läuft in ${location.daysUntilExpiry} Tagen ab (Score: ${location.popularityScore})`);
         });
       } else {
         console.log(`Alle "heißen" Standorte sind noch frisch genug (≥${thresholdDays} Tage)`);
@@ -163,7 +163,7 @@ export class HotLocationsService {
       const data = await response.json();
       
       if (!data.items || data.items.length === 0) {
-        console.log(`⚠️ Standort ${gridKey} nicht gefunden`);
+        console.log(` Standort ${gridKey} nicht gefunden`);
         return false;
       }
 
@@ -190,7 +190,7 @@ export class HotLocationsService {
       const data = await response.json();
       
       if (!data.items || data.items.length === 0) {
-        console.log('ℹKeine Standorte mit niedrigem Score gefunden');
+        console.log('Keine Standorte mit niedrigem Score gefunden');
         return 0;
       }
 

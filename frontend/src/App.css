@@ -31,39 +31,35 @@ body {
   overflow-x: hidden;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .layout {
     padding: 0 16px;
   }
 }
 
-/* Smooth Scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Focus Styles für Accessibility - WCAG 2.1 AA konform */
 *:focus {
   outline: 3px solid #0ea5e9;
   outline-offset: 2px;
   box-shadow: 0 0 0 1px #0ea5e9;
 }
 
-/* Verbesserte Kontraste für bessere Lesbarkeit */
 .text-primary {
-  color: #0f172a; /* Dunkler für besseren Kontrast */
+  color: #0f172a; 
 }
 
 .text-secondary {
-  color: #475569; /* Ausreichender Kontrast 4.5:1 */
+  color: #475569; 
 }
 
 .text-muted {
-  color: #64748b; /* Ausreichender Kontrast 4.5:1 */
+  color: #64748b; 
 }
 
-/* Verbesserte Button-Kontraste */
+
 .btn-primary {
   background-color: #1e293b;
   color: #ffffff;
@@ -86,14 +82,14 @@ html {
   border-color: #cbd5e1;
 }
 
-/* Spezielle Focus-Styles für Buttons */
+
 button:focus {
   outline: 3px solid #0ea5e9;
   outline-offset: 2px;
   box-shadow: 0 0 0 1px #0ea5e9, 0 4px 12px rgba(14, 165, 233, 0.3);
 }
 
-/* Focus-Styles für Input-Felder */
+
 input:focus {
   outline: 3px solid #0ea5e9;
   outline-offset: 2px;
@@ -101,14 +97,14 @@ input:focus {
   border-color: #0ea5e9;
 }
 
-/* Focus-Styles für Range-Slider */
+
 input[type="range"]:focus {
   outline: 3px solid #0ea5e9;
   outline-offset: 4px;
   box-shadow: 0 0 0 1px #0ea5e9;
 }
 
-/* Custom Scrollbar - WCAG konform */
+
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -118,43 +114,42 @@ input[type="range"]:focus {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #64748b; /* Besserer Kontrast */
+  background: #64748b; 
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569; /* Noch besserer Kontrast */
+  background: #475569; 
 }
 
-/* WCAG 2.1 AA Verbesserungen */
-/* Mindestgröße für klickbare Elemente */
+
 button, a, input[type="button"], input[type="submit"] {
   min-height: 44px;
   min-width: 44px;
 }
 
-/* Verbesserte Lesbarkeit */
+
 h1, h2, h3, h4, h5, h6 {
   color: #0f172a;
   line-height: 1.3;
 }
 
-/* Skalierung bis 200% ohne Funktionsverlust */
+
 @media (max-width: 768px) {
   .layout {
     padding: 0 16px;
   }
   
-  /* Größere Touch-Targets auf mobilen Geräten */
+ 
   button, a, input[type="button"] {
     min-height: 48px;
     min-width: 48px;
   }
 }
 
-/* 200% Zoom Support - WCAG 2.1 AA */
+
 @media (min-resolution: 2dppx) {
-  /* Größere Schriftgrößen bei hoher Auflösung */
+
   body {
     font-size: 1.125rem;
   }
@@ -163,14 +158,14 @@ h1, h2, h3, h4, h5, h6 {
   h2 { font-size: 2rem; }
   h3 { font-size: 1.75rem; }
   
-  /* Größere Touch-Targets */
+
   button, a, input[type="button"] {
     min-height: 56px;
     min-width: 56px;
     padding: 12px 24px;
   }
   
-  /* Größere Eingabefelder */
+
   input, select, textarea {
     min-height: 48px;
     font-size: 1.125rem;
@@ -178,7 +173,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* High Contrast Mode Support */
+
 @media (prefers-contrast: high) {
   * {
     border-color: #000000 !important;
@@ -189,7 +184,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Reduced Motion Support */
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

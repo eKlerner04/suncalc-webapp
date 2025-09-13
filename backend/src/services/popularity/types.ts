@@ -28,12 +28,12 @@ export interface PopularityConfig {
 }
 
 export interface ScoreDecayConfig {
-  decayIntervalHours: number;      // Alle X Stunden Score-Degradation ausführen
-  halfLifeDays: number;           // Score halbiert sich alle X Tage
-  minScore: number;               // Mindest-Score (wird nie unterschritten)
-  decayPerDay: number;            // Score-Verlust pro Tag ohne Zugriff (0.02 = 2%)
-  scoreCalculationDays: number;   // Zeitraum für Score-Berechnung
-  batchSize: number;              // Anzahl Standorte pro Batch
+  decayIntervalHours: number;      
+  halfLifeDays: number;           
+  minScore: number;               
+  decayPerDay: number;            
+  scoreCalculationDays: number;   
+  batchSize: number;             
 }
 
 export interface PreFetchResult {

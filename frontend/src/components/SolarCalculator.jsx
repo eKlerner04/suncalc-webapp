@@ -16,7 +16,6 @@ export default function SolarCalculator() {
 
   const [showDetails, setShowDetails] = useState(false);
   
-  // State für benutzerdefinierte Koordinaten
   const [coordinates, setCoordinates] = useState({
     lat: '',
     lng: '',
@@ -25,14 +24,12 @@ export default function SolarCalculator() {
     azimuth: '180'
   });
 
-  // Suchfunktionalität
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const searchTimeoutRef = useRef(null);
 
-  // Nominatim API Service
   const searchAddress = async (query) => {
     try {
       const response = await fetch(
@@ -61,7 +58,6 @@ export default function SolarCalculator() {
       return;
     }
 
-    // Verzögerung (Debouncing) - warte 500ms nach dem letzten Tastendruck
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
@@ -97,14 +93,13 @@ export default function SolarCalculator() {
       console.log('Frontend hat Daten erhalten:', data);
       setSolarData(data);
       
-      // Suchverlauf speichern
-      console.log('🔍 [SolarCalculator] Versuche Suchverlauf zu speichern...');
-      console.log('📊 [SolarCalculator] Empfangene Daten:', data);
-      console.log('📍 [SolarCalculator] Aktuelle Koordinaten:', coordinates);
-      console.log('🏠 [SolarCalculator] Aktuelle Adresse:', searchQuery);
+      console.log('[SolarCalculator] Versuche Suchverlauf zu speichern...');
+      console.log('[SolarCalculator] Empfangene Daten:', data);
+      console.log('[SolarCalculator] Aktuelle Koordinaten:', coordinates);
+      console.log('[SolarCalculator] Aktuelle Adresse:', searchQuery);
       
       if (data && data.yield && data.yield.annual_kWh) {
-        console.log('✅ [SolarCalculator] Daten sind gültig, erstelle Suchdaten...');
+        console.log('[SolarCalculator] Daten sind gültig, erstelle Suchdaten...');
         
         const searchData = {
           address: searchQuery || `${coordinates.lat}, ${coordinates.lng}`,
@@ -116,14 +111,46 @@ export default function SolarCalculator() {
           solarPotential: Math.round(data.yield.annual_kWh)
         };
         
-        console.log('📝 [SolarCalculator] Suchdaten erstellt:', searchData);
+        console.log('[SolarCalculator] Suchdaten erstellt:', searchData);
         const result = addToSearchHistory(searchData);
-        console.log('💾 [SolarCalculator] Suchverlauf gespeichert, Ergebnis:', result);
+        console.log('[SolarCalculator] Suchverlauf gespeichert, Ergebnis:', result);
+        
+        setTimeout(() => {
+          const resultsElement = document.querySelector('.solar-results');
+          if (resultsElement) {
+            resultsElement.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+            
+            const startPosition = window.pageYOffset;
+            const targetPosition = resultsElement.offsetTop - 100; 
+            const distance = targetPosition - startPosition;
+            const duration = 1500; 
+            let start = null;
+            
+            const slowScroll = (timestamp) => {
+              if (!start) start = timestamp;
+              const progress = Math.min((timestamp - start) / duration, 1);
+              const easeInOutCubic = progress < 0.5 
+                ? 4 * progress * progress * progress 
+                : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+              
+              window.scrollTo(0, startPosition + distance * easeInOutCubic);
+              
+              if (progress < 1) {
+                requestAnimationFrame(slowScroll);
+              }
+            };
+            
+            requestAnimationFrame(slowScroll);
+          }
+        }, 100);
       } else {
-        console.log('❌ [SolarCalculator] Daten sind ungültig oder yield.annual_kWh fehlt:', data);
-        console.log('🔍 [SolarCalculator] Verfügbare Datenfelder:', Object.keys(data || {}));
+        console.log('[SolarCalculator] Daten sind ungültig oder yield.annual_kWh fehlt:', data);
+        console.log('[SolarCalculator] Verfügbare Datenfelder:', Object.keys(data || {}));
         if (data && data.yield) {
-          console.log('📊 [SolarCalculator] Yield-Daten:', data.yield);
+          console.log('[SolarCalculator] Yield-Daten:', data.yield);
         }
       }
     } catch (err) {
@@ -142,7 +169,6 @@ export default function SolarCalculator() {
     }));
   };
 
-  // Suchverlauf wiederherstellen
   const handleRestoreSearch = (searchItem) => {
     setCoordinates({
       lat: searchItem.lat.toString(),
@@ -153,13 +179,10 @@ export default function SolarCalculator() {
     });
     setSearchQuery(searchItem.address);
     
-    // Solar-Daten zurücksetzen, damit neue Berechnung nötig ist
     setSolarData(null);
     
-    // KEINE automatische Berechnung - User muss selbst klicken
   };
 
-  // Adresse aus Suchergebnissen auswählen
   const handleAddressSelect = (result) => {
     console.log('Adresse ausgewählt:', result);
     setCoordinates(prev => ({
@@ -182,7 +205,6 @@ export default function SolarCalculator() {
     }));
     console.log(`Standort von Karte gesetzt: (${lat}, ${lng})`);
     
-    // Automatisch Adresse für die neuen Koordinaten abrufen und ins Suchfeld eintragen
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=18&addressdetails=1`
@@ -200,7 +222,7 @@ export default function SolarCalculator() {
 
   return (
     <>
-      {/* Globale CSS-Regeln für horizontales Scrollen verhindern */}
+     
       <style>
         {`
           body {
@@ -229,14 +251,12 @@ export default function SolarCalculator() {
         overflowX: 'hidden',
         maxWidth: '100vw'
       }}>
-      {/* Details-Seite anzeigen wenn showDetails true ist */}
       {showDetails ? (
         <SolarDetails 
           solarData={solarData} 
           inputs={solarData.inputs} 
           onBack={() => {
             setShowDetails(false);
-            // Nach dem Zurückschalten nach oben scrollen
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
@@ -244,7 +264,6 @@ export default function SolarCalculator() {
         <div style={{ width: '100%', maxWidth: '100%', margin: '0 auto' }}>
 
       
-          {/* Hauptinhalt - Volle Breite Grid */}
           <div style={{ 
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
@@ -252,7 +271,6 @@ export default function SolarCalculator() {
             width: '100%',
             minHeight: 'calc(100vh - 300px)'
           }}>
-            {/* Linke Spalte - Karte (Volle Höhe) */}
             <div style={{ 
               background: '#ffffff',
               padding: '40px',
@@ -325,7 +343,6 @@ export default function SolarCalculator() {
                 </div>
               </div>
               
-              {/* Adress-Suchfeld */}
               <div style={{ 
                 width: '100%',
                 marginBottom: '24px',
@@ -365,7 +382,6 @@ export default function SolarCalculator() {
                     onKeyDown={(e) => {
                       if (e.key === 'ArrowDown' && searchResults.length > 0) {
                         e.preventDefault();
-                        // Fokus auf erstes Suchergebnis setzen
                         const firstResult = document.querySelector('[tabindex="7"]');
                         if (firstResult) firstResult.focus();
                       }
@@ -386,7 +402,6 @@ export default function SolarCalculator() {
                     }}
                   />
                   
-                  {/* Lösch-Button */}
                   {searchQuery && (
                     <button
                       onClick={clearSearch}
@@ -420,7 +435,6 @@ export default function SolarCalculator() {
                   )}
                 </div>
 
-                {/* Suchergebnisse */}
                 {showSearchResults && searchResults.length > 0 && (
                   <div style={{
                     background: '#ffffff',
@@ -481,7 +495,6 @@ export default function SolarCalculator() {
                           if (e.key === 'ArrowUp') {
                             e.preventDefault();
                             if (index === 0) {
-                              // Zurück zum Suchfeld
                               const searchInput = document.querySelector('#address');
                               if (searchInput) searchInput.focus();
                             } else {
@@ -503,7 +516,7 @@ export default function SolarCalculator() {
                           fontSize: '14px',
                           marginBottom: '4px'
                         }}>
-                          📍 {result.name}
+                          {result.name}
                         </div>
                         <div style={{ 
                           fontSize: '12px', 
@@ -517,7 +530,6 @@ export default function SolarCalculator() {
                   </div>
                 )}
 
-                {/* Ladeindikator */}
                 {isSearching && (
                   <div style={{
                     background: '#ffffff',
@@ -554,7 +566,6 @@ export default function SolarCalculator() {
               />
             </div>
 
-            {/* Rechte Spalte - Eingaben (Volle Höhe) */}
             <div style={{ 
               background: '#ffffff',
               padding: '40px',
@@ -562,7 +573,6 @@ export default function SolarCalculator() {
               flexDirection: 'column',
               justifyContent: 'flex-start'
             }}>
-              {/* Dachparameter */}
               <div style={{ marginBottom: '40px' }}>
                 <h2 style={{ 
                   margin: '0 0 32px 0',
@@ -602,7 +612,6 @@ export default function SolarCalculator() {
             </div>
           </div>
 
-          {/* Solar-Potential Button - Zentral unten, volle Breite */}
           <div style={{ 
             background: '#ffffff',
             padding: '40px',
@@ -682,7 +691,6 @@ export default function SolarCalculator() {
             )}
           </div>
           
-          {/* Fehlermeldung - Volle Breite */}
           {error && (
             <div style={{ 
               background: '#fef2f2',
@@ -693,17 +701,18 @@ export default function SolarCalculator() {
               fontSize: '1rem',
               fontWeight: '600'
             }}>
-              ❌ Fehler: {error}
+              Fehler: {error}
             </div>
           )}
           
-          {/* Ergebnisse - Volle Breite */}
           {solarData && (
-            <div style={{ 
-              background: '#f8fafc',
-              padding: '40px',
-              borderTop: '1px solid #e2e8f0'
-            }}>
+            <div 
+              className="solar-results"
+              style={{
+                background: '#f8fafc',
+                padding: '40px',
+                borderTop: '1px solid #e2e8f0'
+              }}>
               <SolarResults 
                 solarData={solarData} 
                 onShowDetails={() => setShowDetails(true)}
@@ -711,7 +720,6 @@ export default function SolarCalculator() {
             </div>
           )}
 
-          {/* CSS für Animationen */}
           <style jsx>{`
             @keyframes spin {
               0% { transform: rotate(0deg); }

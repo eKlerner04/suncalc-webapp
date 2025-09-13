@@ -7,7 +7,6 @@ import { cleanupService } from '../services/cleanupService';
 
 const router = Router();
 
-// GET /api/locations/hot - Alle "heißen" Standorte
 router.get('/hot', async (req, res) => {
   try {
     console.log('[LOCATIONS] Anfrage für "heiße" Standorte erhalten');
@@ -28,7 +27,6 @@ router.get('/hot', async (req, res) => {
   }
 });
 
-// GET /api/locations/top - Top 10 Standorte nach Popularity
 router.get('/top', async (req, res) => {
   try {
     console.log('[LOCATIONS] Anfrage für Top-Standorte erhalten');
@@ -49,7 +47,6 @@ router.get('/top', async (req, res) => {
   }
 });
 
-// GET /api/locations/stats - Popularity-Statistiken
 router.get('/stats', async (req, res) => {
   try {
     console.log('[LOCATIONS] Anfrage für Popularity-Statistiken erhalten');
@@ -69,7 +66,6 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-// POST /api/locations/prefetch/run - Manueller Pre-Fetch
 router.post('/prefetch/run', async (req, res) => {
   try {
     console.log('[LOCATIONS] Manueller Pre-Fetch angefordert');
@@ -77,10 +73,8 @@ router.post('/prefetch/run', async (req, res) => {
     
     let result;
     if (gridKey) {
-      // Pre-Fetch für spezifischen Standort
       result = await preFetchService.manualPreFetch(gridKey);
     } else {
-      // Pre-Fetch für alle "heißen" Standorte
       result = await preFetchService.runPreFetch();
     }
     
@@ -99,7 +93,6 @@ router.post('/prefetch/run', async (req, res) => {
   }
 });
 
-// GET /api/locations/prefetch/status - Pre-Fetch Status
 router.get('/prefetch/status', async (req, res) => {
   try {
     console.log('[LOCATIONS] Pre-Fetch Status angefordert');
@@ -119,7 +112,6 @@ router.get('/prefetch/status', async (req, res) => {
   }
 });
 
-// POST /api/locations/decay/run - Manueller Score-Degradation
 router.post('/decay/run', async (req, res) => {
   try {
     console.log('[LOCATIONS] Manueller Score-Degradation angefordert');
@@ -139,7 +131,6 @@ router.post('/decay/run', async (req, res) => {
   }
 });
 
-// GET /api/locations/decay/status - Score-Degradation Status
 router.get('/decay/status', async (req, res) => {
   try {
     console.log('[LOCATIONS] Score-Degradation Status angefordert');
@@ -159,12 +150,10 @@ router.get('/decay/status', async (req, res) => {
   }
 });
 
-// POST /api/locations/cleanup/run - Manueller Cache-Cleanup
 router.post('/cleanup/run', async (req, res) => {
   try {
     console.log('[LOCATIONS] Manueller Cache-Cleanup angefordert');
     
-    // Verwende den neuen echten Cleanup-Service
     const result = await cleanupService.manualCleanup();
     
     res.json({
@@ -182,7 +171,6 @@ router.post('/cleanup/run', async (req, res) => {
   }
 });
 
-// GET /api/locations/cleanup/status - Cleanup Status
 router.get('/cleanup/status', async (req, res) => {
   try {
     console.log('[LOCATIONS] Cleanup Status angefordert');
@@ -204,7 +192,6 @@ router.get('/cleanup/status', async (req, res) => {
   }
 });
 
-// PUT /api/locations/config - Konfiguration aktualisieren
 router.put('/config', async (req, res) => {
   try {
     console.log('[LOCATIONS] Konfigurations-Update angefordert');
@@ -233,7 +220,6 @@ router.put('/config', async (req, res) => {
   }
 });
 
-// GET /api/locations/config - Aktuelle Konfiguration
 router.get('/config', async (req, res) => {
   try {
     console.log('[LOCATIONS] Konfiguration angefordert');
@@ -253,7 +239,6 @@ router.get('/config', async (req, res) => {
   }
 });
 
-// PUT /api/locations/:gridKey/hot - Standort als "heiß" markieren
 router.put('/:gridKey/hot', async (req, res) => {
   try {
     const { gridKey } = req.params;

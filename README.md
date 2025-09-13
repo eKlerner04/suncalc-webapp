@@ -37,9 +37,6 @@ sudo apt install git
 ```bash
 git clone https://github.com/eKlerner04/suncalc-webapp.git
 cd suncalc-webapp
-
-git clone https://gitlab.gwdg.de/e.klerner/suncalc-webapp.git
-cd suncalc-webapp
 ```
 
 2. **Backend-Abhängigkeiten installieren:**
@@ -201,7 +198,7 @@ sudo chown -R caddy:caddy /srv
 
 1. **Code auf Server kopieren:**
 ```bash
-git clone https://gitlab.gwdg.de/e.klerner/suncalc-webapp.git
+git clone https://github.com/eKlerner04/suncalc-webapp.git
 cd suncalc-webapp
 ```
 

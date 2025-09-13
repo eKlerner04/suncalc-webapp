@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Nominatim API Service
 const nominatimService = {
   // Adresse zu Koordinaten
   async searchAddress(query) {
@@ -39,7 +38,7 @@ const nominatimService = {
   }
 };
 
-// Leaflet Marker-Icon-Fix für React
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -47,7 +46,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Fadenkreuz-Komponente (für Mausbewegungen und Klicks)
 function Crosshair({ onLocationSelect, setCrosshairPosition, centerPosition }) {
   const map = useMapEvents({
     click: (e) => {
@@ -56,11 +54,9 @@ function Crosshair({ onLocationSelect, setCrosshairPosition, centerPosition }) {
       onLocationSelect(e.latlng.lat, e.latlng.lng);
     },
     mousemove: (e) => {
-      // Fadenkreuz bei Mausbewegung anzeigen
       map.fire('crosshair:show', { latlng: e.latlng });
     },
     keydown: (e) => {
-      // Keyboard-Support für Marker setzen
       if (e.originalEvent.key === 'Enter' || e.originalEvent.key === ' ') {
         e.originalEvent.preventDefault();
         if (centerPosition) {
@@ -75,7 +71,6 @@ function Crosshair({ onLocationSelect, setCrosshairPosition, centerPosition }) {
   return null;
 }
 
-// Haupt-Karten-Komponente
 export default function LocationMap({ 
   onLocationSelect, 
   initialLat = null, 
@@ -94,7 +89,6 @@ export default function LocationMap({
   const mapRef = useRef(null);
   const searchTimeoutRef = useRef(null);
 
-  // Event-Handler für Fadenkreuz-Updates
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -113,23 +107,18 @@ export default function LocationMap({
     };
   }, [isDragging]);
 
-  // Drag-Events
   const handleDragStart = () => setIsDragging(true);
   const handleDragEnd = () => setIsDragging(false);
 
-  // Karte auf ausgewählten Standort zentrieren (nur wenn explizit gewünscht)
   useEffect(() => {
     if (selectedLat && selectedLng && mapRef.current) {
-      // Fadenkreuz-Position setzen und Standort zentrieren (ohne Zoom zu ändern)
       setCrosshairPosition({ lat: selectedLat, lng: selectedLng });
       
-      // Aktuellen Zoom-Level beibehalten, nur Position zentrieren
       const currentZoom = mapRef.current.getZoom();
       mapRef.current.setView([selectedLat, selectedLng], currentZoom);
     }
   }, [selectedLat, selectedLng]);
 
-  // Kartenzentrum für Keyboard-Support verfolgen
   useEffect(() => {
     if (mapRef.current) {
       const map = mapRef.current;
@@ -140,7 +129,7 @@ export default function LocationMap({
       };
       
       map.on('moveend', updateCenter);
-      updateCenter(); // Initial setzen
+      updateCenter(); 
       
       return () => {
         map.off('moveend', updateCenter);
@@ -148,7 +137,6 @@ export default function LocationMap({
     }
   }, []);
 
-  // Adresssuche mit Debouncing
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -174,7 +162,6 @@ export default function LocationMap({
     };
   }, [searchQuery]);
 
-  // Adresse für aktuelle Koordinaten abrufen
   useEffect(() => {
     if (crosshairPosition) {
       nominatimService.reverseGeocode(crosshairPosition.lat, crosshairPosition.lng)
@@ -182,14 +169,12 @@ export default function LocationMap({
     }
   }, [crosshairPosition]);
 
-  // Adresse auswählen
   const handleAddressSelect = (result) => {
     setCrosshairPosition({ lat: result.lat, lng: result.lng });
     onLocationSelect(result.lat, result.lng);
     setSearchQuery(result.name);
     setShowSearchResults(false);
-    
-    // Karte auf gewählten Standort zentrieren
+
     if (mapRef.current) {
       const currentZoom = mapRef.current.getZoom();
       mapRef.current.setView([result.lat, result.lng], currentZoom);
@@ -203,7 +188,6 @@ export default function LocationMap({
     setShowSearchResults(false);
   };
 
-  // Event-Handler über whenReady (wenn Karte bereit ist)
   const handleMapReady = () => {
     if (mapRef.current) {
       console.log('Karte ist bereit');
@@ -268,19 +252,18 @@ export default function LocationMap({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {/* Fadenkreuz-Komponente */}
+        {/* Fadenkreuz */}
         <Crosshair 
           onLocationSelect={onLocationSelect}
           setCrosshairPosition={setCrosshairPosition}
           centerPosition={centerPosition}
         />
         
-        {/* Marker für ausgewählten Standort - Standard Leaflet */}
+
         {selectedLat && selectedLng && (
           <Marker position={[selectedLat, selectedLng]} />
         )}
         
-        {/* Fadenkreuz-Marker - Standard Leaflet */}
         {crosshairPosition && !isDragging && (
           <Marker position={crosshairPosition} />
         )}
@@ -288,7 +271,6 @@ export default function LocationMap({
 
 
       
-      {/* Zoom-Controls */}
       <div style={{
         position: 'absolute',
         top: '16px',
@@ -380,7 +362,6 @@ export default function LocationMap({
         </div>
       )}
 
-      {/* CSS für Animationen und Leaflet-Attribution */}
       <style jsx>{`
         @keyframes pulse {
           0% { transform: scale(1); opacity: 1; }

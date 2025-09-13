@@ -1,4 +1,3 @@
-// Einfacher Logger für das Backend
 class Logger {
   private getTimestamp(): string {
     return new Date().toISOString();

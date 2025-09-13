@@ -5,10 +5,32 @@ import Header from './Header';
 const SolarDetails = ({ solarData, inputs, onBack }) => {
   const backButtonRef = useRef(null);
 
-  // Beim Laden der Komponente nach oben scrollen und Button fokussieren
+  const slowScrollToTop = () => {
+    const startPosition = window.pageYOffset;
+    const targetPosition = 0;
+    const distance = targetPosition - startPosition;
+    const duration = 1500; 
+    let start = null;
+    
+    const slowScroll = (timestamp) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      const easeInOutCubic = progress < 0.5 
+        ? 4 * progress * progress * progress 
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      
+      window.scrollTo(0, startPosition + distance * easeInOutCubic);
+      
+      if (progress < 1) {
+        requestAnimationFrame(slowScroll);
+      }
+    };
+    
+    requestAnimationFrame(slowScroll);
+  };
+
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Button nach kurzer Verzögerung fokussieren
+    slowScrollToTop();
     setTimeout(() => {
       if (backButtonRef.current) {
         backButtonRef.current.focus();
@@ -16,7 +38,6 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
     }, 100);
   }, []);
 
-  // Koordinaten in Grad/Minuten/Sekunden umrechnen
   const decimalToDMS = (decimal) => {
     const degrees = Math.floor(Math.abs(decimal));
     const minutes = Math.floor((Math.abs(decimal) - degrees) * 60);
@@ -26,7 +47,6 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
     return `${direction}${degrees}°${minutes}'${seconds}"`;
   };
 
-  // Standort-Name basierend auf Koordinaten
   const getLocationName = (lat, lng) => {
     const locations = {
       '51.5413,9.9158': 'Göttingen, Niedersachsen, Germany',
@@ -49,19 +69,19 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
       <Header />
       
       <main className="main">
-        {/* Navigation Bar */}
         <div style={{ 
-          padding: '16px 32px',
-          marginBottom: '32px',
-          borderBottom: '1px solid #e2e8f0',
+          padding: '20px',
+          marginBottom: '0',
+          borderBottom: '1px solid #e5e7eb',
           backgroundColor: '#ffffff'
         }}>
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            justifyContent: 'flex-start',
-            maxWidth: '1200px',
-            margin: '0 auto'
+            justifyContent: 'center',
+            maxWidth: '100%',
+            margin: '0',
+            position: 'relative'
           }}>
             <button
               ref={backButtonRef}
@@ -69,60 +89,73 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
               tabIndex={1}
               aria-label="Zurück zur Solarpotential-Berechnung"
               style={{
+                position: 'absolute',
+                left: '20px',
+                top: '50%',
+                transform: 'translateY(-50%)',
                 padding: '12px 24px',
-                backgroundColor: '#f8fafc',
-                color: '#374151',
-                border: '1px solid #e2e8f0',
+                backgroundColor: '#374151',
+                color: 'white',
+                border: 'none',
                 borderRadius: '8px',
                 cursor: 'pointer',
                 fontSize: '16px',
                 fontWeight: '500',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
               }}
               onMouseEnter={(e) => {
                 if (document.activeElement !== e.target) {
-                  e.target.style.backgroundColor = '#f1f5f9';
-                  e.target.style.borderColor = '#cbd5e1';
+                  e.target.style.backgroundColor = '#1f2937';
+                  e.target.style.transform = 'translateY(-50%) scale(1.02)';
+                  e.target.style.boxShadow = '0 3px 6px rgba(0, 0, 0, 0.15)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (document.activeElement !== e.target) {
-                  e.target.style.backgroundColor = '#f8fafc';
-                  e.target.style.borderColor = '#e2e8f0';
+                  e.target.style.backgroundColor = '#374151';
+                  e.target.style.transform = 'translateY(-50%) scale(1)';
+                  e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
                 }
               }}
               onFocus={(e) => {
-                e.target.style.backgroundColor = '#e0f2fe';
-                e.target.style.borderColor = '#0ea5e9';
-                e.target.style.outline = '3px solid #0ea5e9';
+                e.target.style.backgroundColor = '#1f2937';
+                e.target.style.outline = '3px solid #3b82f6';
                 e.target.style.outlineOffset = '2px';
-                e.target.style.boxShadow = '0 0 0 1px #0ea5e9';
+                e.target.style.boxShadow = '0 3px 6px rgba(0, 0, 0, 0.15)';
               }}
               onBlur={(e) => {
-                e.target.style.backgroundColor = '#f8fafc';
-                e.target.style.borderColor = '#e2e8f0';
+                e.target.style.backgroundColor = '#374151';
                 e.target.style.outline = 'none';
-                e.target.style.boxShadow = 'none';
+                e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
               }}
             >
               ← Zurück zur Berechnung
             </button>
+            
+            <h1 style={{
+              margin: '0',
+              fontSize: '2rem',
+              fontWeight: '600',
+              color: '#111827',
+              textAlign: 'center'
+            }}>
+              Solar-Details
+            </h1>
           </div>
         </div>
 
-        {/* Main Content Container */}
         <div style={{
           maxWidth: '1200px',
           margin: '0 auto',
-          padding: '0 32px 32px 32px'
+          padding: '20px 40px 40px 40px'
         }}>
 
-        {/* Standort-Informationen */}
         <div style={{ 
           backgroundColor: 'white', 
           borderRadius: '16px', 
-          padding: '32px', 
-          marginBottom: '32px',
+          padding: '24px', 
+          marginBottom: '24px',
           border: '1px solid #e2e8f0',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
         }}>
@@ -196,12 +229,11 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
           </div>
         </div>
 
-        {/* Solar-Ergebnisse */}
         <div style={{ 
           backgroundColor: 'white', 
           borderRadius: '16px', 
-          padding: '32px', 
-          marginBottom: '32px',
+          padding: '24px', 
+          marginBottom: '24px',
           border: '1px solid #e2e8f0',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
         }}>
@@ -313,7 +345,6 @@ const SolarDetails = ({ solarData, inputs, onBack }) => {
           </div>
         </div>
 
-        {/* Chart-Komponenten */}
         <div style={{ 
           width: '100%',
           boxSizing: 'border-box'

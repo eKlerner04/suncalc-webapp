@@ -108,15 +108,13 @@ class SolarCacheService {
 
   private async updateLastAccess(solarKey: string): Promise<void> {
     try {
-      // Verwende eine einfache Lösung: Nur lastAccessAt aktualisieren
-      // accessCount wird nicht mehr aktualisiert um Race Conditions zu vermeiden
+     
       const response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?filter=solarKey%3D%22${solarKey}%22`);
       const data = await response.json();
       
       if (data.items && data.items.length > 0) {
         const record = data.items[0];
         
-        // Aktualisiere nur lastAccessAt (kein Race Condition Problem)
         await pb.collection(SOLAR_COLLECTION).update(record.id, {
           lastAccessAt: new Date().toISOString()
         });
@@ -130,12 +128,12 @@ class SolarCacheService {
   private async fetchExternalData(lat: number, lng: number, area: number, tilt: number, azimuth: number): Promise<PVGISResponse> {
     console.log(` Rufe externe Solar-API auf für lat=${lat}, lng=${lng}, area=${area}, tilt=${tilt}, azimuth=${azimuth}`);
     
-    // Prüfe ob bereits Daten für diesen Standort existieren (um API-Konsistenz zu gewährleisten)
+   
     const existingData = await this.findExistingDataForLocation(lat, lng);
     if (existingData) {
       console.log(` Bestehende API-Quelle für Standort gefunden: ${existingData.source}`);
       
-      // Verwende die gleiche API wie bei bestehenden Daten - KEIN FALLBACK!
+    
       if (existingData.source === 'pvgis') {
         console.log(` Verwende PVGIS (konsistent mit bestehenden Daten)...`);
         const pvgisData = await pvgisService.getSolarData(lat, lng, area, tilt, azimuth);
@@ -146,7 +144,7 @@ class SolarCacheService {
         console.log(` PVGIS fehlgeschlagen, verwende Fallback-Daten (kein API-Wechsel!)`);
         return this.generateFallbackData(lat, lng, area, tilt, azimuth, 'pvgis');
       } else if (existingData.source === 'nasa_power') {
-        // Bestehende NASA-Daten werden weiterhin unterstützt, aber neue Anfragen verwenden PVGIS
+       
         console.log(` Bestehende NASA POWER Daten gefunden, aber neue Anfragen verwenden PVGIS...`);
         const pvgisData = await pvgisService.getSolarData(lat, lng, area, tilt, azimuth);
         if (pvgisData) {
@@ -158,7 +156,7 @@ class SolarCacheService {
       }
     }
     
-    // Neue Logik: PVGIS weltweit versuchen, dann Fallback
+   
     console.log(` Versuche PVGIS weltweit für lat=${lat}, lng=${lng}...`);
     const pvgisData = await pvgisService.getSolarData(lat, lng, area, tilt, azimuth);
     if (pvgisData) {
@@ -171,40 +169,38 @@ class SolarCacheService {
   }
 
   private generateFallbackData(lat: number, lng: number, area: number, tilt: number, azimuth: number, preferredSource?: string): PVGISResponse {
-    // Verbesserte Fallback-Berechnung basierend auf geografischen Faktoren
-    const baseEfficiency = 0.20; // Moderne Module: 20% Effizienz
+   
+    const baseEfficiency = 0.20; 
     const systemEfficiency = 0.85; // Systemverluste: 15%
     
-    // Breitengrad-Faktor (höhere Breitengrade = weniger Sonneneinstrahlung)
+  
     const latitudeFactor = Math.cos((Math.abs(lat) * Math.PI) / 180);
     
-    // Dachneigung-Faktor (optimal bei ~30-35°)
+  
     const optimalTilt = 30;
     const tiltFactor = Math.cos((tilt - optimalTilt) * Math.PI / 180);
     
-    // Azimut-Faktor (Süd = optimal)
-    const azimuthFactor = Math.cos((azimuth - 180) * Math.PI / 180); // 180° = Süd
+  
+    const azimuthFactor = Math.cos((azimuth - 180) * Math.PI / 180); 
     
-    // Basis-Sonneneinstrahlung (kWh/m²/Jahr) - variiert je nach Breitengrad
-    let baseRadiation = 1200; // Basis für mittlere Breitengrade
+  
+    let baseRadiation = 1200; 
     
     if (Math.abs(lat) < 30) {
-      baseRadiation = 1800; // Tropen/Subtropen
+      baseRadiation = 1800; 
     } else if (Math.abs(lat) < 45) {
-      baseRadiation = 1400; // Gemäßigte Zone
+      baseRadiation = 1400;   
     } else if (Math.abs(lat) < 60) {
-      baseRadiation = 1000; // Höhere Breitengrade
+      baseRadiation = 1000; 
     } else {
-      baseRadiation = 800; // Polare Regionen
+      baseRadiation = 800; 
     }
     
-    // Berechne jährliche Einstrahlung
     const annualRadiation = baseRadiation * latitudeFactor * tiltFactor * Math.max(0.3, azimuthFactor);
     
-    // Berechne jährlichen Ertrag
     const annual_kWh = Math.round(annualRadiation * area * baseEfficiency * systemEfficiency);
     
-    // Verwende die bevorzugte API-Quelle für Fallback-Daten
+   
     const source = (preferredSource as 'pvgis' | 'fallback') || 'fallback';
     
     console.log(` Fallback-Daten generiert: ${annual_kWh} kWh pro Jahr (Quelle: ${source})`);
@@ -354,7 +350,7 @@ class SolarCacheService {
       const data = await response.json();
       
       if (data.items && data.items.length > 0) {
-        // Finde den neuesten Datensatz für diesen Standort
+        
         const newestRecord = data.items.reduce((newest: any, current: any) => {
           const newestDate = new Date(newest.fetchedAt);
           const currentDate = new Date(current.fetchedAt);

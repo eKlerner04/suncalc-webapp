@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function Footer() {
   return (
     <footer style={{
@@ -63,12 +65,10 @@ export default function Footer() {
             Impressum
           </a>
           <span style={{ color: '#cbd5e0', fontSize: '1.2rem' }}>•</span>
-          <a 
-            href="https://www.uni-goettingen.de/de/591645.html" 
-            target="_blank" 
-            rel="noreferrer"
+          <Link 
+            to="/privacy"
             tabIndex={2}
-            aria-label="Datenschutzerklärung der Universität Göttingen öffnen"
+            aria-label="Datenschutzerklärung öffnen"
             style={{
               color: '#64748b',
               textDecoration: 'none',
@@ -104,14 +104,12 @@ export default function Footer() {
             }}
           >
             Datenschutzerklärung
-          </a>
+          </Link>
           <span style={{ color: '#cbd5e0', fontSize: '1.2rem' }}>•</span>
-          <a 
-            href="https://www.uni-goettingen.de/de/635204.html" 
-            target="_blank" 
-            rel="noreferrer"
+          <Link 
+            to="/accessibility"
             tabIndex={3}
-            aria-label="Barrierefreiheits-Informationen der Universität Göttingen öffnen"
+            aria-label="Barrierefreiheits-Informationen öffnen"
             style={{
               color: '#64748b',
               textDecoration: 'none',
@@ -147,7 +145,7 @@ export default function Footer() {
             }}
           >
             Barrierefreiheit
-          </a>
+          </Link>
         </div>
         <p style={{
           margin: '0',

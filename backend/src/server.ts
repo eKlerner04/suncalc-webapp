@@ -8,9 +8,8 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use((req, res, next) => {
-  // CORS für Produktion und Entwicklung
   const allowedOrigins = process.env.NODE_ENV === 'production' 
-    ? ['https://c100-085.cloud.gwdg.de']  // Produktions-Domain
+    ? ['https://c100-085.cloud.gwdg.de'] 
     : ['http://localhost:5173', 'http://127.0.0.1:5173'];  // Entwicklung
   
   const origin = req.headers.origin;
@@ -25,16 +24,16 @@ app.use((req, res, next) => {
 });
 app.use(express.json());
 
-// Routes
+
 app.use('/api/solar', solarRoutes);
 app.use('/api/locations', locationsRoutes);
 
-// Health check
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend läuft!' });
 });
 
-// Root endpoint
+
 app.get('/', (req, res) => {
   res.json({ 
     message: 'SunCalc Backend läuft erfolgreich!',
@@ -57,14 +56,14 @@ app.get('/', (req, res) => {
   });
 });
 
-// Background-Jobs Status
+
 app.get('/api/background-jobs/status', (req, res) => {
   res.json(backgroundJobController.getStatus());
 });
 
 
 
-// Background-Jobs manuell starten
+
 app.post('/api/background-jobs/cleanup', async (req, res) => {
   try {
     const result = await backgroundJobController.manualCleanup();
@@ -77,7 +76,7 @@ app.post('/api/background-jobs/cleanup', async (req, res) => {
   }
 });
 
-// Background-Jobs Modus wechseln
+
 app.post('/api/background-jobs/mode', (req, res) => {
   try {
     const { mode } = req.body;
@@ -95,7 +94,7 @@ app.post('/api/background-jobs/mode', (req, res) => {
   }
 });
 
-// Server starten
+
 app.listen(PORT, () => {
   console.log('\n[SERVER] SunCalc Backend gestartet');
   console.log('─────────────────────────────────────────────────────────────');

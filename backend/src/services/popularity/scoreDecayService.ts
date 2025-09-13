@@ -18,9 +18,7 @@ export class ScoreDecayService {
     };
   }
 
-  /**
-   * Startet den Score-Degradation-Service
-   */
+    
   async startScoreDecayService(): Promise<void> {
     if (this.isRunning) {
       console.log('[SCORE-DECAY] Service läuft bereits');
@@ -30,10 +28,8 @@ export class ScoreDecayService {
     console.log('[SCORE-DECAY] Starte Score-Degradation-Service...');
     this.isRunning = true;
 
-    // Sofort ersten Durchlauf starten (ohne Log)
     await this.runScoreDecay();
 
-    // Dann alle 24 Stunden wiederholen
     this.intervalId = setInterval(async () => {
       await this.runScoreDecay();
     }, this.config.decayIntervalHours * 60 * 60 * 1000);
@@ -41,9 +37,7 @@ export class ScoreDecayService {
     console.log(`[SCORE-DECAY] Service gestartet - läuft alle ${this.config.decayIntervalHours} Stunden`);
   }
 
-  /**
-   * Stoppt den Score-Degradation-Service
-   */
+    
   stopScoreDecayService(): void {
     if (!this.isRunning) {
       return;
@@ -60,14 +54,11 @@ export class ScoreDecayService {
     console.log('[SCORE-DECAY] Service gestoppt');
   }
 
-  /**
-   * Führt einen Score-Degradation-Durchlauf aus
-   */
+    
   private async runScoreDecay(): Promise<void> {
     try {
       const startTime = Date.now();
 
-      // Alle Standorte über HTTP-API holen
       const response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?sort=-popularityScore`);
       
       if (!response.ok) {
@@ -89,7 +80,6 @@ export class ScoreDecayService {
 
       console.log(`[SCORE-DECAY] ${allRecords.length} Standorte zur Verarbeitung gefunden`);
 
-      // Batch-weise verarbeiten
       for (let i = 0; i < allRecords.length; i += this.config.batchSize) {
         const batch = allRecords.slice(i, i + this.config.batchSize);
         
@@ -108,7 +98,6 @@ export class ScoreDecayService {
           }
         }
 
-        // Kurze Pause zwischen Batches
         if (i + this.config.batchSize < allRecords.length) {
           await new Promise(resolve => setTimeout(resolve, 100));
         }
@@ -123,14 +112,11 @@ export class ScoreDecayService {
     }
   }
 
-  /**
-   * Holt alle Popularity-Records aus der Datenbank
-   */
+    
   private async getAllPopularityRecords(): Promise<any[]> {
     try {
       console.log('[SCORE-DECAY] Versuche Standorte über HTTP-API zu laden...');
       
-      // Verwende die GLEICHE Methode wie der Pre-Fetch-Service!
       const response = await fetch(`${pb.baseUrl}/api/collections/${SOLAR_COLLECTION}/records?sort=-popularityScore`);
       const data = await response.json();
       
@@ -141,7 +127,6 @@ export class ScoreDecayService {
       
       console.log(`[SCORE-DECAY] Debug: ${data.items.length} Standorte über HTTP-API geladen`);
       
-      // Debug: Zeige alle Standorte
       data.items.forEach((record: any, index: number) => {
         console.log(`[SCORE-DECAY] Debug Standort ${index}:`, {
           gridKey: record.gridKey,
@@ -154,7 +139,6 @@ export class ScoreDecayService {
         });
       });
       
-      // Filtere im Code nach Standorten mit gültigem Score
       const validRecords = data.items.filter((record: any) => {
         const isValid = record.popularityScore && 
                        record.popularityScore > 0 && 
@@ -180,64 +164,52 @@ export class ScoreDecayService {
     }
   }
 
-  /**
-   * Verarbeitet einen einzelnen Record für Score-Degradation
-   */
+    
   private async processRecord(record: any): Promise<{ updated: boolean; decayed: boolean }> {
     const oldScore = record.popularityScore;
     const newScore = this.calculateDecayedScore(record);
     
-    // Nur aktualisieren wenn Score sich geändert hat
     if (Math.abs(newScore - oldScore) < 0.1) {
       return { updated: false, decayed: false };
     }
 
-    // Prüfe ob Score reduziert wurde
     const decayed = newScore < oldScore;
     
-    // Score aktualisieren (mit Decay-Information)
     await this.updateRecordScore(record.id, newScore, decayed);
     
-    // isHot-Status aktualisieren (konsistent mit Popularity-System)
-    // Ein Standort ist "heiß" wenn Score >= 50 (wie im Popularity-System)
     const isHot = newScore >= 50;
     await this.updateHotStatus(record.id, isHot);
 
     return { updated: true, decayed };
   }
 
-  /**
-   * Berechnet den neuen, reduzierten Score basierend auf Inaktivität
-   */
+
   private calculateDecayedScore(record: any): number {
     const lastAccess = new Date(record.lastAccessAt);
     const now = new Date();
     const daysSinceLastAccess = Math.floor((now.getTime() - lastAccess.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Exponentieller Verfall basierend auf Inaktivität
+    
     const decayFactor = Math.pow(1 - this.config.decayPerDay, daysSinceLastAccess);
     let newScore = record.popularityScore * decayFactor;
 
-    // Mindest-Score nicht unterschreiten
+    
     newScore = Math.max(this.config.minScore, newScore);
 
-    // Score auf 2 Dezimalstellen runden
+    
     return Math.round(newScore * 100) / 100;
   }
 
-  /**
-   * Aktualisiert den Score eines Records in der Datenbank
-   */
+ 
   private async updateRecordScore(recordId: string, newScore: number, decayed: boolean = false): Promise<void> {
     try {
       const updateData: any = {
         popularityScore: newScore
       };
 
-      // Wenn Score reduziert wurde, decayCount und lastDecayAt aktualisieren
+
       if (decayed) {
-        // Hole aktuellen Record um decayCount zu inkrementieren
-        const currentRecord = await pb.collection('solar_cells').getOne(recordId);
+          const currentRecord = await pb.collection('solar_cells').getOne(recordId);
         const currentDecayCount = currentRecord.decayCount || 0;
         
         updateData.decayCount = currentDecayCount + 1;
@@ -251,9 +223,7 @@ export class ScoreDecayService {
     }
   }
 
-  /**
-   * Aktualisiert den isHot-Status eines Records
-   */
+ 
   private async updateHotStatus(recordId: string, isHot: boolean): Promise<void> {
     try {
       await pb.collection('solar_cells').update(recordId, {
@@ -265,9 +235,7 @@ export class ScoreDecayService {
     }
   }
 
-  /**
-   * Manueller Score-Degradation-Durchlauf
-   */
+ 
   async manualScoreDecay(): Promise<{ success: boolean; message: string }> {
     try {
       console.log('[SCORE-DECAY] Manueller Score-Degradation-Durchlauf gestartet...');
@@ -285,9 +253,7 @@ export class ScoreDecayService {
     }
   }
 
-  /**
-   * Gibt den aktuellen Status des Services zurück
-   */
+  
   getStatus(): { isRunning: boolean; config: ScoreDecayConfig; nextRun: string | null } {
     let nextRun = null;
     if (this.intervalId) {
@@ -302,9 +268,7 @@ export class ScoreDecayService {
     };
   }
 
-  /**
-   * Aktualisiert die Konfiguration
-   */
+ 
   updateConfig(newConfig: Partial<ScoreDecayConfig>): void {
     this.config = { ...this.config, ...newConfig };
     console.log('[SCORE-DECAY] Konfiguration aktualisiert:', this.config);

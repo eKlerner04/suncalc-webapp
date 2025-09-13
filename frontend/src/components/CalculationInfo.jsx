@@ -3,17 +3,14 @@ import React from 'react';
 const CalculationInfo = ({ solarData, isOpen, onToggle, inputs }) => {
   if (!solarData || !inputs) return null;
 
-  // DIREKT aus Props extrahieren - keine Zwischenspeicherung
-  // Prüfe sowohl cache.source als auch die ursprüngliche Quelle in den gecachten Daten
+  
   const cacheSource = solarData?.cache?.source || 'unbekannt';
   const originalSource = solarData?.cache?.solarData?.source || solarData?.source || 'unbekannt';
   
-  // Verwende die ursprüngliche Quelle für die Berechnungsdetails, auch wenn sie aus dem Cache kommt
   const dataSource = cacheSource === 'local' ? originalSource : cacheSource;
   const isPVGIS = dataSource === 'pvgis';
   const isNASA = dataSource === 'nasa_power';
 
-  // Alle Werte DIREKT aus inputs Props extrahieren (UI-Eingabeparameter)
   const currentLat = inputs.lat || 0;
   const currentLng = inputs.lng || 0;
   const currentArea = inputs.area || 15;
@@ -35,9 +32,9 @@ const CalculationInfo = ({ solarData, isOpen, onToggle, inputs }) => {
   })();
 
   // Berechnungen für Beispiel
-  const kwPerM2 = 0.22; // kWp pro m²
-  const pStc = currentArea * kwPerM2; // kWp
-  const yf = currentAnnualKWh / pStc; // kWh/kWp·a
+  const kwPerM2 = 0.22; 
+  const pStc = currentArea * kwPerM2; 
+  const yf = currentAnnualKWh / pStc; 
 
   return (
     <div style={{ marginBottom: '20px' }}>

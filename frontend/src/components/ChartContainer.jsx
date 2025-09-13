@@ -2,7 +2,6 @@ import React from 'react';
 import SolarChart from './SolarChart';
 
 const ChartContainer = ({ solarData, inputs }) => {
-  // API-Antwort normalisieren → Charts brauchen: { annual_kWh, metadata.monthly_data? }
   const normalized = (() => {
     if (!solarData) return null;
     const cacheData = solarData?.cache?.solarData;
@@ -13,7 +12,6 @@ const ChartContainer = ({ solarData, inputs }) => {
     return { annual_kWh, metadata };
   })();
 
-  // Prüfe ob Daten vorhanden sind
   if (!normalized || !normalized.annual_kWh) {
     return (
       <div style={{ 

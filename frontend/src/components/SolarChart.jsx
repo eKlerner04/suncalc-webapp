@@ -1,37 +1,32 @@
 import React from 'react';
 
 const SolarChart = ({ solarData, inputs }) => {
-  // Monatsdaten generieren - verwende immer die API-Daten wenn verfügbar
   const generateMonthlyData = () => {
     const annual_kWh = solarData?.annual_kWh || 0;
     
-    // Verwende echte monatliche Daten von der API wenn verfügbar
     if (solarData?.metadata?.monthly_data && 
         Array.isArray(solarData.metadata.monthly_data) && 
         solarData.metadata.monthly_data.length === 12 &&
         solarData.metadata.monthly_data.some(val => val > 0)) {
-      console.log('✅ Verwende echte monatliche Daten von API:', solarData.metadata.monthly_data);
+      console.log('[SolarChart] Verwende echte monatliche Daten von API:', solarData.metadata.monthly_data);
       return solarData.metadata.monthly_data;
     }
     
-    // Fallback: Schätzung basierend auf Jahresertrag
-    console.log(`📊 Generiere geschätzte monatliche Daten für ${annual_kWh} kWh/Jahr`);
+    console.log(`Generiere geschätzte monatliche Daten für ${annual_kWh} kWh/Jahr`);
     
-    // Realistische monatliche Verteilung für Deutschland/Europa
     const monthlyDistribution = [
       0.04, 0.06, 0.10, 0.14, 0.16, 0.18, // Jan-Jun (Winter/Frühling)
       0.20, 0.18, 0.14, 0.10, 0.06, 0.04  // Jul-Dez (Sommer/Herbst)
     ];
     
     const estimatedData = monthlyDistribution.map(ratio => Math.round(annual_kWh * ratio));
-    console.log('📅 Geschätzte monatliche Daten:', estimatedData);
+    console.log('Geschätzte monatliche Daten:', estimatedData);
     return estimatedData;
   };
 
   const monthlyData = generateMonthlyData();
   const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
   
-  // Bestimme Datenquelle für Beschreibung
   const hasRealMonthlyData = solarData?.metadata?.monthly_data && 
     Array.isArray(solarData.metadata.monthly_data) && 
     solarData.metadata.monthly_data.length === 12 &&
@@ -41,7 +36,6 @@ const SolarChart = ({ solarData, inputs }) => {
   const isPVGIS = dataSource === 'pvgis';
   const isNASA = dataSource === 'nasa_power';
 
-  // Prüfe ob Daten vorhanden sind
   if (!monthlyData || monthlyData.every(val => val === 0)) {
     return (
       <div style={{ 
@@ -64,15 +58,13 @@ const SolarChart = ({ solarData, inputs }) => {
     );
   }
 
-  // Berechne Anteile und Trends
   const totalAnnual = monthlyData.reduce((sum, val) => sum + val, 0);
   const originalAnnual = solarData?.annual_kWh || 0;
   
-  // Verwende die Summe der monatlichen Daten für die Gesamt-Zeile (realistischer)
   const displayTotal = totalAnnual;
   
   const getTrend = (index) => {
-    if (index === 0) return '↓'; // Januar hat keinen Vormonat
+    if (index === 0) return '↓'; 
     const current = monthlyData[index];
     const previous = monthlyData[index - 1];
     return current > previous ? '↑' : '↓';
@@ -97,7 +89,7 @@ const SolarChart = ({ solarData, inputs }) => {
         </p>
       </div>
       
-      {/* Einfache Tabelle */}
+
       <div style={{ overflowX: 'auto' }}>
         <table style={{ 
           width: '100%', 
@@ -258,9 +250,7 @@ const SolarChart = ({ solarData, inputs }) => {
           border: '1px solid #E5E7EB',
           minHeight: '500px'
         }}>
-          {/* Y-Achse Labels und Diagramm */}
           <div style={{ display: 'flex', alignItems: 'end', gap: '12px', height: '400px' }}>
-            {/* Y-Achse */}
             <div style={{ 
               display: 'flex', 
               flexDirection: 'column', 
@@ -272,10 +262,9 @@ const SolarChart = ({ solarData, inputs }) => {
               {(() => {
                 const maxValue = Math.max(...monthlyData);
                 
-                // Dynamische Y-Achse: beginnt immer bei 0, Maximum angepasst an Daten
-                const stepSize = Math.max(50, Math.ceil(maxValue / 8 / 50) * 50); // Mindestens 50, aber angepasst an Datenbereich
+                const stepSize = Math.max(50, Math.ceil(maxValue / 8 / 50) * 50);
                 const yAxisMax = Math.ceil(maxValue / stepSize) * stepSize;
-                const yAxisMin = 0; // Immer bei 0 beginnen
+                const yAxisMin = 0; 
                 
                 const steps = [];
                 for (let i = yAxisMax; i >= yAxisMin; i -= stepSize) {
@@ -294,7 +283,6 @@ const SolarChart = ({ solarData, inputs }) => {
               })()}
             </div>
             
-            {/* Diagramm-Bereich */}
             <div style={{ 
               flex: 1, 
               display: 'flex', 
@@ -303,7 +291,6 @@ const SolarChart = ({ solarData, inputs }) => {
               height: '100%',
               position: 'relative'
             }}>
-              {/* Y-Achse Linien */}
               {(() => {
                 const maxValue = Math.max(...monthlyData);
                 const stepSize = Math.max(50, Math.ceil(maxValue / 8 / 50) * 50);
@@ -338,7 +325,7 @@ const SolarChart = ({ solarData, inputs }) => {
                 const yAxisMin = 0;
                 const yAxisRange = yAxisMax - yAxisMin;
                 
-                const chartHeight = 400; // Feste Diagramm-Höhe in Pixeln
+                const chartHeight = 400; 
                 const heightInPixels = yAxisRange > 0 ? (value / yAxisRange) * chartHeight : 0;
                 const isPeakMonth = value === maxValue;
                 
@@ -353,13 +340,11 @@ const SolarChart = ({ solarData, inputs }) => {
                     height: `${chartHeight}px`,
                     justifyContent: 'flex-end'
                   }}>
-                    {/* Unsichtbarer Platzhalter für die Basislinie */}
                     <div style={{
                       width: '100%',
                       height: `${chartHeight - heightInPixels}px`,
                       minHeight: '0px'
                     }}></div>
-                    {/* Balken */}
                     <div style={{
                       width: '100%',
                       height: `${heightInPixels}px`,
@@ -375,7 +360,6 @@ const SolarChart = ({ solarData, inputs }) => {
                     }}
                     title={`${months[index]}: ${value} kWh`}
                     >
-                      {/* Wert-Anzeige im Balken */}
                       {value > 0 && (
                         <div style={{
                           color: 'white',
@@ -399,7 +383,6 @@ const SolarChart = ({ solarData, inputs }) => {
             </div>
           </div>
           
-          {/* X-Achse Labels */}
           <div style={{ 
             display: 'flex', 
             marginTop: '12px',

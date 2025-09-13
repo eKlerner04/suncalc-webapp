@@ -10,7 +10,7 @@ export default function Compass({ azimuth, onInputChange }) {
       alignItems: 'center',
       padding: '20px'
     }}>
-      {/* Elegante Windrose */}
+      {/*  Windrose */}
       <div 
         role="slider"
         aria-label="Dachausrichtung einstellen"
@@ -30,7 +30,7 @@ export default function Compass({ azimuth, onInputChange }) {
           userSelect: 'none',
           transition: 'all 0.3s ease'
         }}>
-        {/* Äußerer Ring für bessere Definition */}
+        {/* Ring */}
         <div style={{
           position: 'absolute',
           top: '-2px',
@@ -42,7 +42,7 @@ export default function Compass({ azimuth, onInputChange }) {
           zIndex: '-1'
         }}></div>
         
-        {/* Innere Kreise für Tiefe */}
+        {/* Innere Kreise*/}
         <div style={{
           position: 'absolute',
           top: '15px',
@@ -54,7 +54,7 @@ export default function Compass({ azimuth, onInputChange }) {
           border: '1px solid rgba(255, 255, 255, 0.6)'
         }}></div>
         
-        {/* Gradmarkierungen mit verbesserter Optik */}
+        {/* Gradmarkierungen*/}
         {[0, 45, 90, 135, 180, 225, 270, 315].map(deg => (
           <div
             key={deg}
@@ -73,7 +73,7 @@ export default function Compass({ azimuth, onInputChange }) {
           ></div>
         ))}
         
-        {/* Himmelsrichtungen - außerhalb positioniert mit verbesserter Farbunabhängigkeit */}
+        {/* Himmelsrichtungen */}
         <div style={{
           position: 'absolute',
           top: '-25px',
@@ -86,7 +86,7 @@ export default function Compass({ azimuth, onInputChange }) {
           background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
           padding: '4px 12px',
           borderRadius: '12px',
-          border: '2px solid #1e293b', /* Stärkerer Rahmen für bessere Sichtbarkeit */
+          border: '2px solid #1e293b',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
         }}>N</div>
         <div style={{
@@ -101,7 +101,7 @@ export default function Compass({ azimuth, onInputChange }) {
           background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
           padding: '4px 12px',
           borderRadius: '12px',
-          border: '2px solid #1e293b', /* Stärkerer Rahmen für bessere Sichtbarkeit */
+          border: '2px solid #1e293b',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
         }}>S</div>
         <div style={{
@@ -116,7 +116,7 @@ export default function Compass({ azimuth, onInputChange }) {
           background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
           padding: '4px 12px',
           borderRadius: '12px',
-          border: '2px solid #1e293b', /* Stärkerer Rahmen für bessere Sichtbarkeit */
+          border: '2px solid #1e293b', 
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
         }}>W</div>
         <div style={{
@@ -131,11 +131,11 @@ export default function Compass({ azimuth, onInputChange }) {
           background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
           padding: '4px 12px',
           borderRadius: '12px',
-          border: '2px solid #1e293b', /* Stärkerer Rahmen für bessere Sichtbarkeit */
+          border: '2px solid #1e293b', 
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
         }}>O</div>
         
-        {/* Zwischenrichtungen - elegant positioniert */}
+        {/* Zwischenrichtungen*/}
         <div style={{
           position: 'absolute',
           top: '15px',
@@ -189,7 +189,7 @@ export default function Compass({ azimuth, onInputChange }) {
           border: '1px solid rgba(255, 255, 255, 0.5)'
         }}>SW</div>
         
-        {/* Elegantes Zentrum */}
+        {/* zentrum */}
         <div style={{
           position: 'absolute',
           top: '50%',
@@ -204,7 +204,7 @@ export default function Compass({ azimuth, onInputChange }) {
           zIndex: '10'
         }}></div>
         
-        {/* Elegante greifbare Kompass-Nadel */}
+        {/* greifbare Kompass-Nadel */}
         <div 
           style={{
             position: 'absolute',
@@ -244,7 +244,7 @@ export default function Compass({ azimuth, onInputChange }) {
               let angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
               angle = (90 - angle + 360) % 360;
               
-              // Sofort den Wert aktualisieren
+              
               onInputChange('azimuth', Math.round(angle).toString());
             };
             
@@ -273,13 +273,13 @@ export default function Compass({ azimuth, onInputChange }) {
             return false;
           }}
         >
-          {/* Hauptzeiger mit Gradient */}
+          {/* Hauptzeiger */}
           <div style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
             width: '8px',
-            height: '80px',
+            height: '100px',
             background: 'linear-gradient(180deg, #4299e1 0%, #3182ce 50%, #2c5aa0 100%)',
             borderRadius: '4px',
             transform: 'translateX(-50%) translateY(-50%)',
@@ -289,7 +289,7 @@ export default function Compass({ azimuth, onInputChange }) {
             transition: 'all 0.2s ease'
           }}></div>
           
-          {/* Elegante Pfeilspitze */}
+          {/*  Pfeilspitze */}
           <div style={{
             position: 'absolute',
             top: '50%',
@@ -304,20 +304,6 @@ export default function Compass({ azimuth, onInputChange }) {
             pointerEvents: 'none'
           }}></div>
           
-          {/* Südpol der Nadel */}
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            width: '6px',
-            height: '30px',
-            background: 'linear-gradient(180deg, #fc8181 0%, #e53e3e 50%, #c53030 100%)',
-            borderRadius: '3px',
-            transform: 'translateX(-50%) translateY(-50%) translateY(40px)',
-            boxShadow: '0 3px 12px rgba(229, 62, 62, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            pointerEvents: 'none'
-          }}></div>
           
           {/* Zentral-Punkt */}
           <div style={{
@@ -336,7 +322,6 @@ export default function Compass({ azimuth, onInputChange }) {
           }}></div>
         </div>
         
-        {/* Klickbare Bereiche für schnelle Auswahl */}
         <div
           data-compass
           style={{
@@ -355,15 +340,13 @@ export default function Compass({ azimuth, onInputChange }) {
             const clickX = e.clientX;
             const clickY = e.clientY;
             
-            // Berechne Winkel
+           
             const deltaX = clickX - centerX;
             const deltaY = centerY - clickY;
             let angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
             
-            // Konvertiere zu 0-360 Grad (0° = Norden)
             angle = (90 - angle + 360) % 360;
             
-            // Sofort den Wert aktualisieren
             onInputChange('azimuth', Math.round(angle).toString());
           }}
         ></div>
@@ -371,7 +354,7 @@ export default function Compass({ azimuth, onInputChange }) {
       
 
       
-      {/* Direkte Gradzahl-Eingabe */}
+      {/* Gradzahl-Eingabe */}
       <div style={{
         position: 'absolute',
         bottom: '-40px',
@@ -406,6 +389,8 @@ export default function Compass({ azimuth, onInputChange }) {
             const value = parseInt(e.target.value) || 0;
             const clampedValue = Math.max(0, Math.min(359, value));
             onInputChange('azimuth', clampedValue.toString());
+            e.target.style.borderColor = '#e2e8f0';
+            e.target.style.boxShadow = 'none';
           }}
           style={{
             width: '80px',
@@ -416,10 +401,6 @@ export default function Compass({ azimuth, onInputChange }) {
             textAlign: 'center',
             outline: 'none',
             transition: 'all 0.2s ease'
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = '#e2e8f0';
-            e.target.style.boxShadow = 'none';
           }}
         />
         <span style={{

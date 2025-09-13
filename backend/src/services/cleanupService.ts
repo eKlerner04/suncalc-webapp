@@ -4,14 +4,12 @@ export class CleanupService {
   private isRunning: boolean = false;
   private intervalId: NodeJS.Timeout | null = null;
   private config = {
-    cleanupIntervalHours: 6, // Alle 6 Stunden
-    ttlDays: 90, // Nach 90 Tagen werden Daten als abgelaufen betrachtet
-    batchSize: 100 // Anzahl Standorte pro Batch
+    cleanupIntervalHours: 6, 
+    ttlDays: 90, 
+    batchSize: 100 
   };
 
-  /**
-   * Startet den Cleanup-Service
-   */
+ 
   async startCleanupService(): Promise<void> {
     if (this.isRunning) {
       console.log('[CLEANUP] Service läuft bereits');
@@ -21,10 +19,8 @@ export class CleanupService {
     console.log('[CLEANUP] Starte Cleanup-Service...');
     this.isRunning = true;
 
-    // Sofort ersten Durchlauf starten (ohne Log)
     await this.runCleanup();
 
-    // Dann alle 6 Stunden wiederholen
     this.intervalId = setInterval(async () => {
       await this.runCleanup();
     }, this.config.cleanupIntervalHours * 60 * 60 * 1000);
@@ -32,9 +28,6 @@ export class CleanupService {
     console.log(`[CLEANUP] Service gestartet - läuft alle ${this.config.cleanupIntervalHours} Stunden`);
   }
 
-  /**
-   * Stoppt den Cleanup-Service
-   */
   stopCleanupService(): void {
     if (!this.isRunning) {
       return;
@@ -51,9 +44,7 @@ export class CleanupService {
     console.log('[CLEANUP] Service gestoppt');
   }
 
-  /**
-   * Holt alle Datensätze in Batches
-   */
+  
   private async fetchAllRecords(): Promise<any[]> {
     const allRecords: any[] = [];
     let page = 1;
@@ -70,14 +61,14 @@ export class CleanupService {
       const data = await response.json();
       
       if (!data.items || data.items.length === 0) {
-        break; // Keine weiteren Datensätze
+        break; 
       }
       
       allRecords.push(...data.items);
       console.log(`[CLEANUP] Batch ${page}: ${data.items.length} Datensätze geladen (Total: ${allRecords.length})`);
       
       if (data.items.length < perPage) {
-        break; // Letzte Seite erreicht
+        break; 
       }
       
       page++;
@@ -86,14 +77,12 @@ export class CleanupService {
     return allRecords;
   }
 
-  /**
-   * Führt einen Cleanup-Durchlauf aus
-   */
+ 
   private async runCleanup(): Promise<void> {
     try {
       const startTime = Date.now();
 
-      // Alle Standorte über HTTP-API holen (alle Datensätze in Batches)
+     
       const allRecords = await this.fetchAllRecords();
       
       if (!allRecords || allRecords.length === 0) {
@@ -106,16 +95,16 @@ export class CleanupService {
 
       console.log(`[CLEANUP] ${allRecords.length} Standorte zur Überprüfung gefunden`);
 
-      // Verarbeite alle gefundenen Datensätze
+      
       for (const record of allRecords) {
-        // Bei manuellem Cleanup ignorieren wir isRunning
+       
         // if (!this.isRunning) break; // Stoppe bei Shutdown
 
         try {
           const ttlDays = record.ttlDays || this.config.ttlDays;
           const lastAccessAt = new Date(record.lastAccessAt);
           
-          // Berechne Ablaufzeit
+         
           const expiry = new Date(lastAccessAt.getTime() + ttlDays * 24 * 60 * 60 * 1000);
           const isExpired = expiry < now;
 
@@ -124,7 +113,7 @@ export class CleanupService {
           if (isExpired) {
             console.log(`[CLEANUP] Standort ${record.gridKey} ist abgelaufen (${Math.round((now.getTime() - expiry.getTime()) / (24 * 60 * 60 * 1000))} Tage über TTL)`);
             
-            // Lösche abgelaufenen Standort
+           
             await pb.collection(SOLAR_COLLECTION).delete(record.id);
             console.log(`[CLEANUP] Gelöscht: ${record.gridKey} (TTL: ${ttlDays} Tage, abgelaufen: ${Math.round((now.getTime() - expiry.getTime()) / (24 * 60 * 60 * 1000))} Tage)`);
             deletedCount++;
@@ -146,17 +135,15 @@ export class CleanupService {
     }
   }
 
-  /**
-   * Führt manuell einen Cleanup durch
-   */
+ 
   async manualCleanup(): Promise<{ success: boolean; message: string; deletedCount?: number }> {
     try {
       console.log('[CLEANUP] Starte manuellen Cleanup...');
       
-      // Verwende die exakt gleiche Logik wie runCleanup()
+      
       const startTime = Date.now();
 
-      // Alle Standorte über HTTP-API holen (alle Datensätze in Batches)
+     
       const allRecords = await this.fetchAllRecords();
       
       if (!allRecords || allRecords.length === 0) {
@@ -173,20 +160,20 @@ export class CleanupService {
 
       console.log(`[CLEANUP] ${allRecords.length} Standorte zur Überprüfung gefunden`);
 
-      // Verarbeite alle gefundenen Datensätze
+     
       for (const record of allRecords) {
         try {
           const ttlDays = record.ttlDays || this.config.ttlDays;
           const lastAccessAt = new Date(record.lastAccessAt);
           
-          // Berechne Ablaufzeit
+         
           const expiry = new Date(lastAccessAt.getTime() + ttlDays * 24 * 60 * 60 * 1000);
           const isExpired = expiry < now;
 
           if (isExpired) {
             console.log(`[CLEANUP] Standort ${record.gridKey} ist abgelaufen (${Math.round((now.getTime() - expiry.getTime()) / (24 * 60 * 60 * 1000))} Tage über TTL)`);
             
-            // Lösche abgelaufenen Standort
+           
             await pb.collection(SOLAR_COLLECTION).delete(record.id);
             console.log(`[CLEANUP] Gelöscht: ${record.gridKey} (TTL: ${ttlDays} Tage, abgelaufen: ${Math.round((now.getTime() - expiry.getTime()) / (24 * 60 * 60 * 1000))} Tage)`);
             deletedCount++;
@@ -217,9 +204,7 @@ export class CleanupService {
     }
   }
 
-  /**
-   * Gibt den aktuellen Status des Services zurück
-   */
+  
   getStatus(): { isRunning: boolean; config: any; nextRun: string | null } {
     let nextRun = null;
     if (this.intervalId) {

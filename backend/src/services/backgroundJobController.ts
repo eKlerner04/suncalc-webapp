@@ -6,14 +6,11 @@ export class BackgroundJobController {
   private isRunning: boolean = false;
 
   constructor() {
-    // Starte automatisch im simple-Modus 
     this.currentMode = 'simple';
     this.startSimpleMode();
   }
 
-  /**
-   * Startet den Simple-Modus 
-   */
+
   public startSimpleMode(): void {
     console.log('[BACKGROUND] Starte erweiterte Background-Jobs...');
     startBackgroundJobs();
@@ -21,9 +18,7 @@ export class BackgroundJobController {
     console.log('');
   }
 
-  /**
-   * Stoppt alle Background-Jobs
-   */
+ 
   public stopAllJobs(): void {
     console.log('[BACKGROUND] Stoppe alle Background-Jobs...');
     stopBackgroundJobs();
@@ -55,7 +50,6 @@ export class BackgroundJobController {
       const status = this.getStatus();
       console.log('[CLEANUP] Background Jobs Status:', status);
       
-      // Rufe den echten Cleanup-Service auf
       const result = await cleanupService.manualCleanup();
       console.log('[CLEANUP] Manueller Cleanup abgeschlossen');
       

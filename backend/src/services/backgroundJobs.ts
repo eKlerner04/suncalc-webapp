@@ -16,7 +16,6 @@ export async function startBackgroundJobs(): Promise<void> {
   console.log('');
 
   try {
-    // Starte alle Services
     await preFetchService.startPreFetchService();
     await scoreDecayService.startScoreDecayService();
     await cleanupService.startCleanupService();

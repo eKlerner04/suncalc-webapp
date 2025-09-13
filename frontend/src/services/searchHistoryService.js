@@ -1,9 +1,8 @@
-// Service für die Verwaltung des Suchverlaufs mit LocalStorage
+
 
 const STORAGE_KEY = 'solarSearchHistory';
 const MAX_ENTRIES = 3;
 
-// Suchverlauf laden
 export const loadSearchHistory = () => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -14,15 +13,13 @@ export const loadSearchHistory = () => {
   }
 };
 
-// Suche zum Verlauf hinzufügen
 export const addToSearchHistory = (searchData) => {
   try {
-    console.log('🔍 [SearchHistoryService] Versuche Suche zu speichern:', searchData);
+    console.log('[SearchHistoryService] Versuche Suche zu speichern:', searchData);
     
     const currentHistory = loadSearchHistory();
-    console.log('📚 [SearchHistoryService] Aktueller Verlauf:', currentHistory);
+    console.log('[SearchHistoryService] Aktueller Verlauf:', currentHistory);
     
-    // Neue Suche erstellen
     const newSearch = {
       ...searchData,
       timestamp: new Date().toISOString(),
@@ -30,7 +27,6 @@ export const addToSearchHistory = (searchData) => {
     };
     console.log('🆕 [SearchHistoryService] Neue Suche erstellt:', newSearch);
 
-    // Duplikate entfernen (gleiche Adresse + Koordinaten + Dachparameter)
     const filteredHistory = currentHistory.filter(item => 
       item.address !== searchData.address || 
       item.lat !== searchData.lat || 
@@ -41,22 +37,19 @@ export const addToSearchHistory = (searchData) => {
     );
     console.log('🧹 [SearchHistoryService] Nach Duplikat-Entfernung:', filteredHistory);
 
-    // Neue Suche an den Anfang setzen und auf MAX_ENTRIES begrenzen
     const updatedHistory = [newSearch, ...filteredHistory].slice(0, MAX_ENTRIES);
-    console.log('📝 [SearchHistoryService] Aktualisierter Verlauf:', updatedHistory);
+    console.log('[SearchHistoryService] Aktualisierter Verlauf:', updatedHistory);
 
-    // In LocalStorage speichern
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedHistory));
-    console.log('💾 [SearchHistoryService] In LocalStorage gespeichert. Key:', STORAGE_KEY);
+    console.log('[SearchHistoryService] In LocalStorage gespeichert. Key:', STORAGE_KEY);
     
     return updatedHistory;
   } catch (error) {
-    console.error('❌ [SearchHistoryService] Fehler beim Speichern des Suchverlaufs:', error);
+    console.error('[SearchHistoryService] Fehler beim Speichern des Suchverlaufs:', error);
     return [];
   }
 };
 
-// Eintrag aus dem Verlauf löschen
 export const removeFromSearchHistory = (id) => {
   try {
     const currentHistory = loadSearchHistory();
@@ -70,7 +63,6 @@ export const removeFromSearchHistory = (id) => {
   }
 };
 
-// Verlauf komplett löschen
 export const clearSearchHistory = () => {
   try {
     localStorage.removeItem(STORAGE_KEY);
@@ -81,7 +73,6 @@ export const clearSearchHistory = () => {
   }
 };
 
-// Suchverlauf aktualisieren (für externe Komponenten)
 export const updateSearchHistory = (newHistory) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
