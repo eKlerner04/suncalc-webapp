@@ -43,6 +43,8 @@ cd suncalc-webapp
 ```bash
 cd backend
 npm install
+npm install cors express-rate-limit
+npm install --save-dev @types/cors
 ```
 
 3. **Frontend-Abhängigkeiten installieren:**
@@ -56,7 +58,7 @@ npm install
 ### 1. Backend starten
 ```bash
 cd backend
-npm start
+npm run dev
 ```
 Das Backend läuft auf `http://localhost:3000`
 
@@ -105,6 +107,25 @@ curl -sS -X POST https://c110-055.cloud.gwdg.de/api/background-jobs/cleanup
 curl -sS -X POST https://c110-055.cloud.gwdg.de/api/locations/prefetch/run
 curl -sS -X POST https://c110-055.cloud.gwdg.de/api/locations/decay/run
 ```
+
+## Sicherheitsfeatures
+
+Die Anwendung implementiert grundlegende Sicherheitsmaßnahmen:
+
+### CORS (Cross-Origin Resource Sharing)
+- **Produktion:** Nur `https://c110-055.cloud.gwdg.de` erlaubt
+- **Development:** `http://localhost:5173`, `http://127.0.0.1:5173` erlaubt
+
+### Rate Limiting
+- **Limit:** 100 Requests pro 15 Minuten pro IP-Adresse
+- **Gilt für:** Alle `/api/*` Endpunkte
+- **Schutz vor:** Missbrauch und DDoS-Angriffe
+
+### Eingangsvalidierung
+- Koordinaten-Validierung
+- Parameter-Checks
+- Sanitization der Eingabedaten
+
 
 ## Build
 
@@ -217,6 +238,8 @@ cd suncalc-webapp
 ```bash
 cd backend
 npm install
+npm install cors express-rate-limit
+npm install --save-dev @types/cors
 NODE_ENV=production npm run build
 # Als Service starten (siehe unten)
 ```
@@ -290,6 +313,24 @@ suncalc-webapp/
 ├── frontend/          # React Frontend
 │   ├── src/
 │   │   ├── components/    # React Komponenten
+│   │   │   ├── SolarCalculator.jsx      # Haupt-Container
+│   │   │   ├── LocationInputs.jsx       # Standort-Eingabe
+│   │   │   ├── RoofParameters.jsx       # Dachparameter
+│   │   │   ├── SolarResults.jsx         # Ergebnisse
+│   │   │   ├── SolarDetails.jsx         # Detail-Ansicht
+│   │   │   ├── SolarChart.jsx           # Diagramme
+│   │   │   ├── MonthlyStats.jsx         # Monatliche Stats
+│   │   │   ├── Compass.jsx              # Kompass
+│   │   │   ├── LocationMap.jsx          # Karte
+│   │   │   ├── SearchHistory.jsx        # Suchhistorie
+│   │   │   ├── Header.jsx               # Navigation
+│   │   │   ├── Footer.jsx               # Impressum
+│   │   │   ├── CalculationInfo.jsx      # Berechnungsinfo
+│   │   │   ├── ChartContainer.jsx       # Diagramm-Container
+│   │   │   ├── AccessibilityPage.jsx    # Barrierefreiheit
+│   │   │   ├── AccessibilityPage.css    # Barrierefreiheit-Styles
+│   │   │   ├── PrivacyPage.jsx          # Datenschutz
+│   │   │   └── PrivacyPage.css          # Datenschutz-Styles
 │   │   └── services/      # API Services
 │   └── package.json
 ├── backend/           # Node.js Backend
@@ -305,6 +346,7 @@ suncalc-webapp/
 
 - **Frontend:** React 19.1.1, Vite 7.1.2, Leaflet.js 1.9.4
 - **Backend:** Node.js, Express.js 5.1.0, TypeScript 5.5.4
+- **Sicherheit:** CORS, Rate Limiting, Input Validation
 - **Datenbank:** Pocketbase 0.22.0 (SQLite)
 - **APIs:** PVGIS, Nominatim
 
@@ -318,3 +360,5 @@ suncalc-webapp/
 - Vollständige Tastaturnavigation
 - WCAG 2.1 AA Barrierefreiheit
 - Responsive Design
+- Datenschutz- und Barrierefreiheits-Seiten
+- API-Sicherheit (CORS, Rate Limiting)
