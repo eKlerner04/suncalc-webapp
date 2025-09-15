@@ -3,6 +3,7 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import solarRoutes from './routes/solar';
 import locationsRoutes from './routes/locations';
+import addressCacheRoutes from './routes/addressCache';
 import { backgroundJobController } from './services/backgroundJobController';
 
 const app = express();
@@ -40,6 +41,7 @@ app.use(express.json());
 
 app.use('/api/solar', solarRoutes);
 app.use('/api/locations', locationsRoutes);
+app.use('/api/address-cache', addressCacheRoutes);
 
 
 app.get('/health', (req, res) => {
